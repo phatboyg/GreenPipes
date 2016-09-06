@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{59052DB9-B527-4683-A56A-56C4D8FB6584}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GreenPipes</RootNamespace>
+    <AssemblyName>GreenPipes</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\GreenPipes.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\..\MassTransit\src\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\MassTransit\src\SolutionVersion.cs">
+      <Link>Properties\SolutionVersion.cs</Link>
+    </Compile>
+    <Compile Include="BasePipeContext.cs" />
+    <Compile Include="Configuration\Builders\IBuildPipeConfigurator.cs" />
+    <Compile Include="Configuration\Builders\PipeBuilder.cs" />
+    <Compile Include="Configuration\Configurator.cs" />
+    <Compile Include="Configuration\Configurators\PipeConfigurator.cs" />
+    <Compile Include="Configuration\DelegateConfigurationExtensions.cs" />
+    <Compile Include="Configuration\IPipeBuilder.cs" />
+    <Compile Include="Configuration\IPipeConfigurationResult.cs" />
+    <Compile Include="Configuration\IPipeConfigurator.cs" />
+    <Compile Include="Configuration\IPipeSpecification.cs" />
+    <Compile Include="Configuration\PartitionerConfigurationExtensions.cs" />
+    <Compile Include="Configuration\Specifications\AsyncDelegatePipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\DelegatePipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\PartitionerPipeSpecification.cs" />
+    <Compile Include="Configuration\ValidationResult.cs" />
+    <Compile Include="Configuration\ValidationResultDisposition.cs" />
+    <Compile Include="Configuration\ValidationResultExtensions.cs" />
+    <Compile Include="Configuration\Validation\ConfigurationValidationResult.cs" />
+    <Compile Include="Configuration\Validation\PipeConfigurationResult.cs" />
+    <Compile Include="Exceptions\PayloadException.cs" />
+    <Compile Include="Exceptions\PayloadFactoryException.cs" />
+    <Compile Include="Exceptions\PayloadNotFoundException.cs" />
+    <Compile Include="Exceptions\PipeConfigurationException.cs" />
+    <Compile Include="Filters\AsyncDelegateFilter.cs" />
+    <Compile Include="Filters\DelegateFilter.cs" />
+    <Compile Include="Partitioning\IHashGenerator.cs" />
+    <Compile Include="Partitioning\IPartitioner.cs" />
+    <Compile Include="Partitioning\Murmur3UnsafeHashGenerator.cs" />
+    <Compile Include="Partitioning\Partition.cs" />
+    <Compile Include="Partitioning\Partitioner.cs" />
+    <Compile Include="Filters\PartitionFilter.cs" />
+    <Compile Include="Partitioning\PartitionKeyProvider.cs" />
+    <Compile Include="IAsyncDisposable.cs" />
+    <Compile Include="IFilter.cs" />
+    <Compile Include="Introspection\ScopeProbeContext.cs" />
+    <Compile Include="Introspection\SerializerCache.cs" />
+    <Compile Include="IPipe.cs" />
+    <Compile Include="IProbeSite.cs" />
+    <Compile Include="PayloadFactory.cs" />
+    <Compile Include="Payloads\Collections\ArrayPayloadCollection.cs" />
+    <Compile Include="Payloads\Collections\BasePayloadCollection.cs" />
+    <Compile Include="Payloads\Collections\EmptyPayloadCollection.cs" />
+    <Compile Include="Payloads\IPayloadCache.cs" />
+    <Compile Include="Payloads\IPayloadCollection.cs" />
+    <Compile Include="Payloads\IPayloadValue.cs" />
+    <Compile Include="Payloads\IReadOnlyPayloadCollection.cs" />
+    <Compile Include="Payloads\PayloadCache.cs" />
+    <Compile Include="Payloads\PayloadCacheProxy.cs" />
+    <Compile Include="Payloads\PayloadCacheScope.cs" />
+    <Compile Include="Payloads\PayloadValue.cs" />
+    <Compile Include="Payloads\Collections\SinglePayloadCollection.cs" />
+    <Compile Include="Pipe.cs" />
+    <Compile Include="PipeContext.cs" />
+    <Compile Include="PipeExtensions.cs" />
+    <Compile Include="Pipes\EmptyPipe.cs" />
+    <Compile Include="Pipes\FilterPipe.cs" />
+    <Compile Include="Pipes\LastPipe.cs" />
+    <Compile Include="ProbeContext.cs" />
+    <Compile Include="ProbeContextExtensions.cs" />
+    <Compile Include="Util\TaskUtil.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
