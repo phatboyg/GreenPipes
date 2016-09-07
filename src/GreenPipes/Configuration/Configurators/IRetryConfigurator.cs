@@ -10,22 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Util
+namespace GreenPipes.Configurators
 {
-    using System.Threading.Tasks;
-
-
-    public static class TaskUtil
+    public interface IRetryConfigurator
     {
-        public static Task Completed => Cached.CompletedTask;
-        public static Task<bool> False => Cached.FalseTask;
-        public static Task<bool> True => Cached.TrueTask;
-
-        static class Cached
-        {
-            public static readonly Task CompletedTask = Task.FromResult(true);
-            public static readonly Task<bool> TrueTask = Task.FromResult(true);
-            public static readonly Task<bool> FalseTask = Task.FromResult(false);
-        }
+        void SetRetryPolicy(RetryPolicyFactory factory);
+        void SetExceptionFilter(IExceptionFilter filter);
     }
 }

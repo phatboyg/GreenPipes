@@ -10,22 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Util
+namespace GreenPipes
 {
+    using System;
     using System.Threading.Tasks;
 
 
-    public static class TaskUtil
+    /// <summary>
+    /// A retry policy determines how exceptions are handled, and whether or not the
+    /// remaining filters should be retried
+    /// </summary>
+    public interface RetryPolicy :
+        IProbeSite
     {
-        public static Task Completed => Cached.CompletedTask;
-        public static Task<bool> False => Cached.FalseTask;
-        public static Task<bool> True => Cached.TrueTask;
-
-        static class Cached
-        {
-            public static readonly Task CompletedTask = Task.FromResult(true);
-            public static readonly Task<bool> TrueTask = Task.FromResult(true);
-            public static readonly Task<bool> FalseTask = Task.FromResult(false);
-        }
+        /// <summary>
+        /// Determines if the exception can be retried
+        /// </summary>
+        /// <param name="exception">The exception that occurred</param>
+        /// <param name="retryContext">The retry context for the retry</param>
+        /// <returns>True if the task should be retried</returns>
+        Task<bool> CanRetry(Exception exception, out RetryContext retryContext);
     }
 }

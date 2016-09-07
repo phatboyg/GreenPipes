@@ -49,6 +49,8 @@
     <Compile Include="Configuration\Builders\IBuildPipeConfigurator.cs" />
     <Compile Include="Configuration\Builders\PipeBuilder.cs" />
     <Compile Include="Configuration\CircuitBreakerConfigurationExtensions.cs" />
+    <Compile Include="Configuration\Configurators\IRetryConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\RetryPolicyFactory.cs" />
     <Compile Include="Configuration\ForkConfigurationExtensions.cs" />
     <Compile Include="Configuration\ISpecification.cs" />
     <Compile Include="Configuration\Configurators\ICircuitBreakerConfigurator.cs" />
@@ -62,6 +64,7 @@
     <Compile Include="Configuration\IPipeSpecification.cs" />
     <Compile Include="Configuration\LogConfigurationExtensions.cs" />
     <Compile Include="Configuration\PartitionerConfigurationExtensions.cs" />
+    <Compile Include="Configuration\RetryConfigurationExtensions.cs" />
     <Compile Include="Configuration\Specifications\AsyncDelegatePipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\CircuitBreakerPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\ContextFilterPipeSpecification.cs" />
@@ -70,6 +73,7 @@
     <Compile Include="Configuration\Specifications\ForkPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\LogPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\PartitionerPipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\RetryPipeSpecification.cs" />
     <Compile Include="Configuration\ValidationResult.cs" />
     <Compile Include="Configuration\ValidationResultDisposition.cs" />
     <Compile Include="Configuration\ValidationResultExtensions.cs" />
@@ -93,6 +97,8 @@
     <Compile Include="Filters\CircuitBreaker\HalfOpenBehavior.cs" />
     <Compile Include="Filters\CircuitBreaker\ICircuitBreaker.cs" />
     <Compile Include="Filters\CircuitBreaker\OpenBehavior.cs" />
+    <Compile Include="Filters\RetryFilter.cs" />
+    <Compile Include="IExceptionFilter.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="Introspection\GreenPipesHostInfo.cs" />
     <Compile Include="Introspection\IProbeResultBuilder.cs" />
@@ -100,6 +106,20 @@
     <Compile Include="Introspection\ProbeHostInfoCache.cs" />
     <Compile Include="Introspection\ProbeResult.cs" />
     <Compile Include="Introspection\ProbeResultBuilder.cs" />
+    <Compile Include="Policies\ExceptionFilters\AllExceptionFilter.cs" />
+    <Compile Include="Policies\ExponentialRetryContext.cs" />
+    <Compile Include="Policies\ExponentialRetryPolicy.cs" />
+    <Compile Include="Policies\ExceptionFilters\FilterExceptionFilter.cs" />
+    <Compile Include="Policies\ImmediateRetryContext.cs" />
+    <Compile Include="Policies\ImmediateRetryPolicy.cs" />
+    <Compile Include="Policies\IncrementalRetryContext.cs" />
+    <Compile Include="Policies\IncrementalRetryPolicy.cs" />
+    <Compile Include="Policies\IntervalRetryContext.cs" />
+    <Compile Include="Policies\IntervalRetryPolicy.cs" />
+    <Compile Include="Policies\NoRetryPolicy.cs" />
+    <Compile Include="Policies\ExceptionFilters\ExceptExceptionFilter.cs" />
+    <Compile Include="Policies\ExceptionFilters\SelectedExceptionFilter.cs" />
+    <Compile Include="RetryPolicy.cs" />
     <Compile Include="Partitioning\IHashGenerator.cs" />
     <Compile Include="Partitioning\IPartitioner.cs" />
     <Compile Include="Partitioning\Murmur3UnsafeHashGenerator.cs" />
@@ -134,6 +154,7 @@
     <Compile Include="Pipes\LastPipe.cs" />
     <Compile Include="ProbeContext.cs" />
     <Compile Include="ProbeContextExtensions.cs" />
+    <Compile Include="RetryContext.cs" />
     <Compile Include="Util\TaskUtil.cs" />
   </ItemGroup>
   <ItemGroup>
