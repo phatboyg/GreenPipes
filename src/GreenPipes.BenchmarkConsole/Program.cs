@@ -12,7 +12,7 @@
 
         static void Main(string[] args)
         {
-            Console.WriteLine("MassTransit Benchmark");
+            Console.WriteLine("Green Pipes Benchmark");
             Console.WriteLine();
 
             var optionSet = new ProgramOptionSet();
@@ -42,7 +42,7 @@
             }
             catch (OptionException ex)
             {
-                Console.Write("mtbench: ");
+                Console.Write("gpbench: ");
                 Console.WriteLine(ex.Message);
                 Console.WriteLine("Use 'gpbench --help' for detailed usage information.");
             }
@@ -64,7 +64,7 @@
         static void ShowHelp(OptionSet p)
         {
             Console.WriteLine("Usage: gpbench [OPTIONS]+");
-            Console.WriteLine("Executes the benchmark using the specified transport with the specified options.");
+            Console.WriteLine("Executes the benchmark using the specified options.");
             Console.WriteLine("If no benchmark is specified, all benchmarks are executed.");
             Console.WriteLine();
             Console.WriteLine("Options:");

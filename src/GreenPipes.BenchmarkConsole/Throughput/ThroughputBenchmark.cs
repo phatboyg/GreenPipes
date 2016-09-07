@@ -39,7 +39,7 @@
             {
                 x.UseFilter(new ThroughputFilter(_capture));
             });
-            Console.WriteLine("Running Message Latency Benchmark");
+            Console.WriteLine("Running Throughput Benchmark");
 
             RunBenchmark(pipe).Wait(cancellationToken);
 
