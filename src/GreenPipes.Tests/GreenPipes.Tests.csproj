@@ -38,6 +38,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authentication_Specs.cs" />
     <Compile Include="IntentionalTestException.cs" />
     <Compile Include="CircuitBreaker_Specs.cs" />
     <Compile Include="Parent_Child_Pipes.cs" />
