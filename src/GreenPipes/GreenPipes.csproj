@@ -64,6 +64,7 @@
     <Compile Include="Configuration\IPipeSpecification.cs" />
     <Compile Include="Configuration\LogConfigurationExtensions.cs" />
     <Compile Include="Configuration\PartitionerConfigurationExtensions.cs" />
+    <Compile Include="Configuration\RescueConfigurationExtensions.cs" />
     <Compile Include="Configuration\RetryConfigurationExtensions.cs" />
     <Compile Include="Configuration\Specifications\AsyncDelegatePipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\CircuitBreakerPipeSpecification.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Configuration\Specifications\ForkPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\LogPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\PartitionerPipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\RescuePipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\RetryPipeSpecification.cs" />
     <Compile Include="Configuration\ValidationResult.cs" />
     <Compile Include="Configuration\ValidationResultDisposition.cs" />
@@ -97,6 +99,8 @@
     <Compile Include="Filters\CircuitBreaker\HalfOpenBehavior.cs" />
     <Compile Include="Filters\CircuitBreaker\ICircuitBreaker.cs" />
     <Compile Include="Filters\CircuitBreaker\OpenBehavior.cs" />
+    <Compile Include="Filters\RescueContextFactory.cs" />
+    <Compile Include="Filters\RescueFilter.cs" />
     <Compile Include="Filters\RetryFilter.cs" />
     <Compile Include="IExceptionFilter.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
@@ -106,6 +110,7 @@
     <Compile Include="Introspection\ProbeHostInfoCache.cs" />
     <Compile Include="Introspection\ProbeResult.cs" />
     <Compile Include="Introspection\ProbeResultBuilder.cs" />
+    <Compile Include="Payloads\PipeContextPayloadAdapter.cs" />
     <Compile Include="Policies\ExceptionFilters\AllExceptionFilter.cs" />
     <Compile Include="Policies\ExponentialRetryContext.cs" />
     <Compile Include="Policies\ExponentialRetryPolicy.cs" />

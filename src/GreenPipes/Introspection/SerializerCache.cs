@@ -17,6 +17,7 @@ namespace GreenPipes.Introspection
     using System.Threading;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
+    using Newtonsoft.Json.Serialization;
 
 
     public static class SerializerCache
@@ -37,6 +38,7 @@ namespace GreenPipes.Introspection
                 TypeNameHandling = TypeNameHandling.None,
                 DateParseHandling = DateParseHandling.None,
                 DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
                 Converters = new List<JsonConverter>(new JsonConverter[]
                 {
                     new StringEnumConverter()

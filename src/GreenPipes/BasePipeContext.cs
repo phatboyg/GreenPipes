@@ -37,6 +37,11 @@ namespace GreenPipes
             _payloadCache = payloadCache;
         }
 
+        protected BasePipeContext(PipeContext context)
+            : this(new PayloadCacheProxy(context), context.CancellationToken)
+        {            
+        }
+
         public CancellationToken CancellationToken { get; }
 
         public virtual bool HasPayloadType(Type contextType)

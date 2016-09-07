@@ -17,29 +17,40 @@ namespace GreenPipes.Payloads
 
 
     public class PayloadCacheScope :
-        IPayloadCache,
-        PipeContext
+        IPayloadCache
     {
-        readonly PipeContext _context;
+        readonly IPayloadCache _parentCache;
         readonly IPayloadCache _payloadCache;
 
         public PayloadCacheScope(PipeContext context)
         {
-            _context = context;
+            _parentCache = new PipeContextPayloadAdapter(context);
+
             CancellationToken = context.CancellationToken;
 
             _payloadCache = new PayloadCache();
         }
 
+        public PayloadCacheScope(IPayloadCache parent, CancellationToken cancellationToken)
+        {
+            _parentCache = parent;
+
+            CancellationToken = cancellationToken;
+
+            _payloadCache = new PayloadCache();
+        }
+
+        public CancellationToken CancellationToken { get; }
+
         public bool HasPayloadType(Type contextType)
         {
-            return _payloadCache.HasPayloadType(contextType) || _context.HasPayloadType(contextType);
+            return _payloadCache.HasPayloadType(contextType) || _parentCache.HasPayloadType(contextType);
         }
 
         public bool TryGetPayload<TPayload>(out TPayload context)
             where TPayload : class
         {
-            return _payloadCache.TryGetPayload(out context) || _context.TryGetPayload(out context);
+            return _payloadCache.TryGetPayload(out context) || _parentCache.TryGetPayload(out context);
         }
 
         public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
@@ -49,7 +60,7 @@ namespace GreenPipes.Payloads
             if (_payloadCache.TryGetPayload(out payload))
                 return payload;
 
-            if (_context.TryGetPayload(out payload))
+            if (_parentCache.TryGetPayload(out payload))
                 return payload;
 
             return _payloadCache.GetOrAddPayload(payloadFactory);
@@ -57,9 +68,7 @@ namespace GreenPipes.Payloads
 
         public IPayloadCache CreateScope()
         {
-            return new PayloadCacheScope(this);
+            return new PayloadCacheScope(this, CancellationToken);
         }
-
-        public CancellationToken CancellationToken { get; }
     }
 }

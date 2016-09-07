@@ -43,6 +43,7 @@
     <Compile Include="CircuitBreaker_Specs.cs" />
     <Compile Include="Parent_Child_Pipes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rescue_Specs.cs" />
     <Compile Include="Retry_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
