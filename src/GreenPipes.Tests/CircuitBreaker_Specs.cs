@@ -18,7 +18,6 @@ namespace GreenPipes.Tests
     using NUnit.Framework;
     using Payloads;
 
-
     [TestFixture]
     public class Using_a_circuit_breaker
     {
