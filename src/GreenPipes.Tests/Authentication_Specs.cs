@@ -98,14 +98,7 @@ namespace GreenPipes.Tests
         public IEnumerable<ValidationResult> Validate()
         {
             if (_allowedRoles == null || !_allowedRoles.Any())
-            {
-                return new List<ValidationResult>
-                {
-                    new ConfigurationValidationResult(ValidationResultDisposition.Failure, "SampleAuthenticationFilter","You need to supply roles")
-                };
-            }
-
-            return Enumerable.Empty<ValidationResult>();
+                yield return this.Failure("SampleAuthenticationFilter", "You need to supply roles");
         }
     }
 
