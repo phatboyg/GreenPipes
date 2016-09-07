@@ -21,7 +21,7 @@ namespace GreenPipes.Configurators
 
     public class PipeConfigurator<TContext> :
         IBuildPipeConfigurator<TContext>,
-        Configurator
+        ISpecification
         where TContext : class, PipeContext
     {
         readonly List<IPipeSpecification<TContext>> _specifications;
@@ -31,7 +31,7 @@ namespace GreenPipes.Configurators
             _specifications = new List<IPipeSpecification<TContext>>();
         }
 
-        IEnumerable<ValidationResult> Configurator.Validate()
+        IEnumerable<ValidationResult> ISpecification.Validate()
         {
             return _specifications.SelectMany(x => x.Validate());
         }

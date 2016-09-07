@@ -10,21 +10,36 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes
+namespace GreenPipes.Filters
 {
+    using System.Threading.Tasks;
+
     /// <summary>
-    /// Configures a pipe builder (typically by adding filters), but allows late binding to the
-    /// pipe builder with pre-validation that the operations will succeed.
+    /// Forks to a separate pipe before invoking the next filter in the pipe
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IPipeSpecification<T> :
-        ISpecification
+    public class ForkFilter<T> :
+        IFilter<T>
         where T : class, PipeContext
     {
-        /// <summary>
-        /// Apply the specification to the builder
-        /// </summary>
-        /// <param name="builder">The pipe builder</param>
-        void Apply(IPipeBuilder<T> builder);
+        readonly IPipe<T> _pipe;
+
+        public ForkFilter(IPipe<T> pipe)
+        {
+            _pipe = pipe;
+        }
+
+        async Task IFilter<T>.Send(T context, IPipe<T> next)
+        {
+            await _pipe.Send(context).ConfigureAwait(false);
+
+            await next.Send(context).ConfigureAwait(false);
+        }
+
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateFilterScope("fork");
+            _pipe.Probe(scope);
+        }
     }
 }

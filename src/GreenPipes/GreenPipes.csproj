@@ -49,10 +49,13 @@
     <Compile Include="Configuration\Builders\IBuildPipeConfigurator.cs" />
     <Compile Include="Configuration\Builders\PipeBuilder.cs" />
     <Compile Include="Configuration\CircuitBreakerConfigurationExtensions.cs" />
-    <Compile Include="Configuration\Configurator.cs" />
+    <Compile Include="Configuration\ForkConfigurationExtensions.cs" />
+    <Compile Include="Configuration\ISpecification.cs" />
     <Compile Include="Configuration\Configurators\ICircuitBreakerConfigurator.cs" />
     <Compile Include="Configuration\Configurators\PipeConfigurator.cs" />
+    <Compile Include="Configuration\ContextFilterConfigurationExtensions.cs" />
     <Compile Include="Configuration\DelegateConfigurationExtensions.cs" />
+    <Compile Include="Configuration\FilterConfigurationExtensions.cs" />
     <Compile Include="Configuration\IPipeBuilder.cs" />
     <Compile Include="Configuration\IPipeConfigurationResult.cs" />
     <Compile Include="Configuration\IPipeConfigurator.cs" />
@@ -61,7 +64,10 @@
     <Compile Include="Configuration\PartitionerConfigurationExtensions.cs" />
     <Compile Include="Configuration\Specifications\AsyncDelegatePipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\CircuitBreakerPipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\ContextFilterPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\DelegatePipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\FilterPipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\ForkPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\LogPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\PartitionerPipeSpecification.cs" />
     <Compile Include="Configuration\ValidationResult.cs" />
@@ -74,7 +80,9 @@
     <Compile Include="Exceptions\PayloadNotFoundException.cs" />
     <Compile Include="Exceptions\PipeConfigurationException.cs" />
     <Compile Include="Filters\AsyncDelegateFilter.cs" />
+    <Compile Include="Filters\ContextFilter.cs" />
     <Compile Include="Filters\DelegateFilter.cs" />
+    <Compile Include="Filters\ForkFilter.cs" />
     <Compile Include="Filters\LogFilter.cs" />
     <Compile Include="Filters\Log\LogContext.cs" />
     <Compile Include="Filters\Log\LogFormatter.cs" />
@@ -85,6 +93,13 @@
     <Compile Include="Filters\CircuitBreaker\HalfOpenBehavior.cs" />
     <Compile Include="Filters\CircuitBreaker\ICircuitBreaker.cs" />
     <Compile Include="Filters\CircuitBreaker\OpenBehavior.cs" />
+    <Compile Include="IntrospectionExtensions.cs" />
+    <Compile Include="Introspection\GreenPipesHostInfo.cs" />
+    <Compile Include="Introspection\IProbeResultBuilder.cs" />
+    <Compile Include="Introspection\ProbeHostInfo.cs" />
+    <Compile Include="Introspection\ProbeHostInfoCache.cs" />
+    <Compile Include="Introspection\ProbeResult.cs" />
+    <Compile Include="Introspection\ProbeResultBuilder.cs" />
     <Compile Include="Partitioning\IHashGenerator.cs" />
     <Compile Include="Partitioning\IPartitioner.cs" />
     <Compile Include="Partitioning\Murmur3UnsafeHashGenerator.cs" />
@@ -124,9 +139,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Filters\Transaction\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

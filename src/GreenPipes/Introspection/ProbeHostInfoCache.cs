@@ -10,21 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes
+namespace GreenPipes.Introspection
 {
-    /// <summary>
-    /// Configures a pipe builder (typically by adding filters), but allows late binding to the
-    /// pipe builder with pre-validation that the operations will succeed.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IPipeSpecification<T> :
-        ISpecification
-        where T : class, PipeContext
+    public static class ProbeHostInfoCache
     {
-        /// <summary>
-        /// Apply the specification to the builder
-        /// </summary>
-        /// <param name="builder">The pipe builder</param>
-        void Apply(IPipeBuilder<T> builder);
+        public static ProbeHostInfo Host => Cached.HostInfo;
+
+
+        static class Cached
+        {
+            internal static readonly ProbeHostInfo HostInfo = new GreenPipesHostInfo(true);
+        }
     }
 }

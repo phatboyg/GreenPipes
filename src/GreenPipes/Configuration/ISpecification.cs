@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,19 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes
 {
+    using System.Collections.Generic;
+    using System.ComponentModel;
+
+
     /// <summary>
-    /// Configures a pipe builder (typically by adding filters), but allows late binding to the
-    /// pipe builder with pre-validation that the operations will succeed.
+    /// A specification, that can be validated as part of a configurator, is used
+    /// to allow nesting and chaining of specifications while ensuring that all aspects
+    /// of the configuration are verified correct.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IPipeSpecification<T> :
-        ISpecification
-        where T : class, PipeContext
+    public interface ISpecification
     {
         /// <summary>
-        /// Apply the specification to the builder
+        /// Validate the specification, ensuring that a successful build will occur.
         /// </summary>
-        /// <param name="builder">The pipe builder</param>
-        void Apply(IPipeBuilder<T> builder);
+        /// <returns></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        IEnumerable<ValidationResult> Validate();
     }
 }
