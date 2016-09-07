@@ -1,0 +1,1 @@
+".\src\GreenPipes.BenchmarkConsole\bin\Debug\gpbench.exe" %*
