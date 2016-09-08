@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using GreenPipes.Payloads;
-using GreenPipes.Validation;
 using NUnit.Framework;
 
 namespace GreenPipes.Tests
@@ -14,12 +13,14 @@ namespace GreenPipes.Tests
         IPipe<RequestContext> _thePipe;
         bool protectedBusinessAction;
         bool cleanUp;
+        bool rejected;
 
         [SetUp]
         public void SetUp()
         {
             protectedBusinessAction = false;
             cleanUp = false;
+            rejected = false;
 
             var authPipe = Pipe.New<RequestContext>(cfg =>
             {
@@ -31,7 +32,10 @@ namespace GreenPipes.Tests
 
             var unauthPipe = Pipe.New<RequestContext>(cfg =>
             {
-
+                cfg.UseExecute(cxt =>
+                {
+                    rejected = true;
+                });
             });
 
             _thePipe = Pipe.New<RequestContext>(cfg =>
@@ -62,6 +66,7 @@ namespace GreenPipes.Tests
 
             Assert.That(protectedBusinessAction, Is.True);
             Assert.That(cleanUp, Is.True);
+            Assert.That(rejected, Is.False);
         }
 
         [Test]
@@ -74,7 +79,7 @@ namespace GreenPipes.Tests
 
             Assert.That(protectedBusinessAction, Is.False);
             Assert.That(cleanUp, Is.True);
-
+            Assert.That(rejected, Is.True);
         }
 
         [Test]
@@ -174,6 +179,9 @@ namespace GreenPipes.Tests
         {
             var scope = context.CreateScope("SampleAuthFilter");
             scope.Add("allowed-roles", _allowedRoles);
+            
+            _authPipe.Probe(scope.CreateScope("auth-pipe"));
+            _unauthPipe.Probe(scope.CreateScope("unauth-pipe"));
         }
 
         public async Task Send(T context, IPipe<T> next)
