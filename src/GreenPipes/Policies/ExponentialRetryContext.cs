@@ -17,32 +17,51 @@ namespace GreenPipes.Policies
     using Util;
 
 
-    public class ExponentialRetryContext :
-        RetryContext
+    public class ExponentialRetryContext<T> :
+        RetryContext<T>
+        where T : class
     {
         readonly ExponentialRetryPolicy _policy;
         readonly int _retryCount;
 
-        public ExponentialRetryContext(ExponentialRetryPolicy policy, Exception exception, int retryCount)
+        public ExponentialRetryContext(ExponentialRetryPolicy policy, T context, Exception exception, int retryCount)
         {
             _policy = policy;
             _retryCount = retryCount;
+            Context = context;
             Exception = exception;
         }
+
+        public T Context { get; }
 
         public Exception Exception { get; }
 
         public int RetryCount => _retryCount;
 
-        public TimeSpan? Delay => _policy.Intervals[_retryCount];
+        public int RetryAttempt => _retryCount;
 
-        public Task<bool> CanRetry(Exception exception, out RetryContext retryContext)
+        public TimeSpan? Delay => _policy.Intervals[_retryCount - 1];
+
+        public Task PreRetry()
         {
-            retryContext = new ExponentialRetryContext(_policy, Exception, _retryCount + 1);
+            return TaskUtil.Completed;
+        }
 
-            var canRetry = _retryCount + 1 < _policy.Intervals.Length && _policy.Matches(exception);
+        public Task PostRetry()
+        {
+            return TaskUtil.Completed;
+        }
 
-            return canRetry ? TaskUtil.True : TaskUtil.False;
+        public Task RetryFaulted(Exception exception)
+        {
+            return TaskUtil.Completed;
+        }
+
+        bool RetryPolicyContext<T>.CanRetry(Exception exception, out RetryContext<T> retryContext)
+        {
+            retryContext = new ExponentialRetryContext<T>(_policy, Context, Exception, _retryCount + 1);
+
+            return _retryCount < _policy.Intervals.Length && _policy.Matches(exception);
         }
     }
 }

@@ -16,40 +16,25 @@ namespace GreenPipes
     using System.Threading.Tasks;
 
 
-    public interface RetryContext
-    {
-        /// <summary>
-        /// The retry attempt currently being attempted
-        /// </summary>
-        int RetryAttempt { get; }
-    }
-
-
-    public interface RetryContext<T> :
-        RetryPolicyContext<T>,
-        RetryContext
+    /// <summary>
+    /// An initial context acquired to begin a retry filter
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface RetryPolicyContext<T>
         where T : class
     {
         /// <summary>
-        /// The exception that originally caused the retry to be initiated
+        /// The context being managed by the retry policy
         /// </summary>
-        Exception Exception { get; }
+        T Context { get; }
 
         /// <summary>
-        /// The number of retries which were attempted beyond the initial attempt
+        /// Determines if the exception can be retried
         /// </summary>
-        int RetryCount { get; }
-
-        /// <summary>
-        /// The time to wait before the next retry attempt
-        /// </summary>
-        TimeSpan? Delay { get; }
-
-        /// <summary>
-        /// Called before the retry attempt is performed
-        /// </summary>
-        /// <returns></returns>
-        Task PreRetry();
+        /// <param name="exception">The exception that occurred</param>
+        /// <param name="retryContext">The retry context for the retry</param>
+        /// <returns>True if the task should be retried</returns>
+        bool CanRetry(Exception exception, out RetryContext<T> retryContext);
 
         /// <summary>
         /// Called after the retry attempt has failed

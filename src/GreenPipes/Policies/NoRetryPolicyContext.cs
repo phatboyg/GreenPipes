@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,25 +12,34 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Policies
 {
-    public class NoRetryPolicy :
-        IRetryPolicy
+    using System;
+    using System.Threading.Tasks;
+    using Util;
+
+
+    public class NoRetryPolicyContext<T> :
+        RetryPolicyContext<T>
+        where T : class
     {
-        void IProbeSite.Probe(ProbeContext context)
+        readonly T _context;
+
+        public NoRetryPolicyContext(T context)
         {
-            context.Set(new
-            {
-                Policy = "None"
-            });
+            _context = context;
         }
 
-        RetryPolicyContext<T> IRetryPolicy.CreatePolicyContext<T>(T context)
+        public T Context => _context;
+
+        public bool CanRetry(Exception exception, out RetryContext<T> retryContext)
         {
-            return new NoRetryPolicyContext<T>(context);
+            retryContext = new NoRetryContext<T>(_context, exception);
+
+            return false;
         }
 
-        public override string ToString()
+        public Task RetryFaulted(Exception exception)
         {
-            return "None";
+            return TaskUtil.Completed;
         }
     }
 }

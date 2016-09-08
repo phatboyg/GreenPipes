@@ -17,36 +17,55 @@ namespace GreenPipes.Policies
     using Util;
 
 
-    public class IncrementalRetryContext :
-        RetryContext
+    public class IncrementalRetryContext<T> :
+        RetryContext<T>
+        where T : class
     {
         readonly TimeSpan _delay;
         readonly TimeSpan _delayIncrement;
         readonly IncrementalRetryPolicy _policy;
         readonly int _retryCount;
 
-        public IncrementalRetryContext(IncrementalRetryPolicy policy, Exception exception, int retryCount, TimeSpan delay, TimeSpan delayIncrement)
+        public IncrementalRetryContext(IncrementalRetryPolicy policy, T context, Exception exception, int retryCount, TimeSpan delay, TimeSpan delayIncrement)
         {
             _policy = policy;
             _retryCount = retryCount;
             _delay = delay;
             _delayIncrement = delayIncrement;
+            Context = context;
             Exception = exception;
         }
+
+        public T Context { get; }
 
         public Exception Exception { get; }
 
         public int RetryCount => _retryCount;
 
+        public int RetryAttempt => _retryCount;
+
         public TimeSpan? Delay => _delay;
 
-        public Task<bool> CanRetry(Exception exception, out RetryContext retryContext)
+        public Task PreRetry()
         {
-            retryContext = new IncrementalRetryContext(_policy, Exception, _retryCount + 1, _delay + _delayIncrement, _delayIncrement);
+            return TaskUtil.Completed;
+        }
 
-            var canRetry = _retryCount + 1 < _policy.RetryLimit && _policy.Matches(exception);
+        public Task PostRetry()
+        {
+            return TaskUtil.Completed;
+        }
 
-            return canRetry ? TaskUtil.True : TaskUtil.False;
+        public Task RetryFaulted(Exception exception)
+        {
+            return TaskUtil.Completed;
+        }
+
+        public bool CanRetry(Exception exception, out RetryContext<T> retryContext)
+        {
+            retryContext = new IncrementalRetryContext<T>(_policy, Context, Exception, _retryCount + 1, _delay + _delayIncrement, _delayIncrement);
+
+            return _retryCount < _policy.RetryLimit && _policy.Matches(exception);
         }
     }
 }

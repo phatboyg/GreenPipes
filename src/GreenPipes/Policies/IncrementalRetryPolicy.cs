@@ -13,16 +13,12 @@
 namespace GreenPipes.Policies
 {
     using System;
-    using System.Threading.Tasks;
-    using Util;
 
 
     public class IncrementalRetryPolicy :
-        RetryPolicy
+        IRetryPolicy
     {
         readonly IExceptionFilter _filter;
-        readonly TimeSpan _initialInterval;
-        readonly TimeSpan _intervalIncrement;
         readonly int _retryLimit;
 
         public IncrementalRetryPolicy(IExceptionFilter filter, int retryLimit, TimeSpan initialInterval,
@@ -42,11 +38,15 @@ namespace GreenPipes.Policies
 
             _filter = filter;
             _retryLimit = retryLimit;
-            _initialInterval = initialInterval;
-            _intervalIncrement = intervalIncrement;
+            InitialInterval = initialInterval;
+            IntervalIncrement = intervalIncrement;
         }
 
         public int RetryLimit => _retryLimit;
+
+        public TimeSpan InitialInterval { get; }
+
+        public TimeSpan IntervalIncrement { get; }
 
         void IProbeSite.Probe(ProbeContext context)
         {
@@ -54,18 +54,16 @@ namespace GreenPipes.Policies
             {
                 Policy = "Incremental",
                 Limit = _retryLimit,
-                Initial = _initialInterval,
-                Increment = _intervalIncrement
+                Initial = InitialInterval,
+                Increment = IntervalIncrement
             });
 
             _filter.Probe(context);
         }
 
-        public Task<bool> CanRetry(Exception exception, out RetryContext retryContext)
+        RetryPolicyContext<T> IRetryPolicy.CreatePolicyContext<T>(T context)
         {
-            retryContext = new IncrementalRetryContext(this, exception, 0, _initialInterval, _intervalIncrement);
-
-            return Matches(exception) ? TaskUtil.True : TaskUtil.False;
+            return new IncrementalRetryPolicyContext<T>(this, context);
         }
 
         public bool Matches(Exception exception)

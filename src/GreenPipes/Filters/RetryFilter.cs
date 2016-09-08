@@ -25,9 +25,9 @@ namespace GreenPipes.Filters
         IFilter<T>
         where T : class, PipeContext
     {
-        readonly RetryPolicy _retryPolicy;
+        readonly IRetryPolicy _retryPolicy;
 
-        public RetryFilter(RetryPolicy retryPolicy)
+        public RetryFilter(IRetryPolicy retryPolicy)
         {
             _retryPolicy = retryPolicy;
         }
@@ -43,52 +43,66 @@ namespace GreenPipes.Filters
         [DebuggerStepThrough]
         async Task IFilter<T>.Send(T context, IPipe<T> next)
         {
+            RetryPolicyContext<T> policyContext = _retryPolicy.CreatePolicyContext(context);
+
             try
             {
-                await next.Send(context).ConfigureAwait(false);
+                await next.Send(policyContext.Context).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
-                RetryContext retryContext;
-                if (context.TryGetPayload(out retryContext))
-                    throw;
-
-                var canRetry = await _retryPolicy.CanRetry(exception, out retryContext).ConfigureAwait(false);
-                if (!canRetry)
+                RetryContext<T> payloadRetryContext;
+                if (context.TryGetPayload(out payloadRetryContext) && !payloadRetryContext.CanRetry(exception, out payloadRetryContext))
                 {
+                    await policyContext.RetryFaulted(exception).ConfigureAwait(false);
+                    throw;
+                }
+
+                RetryContext<T> retryContext;
+                if (!policyContext.CanRetry(exception, out retryContext))
+                {
+                    await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+
                     context.GetOrAddPayload(() => retryContext);
                     throw;
                 }
 
-                await Attempt(retryContext, context, next).ConfigureAwait(false);
+                await Attempt(retryContext, next).ConfigureAwait(false);
             }
         }
 
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        async Task Attempt(RetryContext retryContext, T context, IPipe<T> next)
+        async Task Attempt(RetryContext<T> retryContext, IPipe<T> next)
         {
+            await retryContext.PreRetry().ConfigureAwait(false);
+
             try
             {
-                await next.Send(context).ConfigureAwait(false);
+                await next.Send(retryContext.Context).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
-                RetryContext nextRetryContext;
-                if (context.TryGetPayload(out nextRetryContext))
-                    throw;
-
-                var canRetry = await retryContext.CanRetry(exception, out nextRetryContext).ConfigureAwait(false);
-                if (!canRetry)
+                RetryContext<T> payloadRetryContext;
+                if (retryContext.Context.TryGetPayload(out payloadRetryContext) && !payloadRetryContext.CanRetry(exception, out payloadRetryContext))
                 {
-                    context.GetOrAddPayload(() => nextRetryContext);
+                    await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+                    throw;
+                }
+
+                RetryContext<T> nextRetryContext;
+                if (!retryContext.CanRetry(exception, out nextRetryContext))
+                {
+                    await nextRetryContext.RetryFaulted(exception).ConfigureAwait(false);
+
+                    retryContext.Context.GetOrAddPayload(() => nextRetryContext);
                     throw;
                 }
 
                 if (nextRetryContext.Delay.HasValue)
                     await Task.Delay(nextRetryContext.Delay.Value).ConfigureAwait(false);
 
-                await Attempt(nextRetryContext, context, next).ConfigureAwait(false);
+                await Attempt(nextRetryContext, next).ConfigureAwait(false);
             }
         }
     }

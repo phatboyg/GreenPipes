@@ -115,16 +115,21 @@
     <Compile Include="Policies\ExponentialRetryContext.cs" />
     <Compile Include="Policies\ExponentialRetryPolicy.cs" />
     <Compile Include="Policies\ExceptionFilters\FilterExceptionFilter.cs" />
+    <Compile Include="Policies\ExponentialRetryPolicyContext.cs" />
     <Compile Include="Policies\ImmediateRetryContext.cs" />
     <Compile Include="Policies\ImmediateRetryPolicy.cs" />
+    <Compile Include="Policies\ImmediateRetryPolicyContext.cs" />
     <Compile Include="Policies\IncrementalRetryContext.cs" />
     <Compile Include="Policies\IncrementalRetryPolicy.cs" />
+    <Compile Include="Policies\IncrementalRetryPolicyContext.cs" />
     <Compile Include="Policies\IntervalRetryContext.cs" />
     <Compile Include="Policies\IntervalRetryPolicy.cs" />
+    <Compile Include="Policies\IntervalRetryPolicyContext.cs" />
+    <Compile Include="Policies\NoRetryContext.cs" />
     <Compile Include="Policies\NoRetryPolicy.cs" />
     <Compile Include="Policies\ExceptionFilters\ExceptExceptionFilter.cs" />
     <Compile Include="Policies\ExceptionFilters\SelectedExceptionFilter.cs" />
-    <Compile Include="RetryPolicy.cs" />
+    <Compile Include="IRetryPolicy.cs" />
     <Compile Include="Partitioning\IHashGenerator.cs" />
     <Compile Include="Partitioning\IPartitioner.cs" />
     <Compile Include="Partitioning\Murmur3UnsafeHashGenerator.cs" />
@@ -157,9 +162,11 @@
     <Compile Include="Pipes\EmptyPipe.cs" />
     <Compile Include="Pipes\FilterPipe.cs" />
     <Compile Include="Pipes\LastPipe.cs" />
+    <Compile Include="Policies\NoRetryPolicyContext.cs" />
     <Compile Include="ProbeContext.cs" />
     <Compile Include="ProbeContextExtensions.cs" />
     <Compile Include="RetryContext.cs" />
+    <Compile Include="RetryPolicyContext.cs" />
     <Compile Include="Util\TaskUtil.cs" />
   </ItemGroup>
   <ItemGroup>

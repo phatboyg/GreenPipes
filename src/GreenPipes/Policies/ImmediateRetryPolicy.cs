@@ -13,12 +13,10 @@
 namespace GreenPipes.Policies
 {
     using System;
-    using System.Threading.Tasks;
-    using Util;
 
 
     public class ImmediateRetryPolicy :
-        RetryPolicy
+        IRetryPolicy
     {
         readonly IExceptionFilter _filter;
         readonly int _retryLimit;
@@ -42,11 +40,9 @@ namespace GreenPipes.Policies
             _filter.Probe(context);
         }
 
-        public Task<bool> CanRetry(Exception exception, out RetryContext retryContext)
+        RetryPolicyContext<T> IRetryPolicy.CreatePolicyContext<T>(T context)
         {
-            retryContext = new ImmediateRetryContext(this, exception, 0);
-
-            return Matches(exception) ? TaskUtil.True : TaskUtil.False;
+            return new ImmediateRetryPolicyContext<T>(this, context);
         }
 
         public bool Matches(Exception exception)

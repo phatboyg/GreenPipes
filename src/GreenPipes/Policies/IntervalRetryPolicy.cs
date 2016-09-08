@@ -14,12 +14,10 @@ namespace GreenPipes.Policies
 {
     using System;
     using System.Linq;
-    using System.Threading.Tasks;
-    using Util;
 
 
     public class IntervalRetryPolicy :
-        RetryPolicy
+        IRetryPolicy
     {
         readonly IExceptionFilter _filter;
 
@@ -35,8 +33,6 @@ namespace GreenPipes.Policies
             Intervals = intervals;
         }
 
-        public TimeSpan[] Intervals { get; }
-
         public IntervalRetryPolicy(IExceptionFilter filter, params int[] intervals)
         {
             if (intervals == null)
@@ -48,23 +44,23 @@ namespace GreenPipes.Policies
             Intervals = intervals.Select(x => TimeSpan.FromMilliseconds(x)).ToArray();
         }
 
+        public TimeSpan[] Intervals { get; }
+
         void IProbeSite.Probe(ProbeContext context)
         {
             context.Set(new
             {
                 Policy = "Interval",
                 Limit = Intervals.Length,
-                Intervals = Intervals
+                Intervals
             });
 
             _filter.Probe(context);
         }
 
-        public Task<bool> CanRetry(Exception exception, out RetryContext retryContext)
+        RetryPolicyContext<T> IRetryPolicy.CreatePolicyContext<T>(T context)
         {
-            retryContext = new IntervalRetryContext(this, exception, 0);
-
-            return Matches(exception) ? TaskUtil.True : TaskUtil.False;
+            return new IntervalRetryPolicyContext<T>(this, context);
         }
 
         public bool Matches(Exception exception)

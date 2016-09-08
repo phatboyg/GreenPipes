@@ -15,12 +15,10 @@ namespace GreenPipes.Policies
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
-    using Util;
 
 
     public class ExponentialRetryPolicy :
-        RetryPolicy
+        IRetryPolicy
     {
         readonly IExceptionFilter _filter;
         readonly int _highInterval;
@@ -59,11 +57,9 @@ namespace GreenPipes.Policies
             _filter.Probe(context);
         }
 
-        public Task<bool> CanRetry(Exception exception, out RetryContext retryContext)
+        RetryPolicyContext<T> IRetryPolicy.CreatePolicyContext<T>(T context)
         {
-            retryContext = new ExponentialRetryContext(this, exception, 0);
-
-            return Matches(exception) ? TaskUtil.True : TaskUtil.False;
+            return new ExponentialRetryPolicyContext<T>(this, context);
         }
 
         public bool Matches(Exception exception)

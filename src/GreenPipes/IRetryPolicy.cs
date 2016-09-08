@@ -12,23 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes
 {
-    using System;
-    using System.Threading.Tasks;
-
-
     /// <summary>
     /// A retry policy determines how exceptions are handled, and whether or not the
     /// remaining filters should be retried
     /// </summary>
-    public interface RetryPolicy :
+    public interface IRetryPolicy :
         IProbeSite
     {
-        /// <summary>
-        /// Determines if the exception can be retried
-        /// </summary>
-        /// <param name="exception">The exception that occurred</param>
-        /// <param name="retryContext">The retry context for the retry</param>
-        /// <returns>True if the task should be retried</returns>
-        Task<bool> CanRetry(Exception exception, out RetryContext retryContext);
+        RetryPolicyContext<T> CreatePolicyContext<T>(T context)
+            where T : class;
     }
 }

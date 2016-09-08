@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,30 +17,23 @@ namespace GreenPipes.Policies
     using Util;
 
 
-    public class IntervalRetryContext<T> :
+    public class NoRetryContext<T> :
         RetryContext<T>
         where T : class
     {
-        readonly IntervalRetryPolicy _policy;
-        readonly int _retryCount;
-
-        public IntervalRetryContext(IntervalRetryPolicy policy, T context, Exception exception, int retryCount)
+        public NoRetryContext(T context, Exception exception)
         {
-            _policy = policy;
-            _retryCount = retryCount;
             Context = context;
             Exception = exception;
         }
 
         public T Context { get; }
-
         public Exception Exception { get; }
 
-        public int RetryCount => _retryCount;
+        public int RetryCount => 1;
+        public int RetryAttempt => 1;
 
-        public int RetryAttempt => _retryCount;
-
-        public TimeSpan? Delay => _policy.Intervals[_retryCount - 1];
+        public TimeSpan? Delay => default(TimeSpan?);
 
         public Task PreRetry()
         {
@@ -59,9 +52,9 @@ namespace GreenPipes.Policies
 
         public bool CanRetry(Exception exception, out RetryContext<T> retryContext)
         {
-            retryContext = new IntervalRetryContext<T>(_policy, Context, Exception, _retryCount + 1);
+            retryContext = this;
 
-            return _retryCount < _policy.Intervals.Length && _policy.Matches(exception);
+            return false;
         }
     }
 }

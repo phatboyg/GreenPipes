@@ -12,5 +12,5 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Configurators
 {
-    public delegate RetryPolicy RetryPolicyFactory(IExceptionFilter filter);
+    public delegate IRetryPolicy RetryPolicyFactory(IExceptionFilter filter);
 }
