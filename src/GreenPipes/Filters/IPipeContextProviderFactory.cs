@@ -23,4 +23,25 @@ namespace GreenPipes.Filters
         IPipeContextProvider<TContext, TResult> GetPipeContextFactory<TResult>(TKey key)
             where TResult : class, PipeContext;
     }
+
+
+    public interface IPipeContextConverterFactory<in TInput>
+        where TInput : class, PipeContext
+    {
+        IPipeContextConverter<TInput, TOutput> GetConverter<TOutput>()
+            where TOutput : class, PipeContext;
+    }
+
+
+    /// <summary>
+    /// Converts the input context to the output context
+    /// </summary>
+    /// <typeparam name="TInput"></typeparam>
+    /// <typeparam name="TOutput"></typeparam>
+    public interface IPipeContextConverter<in TInput, TOutput>
+        where TInput : class, PipeContext
+        where TOutput : class, PipeContext
+    {
+        bool TryConvert(TInput input, out TOutput output);
+    }
 }

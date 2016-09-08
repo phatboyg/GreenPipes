@@ -12,22 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes
 {
-    public interface IDispatchPipeConnector<in TKey>
+    /// <summary>
+    /// The intent is to connect a pipe of a specific type to a pipe of a different type,
+    /// for which there is a provider that knows how to convert the input type to the output type.
+    /// </summary>
+    public interface IDispatchPipeConnector
     {
-        ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe)
+        /// <summary>
+        /// Connect a pipe of the specified type to the DispatchFilter
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="pipe"></param>
+        /// <returns></returns>
+        ConnectHandle ConnectPipe<T>(IPipe<T> pipe)
             where T : class, PipeContext;
     }
+
 
     public interface IPipeConnector<out T>
         where T : class, PipeContext
     {
         ConnectHandle ConnectPipe(IPipe<T> pipe);
     }
-
-
-//    public interface IPipeConnector<out T>
-//        where T : class, PipeContext
-//    {
-//        ConnectHandle ConnectPipe(IPipe<T> pipe);
-//    }
 }

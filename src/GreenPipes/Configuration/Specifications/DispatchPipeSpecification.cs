@@ -18,36 +18,36 @@ namespace GreenPipes.Specifications
     using Filters;
 
 
-    public class DispatchPipeSpecification<TInput, TKey> :
+    public class DispatchPipeSpecification<TInput> :
         IPipeSpecification<TInput>,
-        IDispatchConfigurator<TInput, TKey>
+        IDispatchConfigurator<TInput>
         where TInput : class, PipeContext
     {
-        readonly IList<Action<IDispatchPipeConnector<TKey>>> _connectActions;
-        readonly IPipeContextProviderFactory<TInput, TKey> _pipeContextProviderFactory;
+        readonly IList<Action<IDispatchPipeConnector>> _connectActions;
+        readonly IPipeContextConverterFactory<TInput> _pipeContextConverterFactory;
 
-        public DispatchPipeSpecification(IPipeContextProviderFactory<TInput, TKey> pipeContextProviderFactory)
+        public DispatchPipeSpecification(IPipeContextConverterFactory<TInput> pipeContextConverterFactory)
         {
-            _pipeContextProviderFactory = pipeContextProviderFactory;
+            _pipeContextConverterFactory = pipeContextConverterFactory;
 
-            _connectActions = new List<Action<IDispatchPipeConnector<TKey>>>();
+            _connectActions = new List<Action<IDispatchPipeConnector>>();
         }
 
-        void IDispatchConfigurator<TInput, TKey>.Pipe<T>(TKey key, Action<IPipeConfigurator<T>> configurePipe)
+        void IDispatchConfigurator<TInput>.Pipe<T>(Action<IPipeConfigurator<T>> configurePipe)
         {
             _connectActions.Add(connector =>
             {
                 IPipe<T> pipe = Pipe.New(configurePipe);
 
-                connector.ConnectPipe(key, pipe);
+                connector.ConnectPipe(pipe);
             });
         }
 
         public void Apply(IPipeBuilder<TInput> builder)
         {
-            var dispatchFilter = new DispatchFilter<TInput, TKey>(_pipeContextProviderFactory);
+            var dispatchFilter = new DispatchFilter<TInput>(_pipeContextConverterFactory);
 
-            foreach (var action in _connectActions)
+            foreach (Action<IDispatchPipeConnector> action in _connectActions)
             {
                 action(dispatchFilter);
             }
@@ -57,7 +57,7 @@ namespace GreenPipes.Specifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_pipeContextProviderFactory == null)
+            if (_pipeContextConverterFactory == null)
                 yield return this.Failure("PipeContextProviderFactory", "must not be null");
         }
     }

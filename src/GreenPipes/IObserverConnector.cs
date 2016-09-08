@@ -12,19 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes
 {
-    public interface IDispatchObserverConnector<in TKey>
-    {
-        /// <summary>
-        /// Connect an observer to the filter and/or pipe
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="observer"></param>
-        /// <returns></returns>
-        ConnectHandle ConnectObserver<T>(TKey key, IFilterObserver<T> observer)
-            where T : class, PipeContext;
-    }
-
-
     public interface IObserverConnector
     {
         /// <summary>

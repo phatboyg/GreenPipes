@@ -20,14 +20,22 @@ namespace GreenPipes
 
     public static class DispatchConfigurationExtensions
     {
-        public static void UseDispatch<T, TKey>(this IPipeConfigurator<T> configurator, IPipeContextProviderFactory<T, TKey> pipeContextProviderFactory,
-            Action<IDispatchConfigurator<T, TKey>> configure = null)
+        /// <summary>
+        /// Adds a dispatch filter to the pipe, which can be used to route traffic
+        /// based on the type of the incoming context
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="pipeContextProviderFactory"></param>
+        /// <param name="configure"></param>
+        public static void UseDispatch<T>(this IPipeConfigurator<T> configurator, IPipeContextConverterFactory<T> pipeContextProviderFactory,
+            Action<IDispatchConfigurator<T>> configure = null)
             where T : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new DispatchPipeSpecification<T, TKey>(pipeContextProviderFactory);
+            var specification = new DispatchPipeSpecification<T>(pipeContextProviderFactory);
 
             configure?.Invoke(specification);
 

@@ -13,7 +13,6 @@
 namespace GreenPipes.Tests
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading.Tasks;
     using Filters;
@@ -31,9 +30,9 @@ namespace GreenPipes.Tests
             {
                 // this needs to be moved from Factory() to some type of management glue that
                 // includes the factory, and hooks to connect/add/review
-                x.UseDispatch(new Factory(), d =>
+                x.UseDispatch(new InputConverterFactory(), d =>
                 {
-                    d.Pipe<Input<string>>(typeof(Input<string>), p =>
+                    d.Pipe<Input<string>>(p =>
                     {
                         p.UseExecute(context => Console.WriteLine(context.Value));
                     });
@@ -56,6 +55,20 @@ namespace GreenPipes.Tests
         }
 
         public object Value { get; }
+
+        public bool TryGetContext<T>(out T result)
+            where T : class
+        {
+            if (typeof(T).IsAssignableFrom(typeof(Input<string>)))
+            {
+                result = new Input<string>(Value.ToString()) as T;
+
+                return result != null;
+            }
+
+            result = null;
+            return false;
+        }
     }
 
 
@@ -74,48 +87,24 @@ namespace GreenPipes.Tests
     }
 
 
-    public class Factory :
-        IPipeContextProviderFactory<Input, Type>
+    class InputConverterFactory :
+        IPipeContextConverterFactory<Input>
     {
-        readonly ConcurrentDictionary<Type, IPipeContextProviderFactory<Input, Type>> _instance =
-            new ConcurrentDictionary<Type, IPipeContextProviderFactory<Input, Type>>();
-
-        IPipeContextProvider<Input, TResult> IPipeContextProviderFactory<Input, Type>.GetPipeContextFactory<TResult>(Type key)
+        IPipeContextConverter<Input, TOutput> IPipeContextConverterFactory<Input>.GetConverter<TOutput>()
         {
-            var messageType = key.GetClosingArguments(typeof(Input<>)).Single();
+            var innerType = typeof(TOutput).GetClosingArguments(typeof(Input<>)).Single();
 
-            IPipeContextProviderFactory<Input, Type> factory = GetOrAdd(messageType);
-
-            return factory.GetPipeContextFactory<TResult>(key);
-        }
-
-        public IPipeContextProviderFactory<Input, Type> GetOrAdd(Type type)
-        {
-            return _instance.GetOrAdd(type, _ =>
-                (IPipeContextProviderFactory<Input, Type>)Activator.CreateInstance(typeof(CachedConfigurator<>).MakeGenericType(type)));
+            return (IPipeContextConverter<Input, TOutput>)Activator.CreateInstance(typeof(Converter<>).MakeGenericType(innerType));
         }
 
 
-        class CachedConfigurator<T> :
-            IPipeContextProviderFactory<Input, Type>
+        class Converter<T> :
+            IPipeContextConverter<Input, Input<T>>
             where T : class
         {
-            IPipeContextProvider<Input, TResult> IPipeContextProviderFactory<Input, Type>.GetPipeContextFactory<TResult>(Type key)
+            bool IPipeContextConverter<Input, Input<T>>.TryConvert(Input input, out Input<T> output)
             {
-                return new ContextProvider<T>() as IPipeContextProvider<Input, TResult>;
-            }
-        }
-
-
-        class ContextProvider<T> :
-            IPipeContextProvider<Input, Input<T>>
-            where T : class
-        {
-            public bool TryGetContext(Input context, out Input<T> result)
-            {
-                result = new Input<T>(context.Value as T);
-
-                return true;
+                return input.TryGetContext(out output);
             }
         }
     }

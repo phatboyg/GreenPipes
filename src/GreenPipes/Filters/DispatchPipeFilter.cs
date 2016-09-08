@@ -32,14 +32,14 @@ namespace GreenPipes.Filters
         where TInput : class, PipeContext
         where TOutput : class, PipeContext
     {
-        readonly IPipeContextProvider<TInput, TOutput> _contextProvider;
+        readonly IPipeContextConverter<TInput, TOutput> _contextConverter;
         readonly FilterObservable<TOutput> _observers;
         readonly TeeFilter<TOutput> _output;
         readonly IPipe<TOutput> _outputPipe;
 
-        public DispatchPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextProvider<TInput, TOutput> contextProvider)
+        public DispatchPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter)
         {
-            _contextProvider = contextProvider;
+            _contextConverter = contextConverter;
 
             _output = new TeeFilter<TOutput>();
 
@@ -60,7 +60,7 @@ namespace GreenPipes.Filters
         async Task IFilter<TInput>.Send(TInput context, IPipe<TInput> next)
         {
             TOutput pipeContext;
-            if (_contextProvider.TryGetContext(context, out pipeContext))
+            if (_contextConverter.TryConvert(context, out pipeContext))
             {
                 if (_observers.Count > 0)
                     await _observers.PreSend(pipeContext).ConfigureAwait(false);
