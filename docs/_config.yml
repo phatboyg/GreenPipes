@@ -4,7 +4,8 @@
 title:               GreenPipes.
 tagline:             'Composable TPL Middleware'
 description:         'Stuff'
-url:                 'http://github.com/phatboyg/greenpipes'
+url:                 'http://blog.phatboyg.com'
+baseurl:             '/GreenPipes'
 
 # About/contact
 author:
