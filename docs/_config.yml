@@ -1,17 +1,16 @@
 # Built with Jekyll 3.2.0
 
 # Setup
-title:               Ed.
-tagline:             'A Jekyll theme for minimal editions'
-description:         'Ed is a Jekyll theme designed for textual editors based on minimal computing principles, and focused on legibility and flexibility.'
-url:                 'http://elotroalex.github.io'
-baseurl:             '/ed'
+title:               GreenPipes.
+tagline:             'Composable TPL Middleware'
+description:         'Stuff'
+url:                 'http://github.com/phatboyg/greenpipes'
 
 # About/contact
 author:
-  name:              Alex Gil
-  url:               https://twitter.com/elotroalex
-  email:             colibri.alex@gmail.com
+  name:              PhatboyG
+  url:               https://twitter.com/phatboyg
+  email:             chris@phatboyg.com
 
 # Permalinks
 
@@ -43,5 +42,3 @@ version:             0.0.6
 
 # Exclusions from the final site
 exclude: [optional, vendor]
-
-

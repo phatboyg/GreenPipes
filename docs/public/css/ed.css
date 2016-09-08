@@ -1,10 +1,10 @@
 /* Ed: the minimal edition theme.
- * ___________________   
- * \_   _____/\______ \  
- *  |    __)_  |    |  \ 
+ * ___________________
+ * \_   _____/\______ \
+ *  |    __)_  |    |  \
  *  |        \ |    `   \
  * /_______  //_______  /
- *         \/         \/ 
+ *         \/         \/
  * Designed, built, and released under an MIT license by @elotroalex.
  * Based on the Poole and Lanyon theme by @mdo. Learn more at
  * https://github.com/elotroalex/ed.
@@ -94,7 +94,7 @@ body {
 /* links */
 
 a, .post-title a {
-  color: #841212;
+  color: #5bb12f;
   text-decoration: none;
 }
 
@@ -113,7 +113,7 @@ a:focus {
 h1, h2, h3, h4, h5, h6 {
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
   margin-bottom: .5rem;
-  font-weight: 400; 
+  font-weight: 400;
   font-size: 1.5rem;
   color: #404040;
   letter-spacing: -.025rem;
@@ -208,7 +208,7 @@ mark {
 
 blockquote {
 	padding: 0rem 1.5rem 0rem 2rem;
-	margin: 0 0 20px 0; 
+	margin: 0 0 20px 0;
   	color: #454545;
 	border-left: none;
 	font-style: italic;
@@ -300,7 +300,7 @@ tbody tr:nth-child(odd) th {
   line-height: 1.5rem;
 }
 .masthead-title a {
-	color: #841212;
+	color: #5bb12f;
 }
 
 .masthead-title small {
@@ -780,8 +780,8 @@ sup, sub {
    top: -0.4em;
 }
 
-sub { 
-  top: 0.4em; 
+sub {
+  top: 0.4em;
 }
 
 .footnotes {
@@ -809,6 +809,3 @@ ol.bibliography {
 	padding-left: 1rem;
 	text-indent: -1rem;
 }
-
-
-

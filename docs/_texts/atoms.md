@@ -1,17 +1,8 @@
 ---
 layout: default
-title: Green Pipes
+title: The Atoms
 subtitle: Composable middleware for the Task Parallel Library
 ---
-
-
-Green Pipes is a composable middleware framework which extends the Task Parallel Library (TPL) designed around the widely understood concept of pipes and filters. By leveraging _Tasks_, filters can execute quickly while also remaining asynchronous friendly. 
-
-You would use Green Pipes if you want to:
-
-- Build a reactive, event-driven application
-- Enable developers to add behavior to applications
-
 
 ## The Atoms
 
@@ -49,7 +40,3 @@ Contexts are then sent through the pipe using the `IPipe<T>` interface.
 The send is invoked using the standard async/await features in the C# language.
 
     await pipe.Send(new PipeContext(...));
-
-
-
-
