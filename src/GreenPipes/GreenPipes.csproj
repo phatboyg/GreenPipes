@@ -47,6 +47,7 @@
     </Compile>
     <Compile Include="BasePipeContext.cs" />
     <Compile Include="CommandExtensions.cs" />
+    <Compile Include="ConcurrencyLimitExtensions.cs" />
     <Compile Include="Configuration\Builders\IBuildPipeConfigurator.cs" />
     <Compile Include="Configuration\Builders\PipeBuilder.cs" />
     <Compile Include="Configuration\CircuitBreakerConfigurationExtensions.cs" />
