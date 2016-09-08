@@ -12,9 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Configurators
 {
+    using System.ComponentModel;
+
+
     public interface IRetryConfigurator
     {
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void SetRetryPolicy(RetryPolicyFactory factory);
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void SetExceptionFilter(IExceptionFilter filter);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using GreenPipes.Payloads;
 using NUnit.Framework;
-using Shouldly;
 
 namespace GreenPipes.Tests
 {
@@ -14,16 +13,16 @@ namespace GreenPipes.Tests
             p.GetOrAddPayload(() => new Item("bob"));
 
             Item i;
-            p.TryGetPayload(out i).ShouldBe(true);
+            Assert.That(p.TryGetPayload(out i), Is.True);
 
             var p2 = p.CreateScope();
 
             p.GetOrAddPayload(() => new Item2("bill"));
 
             Item2 i2;
-            p2.TryGetPayload(out i2).ShouldBe(false);
+            Assert.That(p2.TryGetPayload(out i2), Is.False);
             Item i1;
-            p2.TryGetPayload(out i1).ShouldBe(true);
+            Assert.That(p2.TryGetPayload(out i1), Is.True);
         }
 
 
