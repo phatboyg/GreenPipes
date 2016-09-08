@@ -12,7 +12,32 @@ namespace GreenPipes.Tests
     public class Authentication_Specs
     {
         [Test]
-        public async Task X()
+        public async Task Authorized()
+        {
+            bool visited = false;
+            var pipe = Pipe.New<RequestContext>(cfg =>
+            {
+                cfg.UseAuthFilter("bob");
+                cfg.UseExecute(cxt =>
+                {
+                    visited = true;
+                });
+            });
+
+
+            var request = new RequestContext();
+            request.GetOrAddPayload(() => new GenericPrincipal(new GenericIdentity("test"), new []{"bob"} ));
+
+            await pipe.Send(request).ConfigureAwait(false);
+
+            Assert.That(visited, Is.True);
+
+
+            Console.WriteLine(pipe.GetProbeResult().ToJsonString());
+        }
+
+        [Test]
+        public async Task Unauthorized()
         {
             bool visited = false;
             var pipe = Pipe.New<RequestContext>(cfg =>
