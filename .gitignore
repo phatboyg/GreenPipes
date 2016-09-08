@@ -26,6 +26,8 @@ _ReSharper*
 NuGet.exe
 packages
 
+.DS_Store
+
 TestResult.xml
 submit.xml
 src/tests/*
