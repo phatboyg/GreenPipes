@@ -34,6 +34,10 @@
       <HintPath>..\packages\NUnit.3.4.1\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Shouldly, Version=2.8.2.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
+      <HintPath>..\packages\Shouldly.2.8.2\lib\net451\Shouldly.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
@@ -41,6 +45,7 @@
     <Compile Include="Authentication_Specs.cs" />
     <Compile Include="InterfaceExtensions.cs" />
     <Compile Include="Dispatch_Specs.cs" />
+    <Compile Include="Clone_a_payload_cache.cs" />
     <Compile Include="IntentionalTestException.cs" />
     <Compile Include="CircuitBreaker_Specs.cs" />
     <Compile Include="InterfaceReflectionCache.cs" />
