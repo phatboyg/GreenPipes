@@ -49,8 +49,10 @@
     <Compile Include="Configuration\Builders\IBuildPipeConfigurator.cs" />
     <Compile Include="Configuration\Builders\PipeBuilder.cs" />
     <Compile Include="Configuration\CircuitBreakerConfigurationExtensions.cs" />
+    <Compile Include="Configuration\Configurators\IDispatchConfigurator.cs" />
     <Compile Include="Configuration\Configurators\IRetryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RetryPolicyFactory.cs" />
+    <Compile Include="Configuration\DispatchConfigurationExtensions.cs" />
     <Compile Include="Configuration\ForkConfigurationExtensions.cs" />
     <Compile Include="Configuration\ISpecification.cs" />
     <Compile Include="Configuration\Configurators\ICircuitBreakerConfigurator.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="Configuration\Specifications\CircuitBreakerPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\ContextFilterPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\DelegatePipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\DispatchPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\FilterPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\ForkPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\LogPipeSpecification.cs" />
@@ -81,13 +84,23 @@
     <Compile Include="Configuration\ValidationResultExtensions.cs" />
     <Compile Include="Configuration\Validation\ConfigurationValidationResult.cs" />
     <Compile Include="Configuration\Validation\PipeConfigurationResult.cs" />
+    <Compile Include="ConnectHandle.cs" />
+    <Compile Include="Exceptions\DuplicateKeyPipeConfigurationException.cs" />
     <Compile Include="Exceptions\PayloadException.cs" />
     <Compile Include="Exceptions\PayloadFactoryException.cs" />
     <Compile Include="Exceptions\PayloadNotFoundException.cs" />
     <Compile Include="Exceptions\PipeConfigurationException.cs" />
     <Compile Include="Filters\AsyncDelegateFilter.cs" />
+    <Compile Include="Filters\IPipeContextProviderFactory.cs" />
+    <Compile Include="Filters\KeyFilter.cs" />
+    <Compile Include="Filters\KeyPipeFilter.cs" />
+    <Compile Include="Filters\ObservableAdapter.cs" />
+    <Compile Include="Filters\PipeContextFactory.cs" />
+    <Compile Include="Filters\DispatchPipeFilter.cs" />
+    <Compile Include="Filters\FilterObservable.cs" />
     <Compile Include="Filters\ContextFilter.cs" />
     <Compile Include="Filters\DelegateFilter.cs" />
+    <Compile Include="Filters\DispatchFilter.cs" />
     <Compile Include="Filters\ForkFilter.cs" />
     <Compile Include="Filters\LogFilter.cs" />
     <Compile Include="Filters\Log\LogContext.cs" />
@@ -102,7 +115,10 @@
     <Compile Include="Filters\RescueContextFactory.cs" />
     <Compile Include="Filters\RescueFilter.cs" />
     <Compile Include="Filters\RetryFilter.cs" />
+    <Compile Include="Filters\TeeFilter.cs" />
+    <Compile Include="IConnectPipeById.cs" />
     <Compile Include="IExceptionFilter.cs" />
+    <Compile Include="IFilterObserver.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="Introspection\GreenPipesHostInfo.cs" />
     <Compile Include="Introspection\IProbeResultBuilder.cs" />
@@ -110,6 +126,9 @@
     <Compile Include="Introspection\ProbeHostInfoCache.cs" />
     <Compile Include="Introspection\ProbeResult.cs" />
     <Compile Include="Introspection\ProbeResultBuilder.cs" />
+    <Compile Include="IObserverConnector.cs" />
+    <Compile Include="IPipeConnector.cs" />
+    <Compile Include="KeyAccessor.cs" />
     <Compile Include="Payloads\PipeContextPayloadAdapter.cs" />
     <Compile Include="Policies\ExceptionFilters\AllExceptionFilter.cs" />
     <Compile Include="Policies\ExponentialRetryContext.cs" />
@@ -167,6 +186,7 @@
     <Compile Include="ProbeContextExtensions.cs" />
     <Compile Include="RetryContext.cs" />
     <Compile Include="RetryPolicyContext.cs" />
+    <Compile Include="Util\Connectable.cs" />
     <Compile Include="Util\TaskUtil.cs" />
   </ItemGroup>
   <ItemGroup>

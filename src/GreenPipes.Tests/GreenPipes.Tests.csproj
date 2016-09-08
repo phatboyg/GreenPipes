@@ -39,8 +39,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authentication_Specs.cs" />
+    <Compile Include="InterfaceExtensions.cs" />
+    <Compile Include="Dispatch_Specs.cs" />
     <Compile Include="IntentionalTestException.cs" />
     <Compile Include="CircuitBreaker_Specs.cs" />
+    <Compile Include="InterfaceReflectionCache.cs" />
     <Compile Include="Parent_Child_Pipes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rescue_Specs.cs" />
