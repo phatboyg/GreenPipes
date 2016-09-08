@@ -24,5 +24,7 @@ namespace GreenPipes.BenchmarkConsole.Throughput
         public string Payload { get; set; }
 
         public Guid CorrelationId { get; set; }
+
+        public int Attempts { get; set; }
     }
 }

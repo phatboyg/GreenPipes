@@ -7,5 +7,7 @@ namespace GreenPipes.BenchmarkConsole.Throughput
         PipeContext
     {
         Guid CorrelationId { get; }
+
+        int Attempts { get; set; }
     }
 }

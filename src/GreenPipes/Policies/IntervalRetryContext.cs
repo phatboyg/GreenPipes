@@ -46,12 +46,7 @@ namespace GreenPipes.Policies
         {
             return TaskUtil.Completed;
         }
-
-        public Task PostRetry()
-        {
-            return TaskUtil.Completed;
-        }
-
+        
         public Task RetryFaulted(Exception exception)
         {
             return TaskUtil.Completed;

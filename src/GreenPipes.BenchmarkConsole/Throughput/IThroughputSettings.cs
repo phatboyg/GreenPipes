@@ -21,5 +21,9 @@ namespace GreenPipes.BenchmarkConsole.Throughput
         int Clients { get; }
 
         int PayloadSize { get; }
+
+        int RetryCount { get; }
+
+        int FaultCount { get; }
     }
 }

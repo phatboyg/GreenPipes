@@ -37,9 +37,18 @@
 
             var pipe = Pipe.New<TestContext>(x =>
             {
-                x.UseFilter(new ThroughputFilter(_capture));
+                if (_settings.RetryCount > 0)
+                    x.UseRetry(r => r.Immediate(_settings.RetryCount));
+
+                x.UseFilter(new ThroughputFilter(_capture, _settings.FaultCount));
             });
+
+
+
+
             Console.WriteLine("Running Throughput Benchmark");
+
+            Console.WriteLine(pipe.GetProbeResult().ToJsonString());
 
             RunBenchmark(pipe).Wait(cancellationToken);
 
