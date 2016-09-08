@@ -27,7 +27,7 @@ namespace GreenPipes.Filters
     /// <typeparam name="TInput"></typeparam>
     public class DispatchFilter<TInput> :
         IFilter<TInput>,
-        IDispatchPipeConnector,
+        IPipeConnector,
         IObserverConnector
         where TInput : class, PipeContext
     {

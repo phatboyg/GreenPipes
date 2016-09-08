@@ -23,14 +23,14 @@ namespace GreenPipes.Specifications
         IDispatchConfigurator<TInput>
         where TInput : class, PipeContext
     {
-        readonly IList<Action<IDispatchPipeConnector>> _connectActions;
+        readonly IList<Action<IPipeConnector>> _connectActions;
         readonly IPipeContextConverterFactory<TInput> _pipeContextConverterFactory;
 
         public DispatchPipeSpecification(IPipeContextConverterFactory<TInput> pipeContextConverterFactory)
         {
             _pipeContextConverterFactory = pipeContextConverterFactory;
 
-            _connectActions = new List<Action<IDispatchPipeConnector>>();
+            _connectActions = new List<Action<IPipeConnector>>();
         }
 
         void IDispatchConfigurator<TInput>.Pipe<T>(Action<IPipeConfigurator<T>> configurePipe)
@@ -47,7 +47,7 @@ namespace GreenPipes.Specifications
         {
             var dispatchFilter = new DispatchFilter<TInput>(_pipeContextConverterFactory);
 
-            foreach (Action<IDispatchPipeConnector> action in _connectActions)
+            foreach (Action<IPipeConnector> action in _connectActions)
             {
                 action(dispatchFilter);
             }

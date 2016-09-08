@@ -10,28 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes
+namespace GreenPipes.Control
 {
-    /// <summary>
-    /// The intent is to connect a pipe of a specific type to a pipe of a different type,
-    /// for which there is a provider that knows how to convert the input type to the output type.
-    /// </summary>
-    public interface IPipeConnector
+    using System;
+
+
+    public interface CommandContext :
+        PipeContext
     {
         /// <summary>
-        /// Connect a pipe of the specified type to the DispatchFilter
+        /// The timestamp at which the command was sent
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="pipe"></param>
-        /// <returns></returns>
-        ConnectHandle ConnectPipe<T>(IPipe<T> pipe)
-            where T : class, PipeContext;
+        DateTime Timestamp { get; }
     }
 
 
-    public interface IPipeConnector<out T>
-        where T : class, PipeContext
+    public interface CommandContext<out T> :
+        CommandContext
+        where T : class
     {
-        ConnectHandle ConnectPipe(IPipe<T> pipe);
+        /// <summary>
+        /// The command object
+        /// </summary>
+        T Command { get; }
     }
 }

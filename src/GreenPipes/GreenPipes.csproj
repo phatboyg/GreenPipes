@@ -46,9 +46,11 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="BasePipeContext.cs" />
+    <Compile Include="CommandExtensions.cs" />
     <Compile Include="Configuration\Builders\IBuildPipeConfigurator.cs" />
     <Compile Include="Configuration\Builders\PipeBuilder.cs" />
     <Compile Include="Configuration\CircuitBreakerConfigurationExtensions.cs" />
+    <Compile Include="Configuration\ConcurrencyLimitConfigurationExtensions.cs" />
     <Compile Include="Configuration\Configurators\IDispatchConfigurator.cs" />
     <Compile Include="Configuration\Configurators\IRetryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RetryPolicyFactory.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="Configuration\RetryConfigurationExtensions.cs" />
     <Compile Include="Configuration\Specifications\AsyncDelegatePipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\CircuitBreakerPipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\ConcurrencyLimitPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\ContextFilterPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\DelegatePipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\DispatchPipeSpecification.cs" />
@@ -91,6 +94,8 @@
     <Compile Include="Exceptions\PayloadNotFoundException.cs" />
     <Compile Include="Exceptions\PipeConfigurationException.cs" />
     <Compile Include="Filters\AsyncDelegateFilter.cs" />
+    <Compile Include="Filters\ConcurrencyLimitFilter.cs" />
+    <Compile Include="Filters\ConcurrencyLimit\SetConcurrencyLimit.cs" />
     <Compile Include="Filters\IPipeContextProviderFactory.cs" />
     <Compile Include="Filters\KeyFilter.cs" />
     <Compile Include="Filters\KeyPipeFilter.cs" />
@@ -119,6 +124,19 @@
     <Compile Include="IConnectPipeById.cs" />
     <Compile Include="IExceptionFilter.cs" />
     <Compile Include="IFilterObserver.cs" />
+    <Compile Include="IControlPipe.cs" />
+    <Compile Include="Internals\Extensions\ExpressionExtensions.cs" />
+    <Compile Include="Internals\Extensions\InterfaceExtensions.cs" />
+    <Compile Include="Internals\Extensions\TypeExtensions.cs" />
+    <Compile Include="Internals\Extensions\TypeNameCache.cs" />
+    <Compile Include="Internals\Reflection\DynamicImplementationBuilder.cs" />
+    <Compile Include="Internals\Reflection\IImplementationBuilder.cs" />
+    <Compile Include="Internals\Reflection\InterfaceReflectionCache.cs" />
+    <Compile Include="Internals\Reflection\ReadOnlyProperty.cs" />
+    <Compile Include="Internals\Reflection\ReadOnlyPropertyCache.cs" />
+    <Compile Include="Internals\Reflection\ReadWriteProperty.cs" />
+    <Compile Include="Internals\Reflection\ReadWritePropertyCache.cs" />
+    <Compile Include="Internals\Reflection\TypeNameFormatter.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="Introspection\GreenPipesHostInfo.cs" />
     <Compile Include="Introspection\IProbeResultBuilder.cs" />
@@ -129,7 +147,10 @@
     <Compile Include="IObserverConnector.cs" />
     <Compile Include="IPipeConnector.cs" />
     <Compile Include="KeyAccessor.cs" />
+    <Compile Include="Control\CommandContext.cs" />
+    <Compile Include="Control\CommandContextConverterFactory.cs" />
     <Compile Include="Payloads\PipeContextPayloadAdapter.cs" />
+    <Compile Include="Pipes\ControlPipe.cs" />
     <Compile Include="Policies\ExceptionFilters\AllExceptionFilter.cs" />
     <Compile Include="Policies\ExponentialRetryContext.cs" />
     <Compile Include="Policies\ExponentialRetryPolicy.cs" />
