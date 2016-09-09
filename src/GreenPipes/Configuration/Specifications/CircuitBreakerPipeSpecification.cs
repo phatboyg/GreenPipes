@@ -21,6 +21,7 @@ namespace GreenPipes.Specifications
 
 
     public class CircuitBreakerPipeSpecification<T> :
+        ExceptionSpecification,
         IPipeSpecification<T>,
         ICircuitBreakerConfigurator<T>
         where T : class, PipeContext
@@ -54,7 +55,7 @@ namespace GreenPipes.Specifications
 
         public void Apply(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new CircuitBreakerFilter<T>(_settings));
+            builder.AddFilter(new CircuitBreakerFilter<T>(_settings, Filter));
         }
 
         public IEnumerable<ValidationResult> Validate()

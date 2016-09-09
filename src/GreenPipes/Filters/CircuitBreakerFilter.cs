@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,12 +25,14 @@ namespace GreenPipes.Filters
         ICircuitBreaker
         where T : class, PipeContext
     {
+        readonly IExceptionFilter _exceptionFilter;
         readonly CircuitBreakerSettings _settings;
         ICircuitBreakerBehavior _behavior;
 
-        public CircuitBreakerFilter(CircuitBreakerSettings settings)
+        public CircuitBreakerFilter(CircuitBreakerSettings settings, IExceptionFilter exceptionFilter)
         {
             _settings = settings;
+            _exceptionFilter = exceptionFilter;
 
             _behavior = new ClosedBehavior(this);
         }
@@ -71,6 +73,9 @@ namespace GreenPipes.Filters
             }
             catch (Exception ex)
             {
+                if (!_exceptionFilter.Match(ex))
+                    throw;
+
                 _behavior.SendFault(ex);
 
                 throw;
@@ -79,13 +84,13 @@ namespace GreenPipes.Filters
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateFilterScope("circuitBreaker");
+            var scope = context.CreateFilterScope("circuitBreaker");
             scope.Set(new
             {
                 ActiveCount = _settings.ActiveThreshold,
                 _settings.TripThreshold,
                 Duration = _settings.TrackingPeriod,
-                ResetTimeout = _settings.ResetTimeout.Take(10).ToArray(),
+                ResetTimeout = _settings.ResetTimeout.Take(10).ToArray()
             });
 
             _behavior.Probe(scope);
