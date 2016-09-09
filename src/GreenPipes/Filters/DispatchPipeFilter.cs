@@ -37,11 +37,12 @@ namespace GreenPipes.Filters
         readonly TeeFilter<TOutput> _output;
         readonly IPipe<TOutput> _outputPipe;
 
-        public DispatchPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter)
+        public DispatchPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
+            TeeFilter<TOutput> outputFilter)
         {
             _contextConverter = contextConverter;
 
-            _output = new TeeFilter<TOutput>();
+            _output = outputFilter;
 
             _outputPipe = BuildOutputPipe(filters.Concat(Enumerable.Repeat(_output, 1)).ToArray());
 
@@ -107,6 +108,34 @@ namespace GreenPipes.Filters
                 current = new FilterPipe<TOutput>(filters[i], current);
 
             return current;
+        }
+    }
+
+
+    public class DispatchPipeFilter<TInput, TOutput, TKey> :
+        DispatchPipeFilter<TInput, TOutput>,
+        IPipeConnector<TOutput, TKey>
+        where TInput : class, PipeContext
+        where TOutput : class, PipeContext
+    {
+        readonly TeeFilter<TOutput, TKey> _outputFilter;
+
+        public DispatchPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
+            KeyAccessor<TOutput, TKey> keyAccessor)
+            : this(filters, contextConverter, new TeeFilter<TOutput, TKey>(keyAccessor))
+        {
+        }
+
+        protected DispatchPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
+            TeeFilter<TOutput, TKey> outputFilter)
+            : base(filters, contextConverter, outputFilter)
+        {
+            _outputFilter = outputFilter;
+        }
+
+        public ConnectHandle ConnectPipe(TKey key, IPipe<TOutput> pipe)
+        {
+            return _outputFilter.ConnectPipe(key, pipe);
         }
     }
 }

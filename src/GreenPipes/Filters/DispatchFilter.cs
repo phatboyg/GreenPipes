@@ -47,6 +47,11 @@ namespace GreenPipes.Filters
             return GetPipe<T>().ConnectObserver(observer);
         }
 
+        ConnectHandle IObserverConnector.ConnectObserver(IFilterObserver observer)
+        {
+            return _observers.Connect(observer);
+        }
+
         public ConnectHandle ConnectPipe<T>(IPipe<T> pipe)
             where T : class, PipeContext
         {
@@ -81,7 +86,7 @@ namespace GreenPipes.Filters
         IDispatchPipe GetPipe<T>()
             where T : class, PipeContext
         {
-            return _pipes.GetOrAdd(typeof(T), x => new DispatchPipe<T>(_converterFactory.GetConverter<T>()));
+            return _pipes.GetOrAdd(typeof(T), x => new DispatchPipe<T>(_observers, _converterFactory.GetConverter<T>()));
         }
 
         public void AddFilter<T>(IFilter<T> filter)
@@ -111,11 +116,13 @@ namespace GreenPipes.Filters
             readonly IPipeContextConverter<TInput, TOutput> _contextConverter;
             readonly Lazy<DispatchPipeFilter<TInput, TOutput>> _filter;
             readonly IList<IFilter<TOutput>> _pipeFilters;
+            readonly FilterObservable _observers;
 
-            public DispatchPipe(IPipeContextConverter<TInput, TOutput> contextConverter)
+            public DispatchPipe(FilterObservable observers, IPipeContextConverter<TInput, TOutput> contextConverter)
             {
                 _filter = new Lazy<DispatchPipeFilter<TInput, TOutput>>(CreateFilter);
                 _contextConverter = contextConverter;
+                _observers = observers;
 
                 _pipeFilters = new List<IFilter<TOutput>>();
             }
@@ -148,9 +155,18 @@ namespace GreenPipes.Filters
                 return connector.ConnectObserver(observer);
             }
 
+            public ConnectHandle ConnectObserver(IFilterObserver observer)
+            {
+                return _observers.Connect(observer);
+            }
+
             DispatchPipeFilter<TInput, TOutput> CreateFilter()
             {
-                return new DispatchPipeFilter<TInput, TOutput>(_pipeFilters, _contextConverter);
+                var filter = new DispatchPipeFilter<TInput, TOutput>(_pipeFilters, _contextConverter, new TeeFilter<TOutput>());
+
+                ((IObserverConnector<TOutput>)filter).ConnectObserver(new ObservableAdapter<TOutput>(_observers));
+                
+                return filter;
             }
         }
     }

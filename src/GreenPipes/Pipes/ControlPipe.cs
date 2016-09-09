@@ -46,5 +46,15 @@ namespace GreenPipes.Pipes
         {
             return _filter.ConnectPipe(pipe);
         }
+
+        public ConnectHandle ConnectObserver<T>(IFilterObserver<T> observer) where T : class, PipeContext
+        {
+            return ((IObserverConnector)_filter).ConnectObserver(observer);
+        }
+
+        public ConnectHandle ConnectObserver(IFilterObserver observer)
+        {
+            return ((IObserverConnector)_filter).ConnectObserver(observer);
+        }
     }
 }

@@ -12,33 +12,40 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Filters
 {
+    using System.Diagnostics;
+    using System.Threading;
     using System.Threading.Tasks;
 
 
     /// <summary>
-    /// Forks a single pipe into two pipes, which are executed concurrently
+    /// Uses a retry policy to handle exceptions, retrying the operation in according
+    /// with the policy
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ForkFilter<T> :
+    public class RepeatFilter<T> :
         IFilter<T>
         where T : class, PipeContext
     {
-        readonly IPipe<T> _pipe;
+        readonly CancellationToken _cancellationToken;
 
-        public ForkFilter(IPipe<T> pipe)
+        public RepeatFilter(CancellationToken cancellationToken)
         {
-            _pipe = pipe;
-        }
-
-        Task IFilter<T>.Send(T context, IPipe<T> next)
-        {
-            return Task.WhenAll(next.Send(context), _pipe.Send(context));
+            _cancellationToken = cancellationToken;
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateFilterScope("fork");
-            _pipe.Probe(scope);
+            context.CreateFilterScope("repeat");
+        }
+
+        [DebuggerNonUserCode]
+        [DebuggerStepThrough]
+        public async Task Send(T context, IPipe<T> next)
+        {
+            while (_cancellationToken.IsCancellationRequested == false)
+            {
+                await next.Send(context).ConfigureAwait(false);
+            }
         }
     }
 }

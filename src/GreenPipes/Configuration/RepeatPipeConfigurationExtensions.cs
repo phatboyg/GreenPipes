@@ -13,26 +13,27 @@
 namespace GreenPipes
 {
     using System;
+    using System.Threading;
     using Specifications;
 
 
-    public static class ForkConfigurationExtensions
+    public static class RepeatPipeConfigurationExtensions
     {
         /// <summary>
-        /// Adds a fork to the pipe, which invokes a separate pipe concurrently with the current pipe
+        /// Repeat the subsequent filter pipe until the cancellationToken is cancelled.
         /// </summary>
-        /// <typeparam name="T">The context type</typeparam>
+        /// <typeparam name="T">The pipe type</typeparam>
         /// <param name="configurator">The pipe configurator</param>
-        /// <param name="pipe">The filter to add</param>
-        public static void UseFork<T>(this IPipeConfigurator<T> configurator, IPipe<T> pipe)
+        /// <param name="cancellationToken">The cancellationToken to cancel the repetition</param>
+        public static void UseRepeat<T>(this IPipeConfigurator<T> configurator, CancellationToken cancellationToken)
             where T : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new ForkPipeSpecification<T>(pipe);
+            var pipeBuilderConfigurator = new RepeatPipeSpecification<T>(cancellationToken);
 
-            configurator.AddPipeSpecification(specification);
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
     }
 }

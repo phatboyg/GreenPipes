@@ -16,28 +16,31 @@ namespace GreenPipes.Filters
 
 
     /// <summary>
-    /// Forks a single pipe into two pipes, which are executed concurrently
+    /// Intercepts the pipe and executes an adjacent pipe prior to executing the next filter in the main pipe
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ForkFilter<T> :
+    public class InterceptFilter<T> :
         IFilter<T>
         where T : class, PipeContext
     {
         readonly IPipe<T> _pipe;
 
-        public ForkFilter(IPipe<T> pipe)
+        public InterceptFilter(IPipe<T> pipe)
         {
             _pipe = pipe;
         }
 
-        Task IFilter<T>.Send(T context, IPipe<T> next)
+        async Task IFilter<T>.Send(T context, IPipe<T> next)
         {
-            return Task.WhenAll(next.Send(context), _pipe.Send(context));
+            await _pipe.Send(context).ConfigureAwait(false);
+
+            await next.Send(context).ConfigureAwait(false);
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateFilterScope("fork");
+            var scope = context.CreateFilterScope("wiretap");
+
             _pipe.Probe(scope);
         }
     }

@@ -13,7 +13,6 @@
 namespace GreenPipes
 {
     using Contracts;
-    using Control;
 
 
     /// <summary>
@@ -22,7 +21,8 @@ namespace GreenPipes
     /// </summary>
     public interface IControlPipe :
         IPipe<CommandContext>,
-        IPipeConnector
+        IPipeConnector,
+        IObserverConnector
     {
     }
 }

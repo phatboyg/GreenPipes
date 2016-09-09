@@ -34,4 +34,23 @@ namespace GreenPipes
     {
         ConnectHandle ConnectPipe(IPipe<T> pipe);
     }
+
+
+    /// <summary>
+    /// Supports connecting a pipe using a key, which is a method of dispatching to different pipes
+    /// based on context.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TKey"></typeparam>
+    public interface IPipeConnector<out T, in TKey>
+        where T : class, PipeContext
+    {
+        /// <summary>
+        /// Connect a pipe to the filter using the specified key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="pipe"></param>
+        /// <returns></returns>
+        ConnectHandle ConnectPipe(TKey key, IPipe<T> pipe);
+    }
 }

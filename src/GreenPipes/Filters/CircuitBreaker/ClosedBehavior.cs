@@ -52,8 +52,8 @@ namespace GreenPipes.Filters.CircuitBreaker
 
             if (IsActive && TripThresholdExceeded(failureCount))
             {
-                _timer.Dispose();
                 _breaker.Open(exception, this);
+                _timer.Dispose();
             }
         }
 

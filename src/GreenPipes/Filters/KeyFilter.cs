@@ -26,7 +26,7 @@ namespace GreenPipes.Filters
     /// <typeparam name="TKey"></typeparam>
     public class KeyFilter<T, TKey> :
         IFilter<T>,
-        IConnectPipeById<T, TKey>
+        IPipeConnector<T, TKey>
         where T : class, PipeContext
     {
         readonly KeyAccessor<T, TKey> _keyAccessor;
@@ -38,7 +38,7 @@ namespace GreenPipes.Filters
             _pipes = new ConcurrentDictionary<TKey, KeyPipeFilter<T, TKey>>();
         }
 
-        public ConnectHandle ConnectById(TKey key, IPipe<T> pipe)
+        public ConnectHandle ConnectPipe(TKey key, IPipe<T> pipe)
         {
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));

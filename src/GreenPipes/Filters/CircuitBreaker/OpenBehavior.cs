@@ -75,8 +75,8 @@ namespace GreenPipes.Filters.CircuitBreaker
 
         void PartiallyCloseCircuit(object state)
         {
-            _timer.Dispose();
             _breaker.ClosePartially(_exception, _timeoutEnumerator, this);
+            _timer.Dispose();
         }
     }
 }
