@@ -10,19 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes
+namespace GreenPipes.Filters
 {
-    using Contracts;
+    public interface ITeeFilter<T> :
+        IFilter<T>,
+        IPipeConnector<T>
+        where T : class, PipeContext
+    {
+        int Count { get; }
+    }
 
 
-    /// <summary>
-    /// A management pipe is used by filters to communicate with the outside world, for management
-    /// purposes such as configuring the acceptance of command and request/response messages.
-    /// </summary>
-    public interface IControlPipe :
-        IPipe<CommandContext>,
-        IPipeConnector,
-        IObserverConnector
+    public interface ITeeFilter<T, in TKey> :
+        ITeeFilter<T>,
+        IPipeConnector<T, TKey>
+        where T : class, PipeContext
     {
     }
 }

@@ -17,6 +17,7 @@ namespace GreenPipes.Filters
     using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
+    using Internals.Extensions;
     using Pipes;
 
 
@@ -25,20 +26,18 @@ namespace GreenPipes.Filters
     /// </summary>
     /// <typeparam name="TInput">The pipe context type</typeparam>
     /// <typeparam name="TOutput">The subsequent pipe context type</typeparam>
-    public class DispatchPipeFilter<TInput, TOutput> :
-        IFilter<TInput>,
-        IPipeConnector<TOutput>,
-        IObserverConnector<TOutput>
+    public class OutputPipeFilter<TInput, TOutput> :
+        IOutputPipeFilter<TInput, TOutput>
         where TInput : class, PipeContext
         where TOutput : class, PipeContext
     {
         readonly IPipeContextConverter<TInput, TOutput> _contextConverter;
         readonly FilterObservable<TOutput> _observers;
-        readonly TeeFilter<TOutput> _output;
+        readonly ITeeFilter<TOutput> _output;
         readonly IPipe<TOutput> _outputPipe;
 
-        public DispatchPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
-            TeeFilter<TOutput> outputFilter)
+        public OutputPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
+            ITeeFilter<TOutput> outputFilter)
         {
             _contextConverter = contextConverter;
 
@@ -52,7 +51,7 @@ namespace GreenPipes.Filters
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("dispatchPipe");
-            scope.Add("outputType", typeof(TOutput).Name);
+            scope.Add("outputType", TypeNameCache<TOutput>.ShortName);
 
             _outputPipe.Probe(scope);
         }
@@ -112,22 +111,22 @@ namespace GreenPipes.Filters
     }
 
 
-    public class DispatchPipeFilter<TInput, TOutput, TKey> :
-        DispatchPipeFilter<TInput, TOutput>,
-        IPipeConnector<TOutput, TKey>
+    public class OutputPipeFilter<TInput, TOutput, TKey> :
+        OutputPipeFilter<TInput, TOutput>,
+        IOutputPipeFilter<TInput, TOutput, TKey>
         where TInput : class, PipeContext
         where TOutput : class, PipeContext
     {
-        readonly TeeFilter<TOutput, TKey> _outputFilter;
+        readonly ITeeFilter<TOutput, TKey> _outputFilter;
 
-        public DispatchPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
+        public OutputPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
             KeyAccessor<TOutput, TKey> keyAccessor)
             : this(filters, contextConverter, new TeeFilter<TOutput, TKey>(keyAccessor))
         {
         }
 
-        protected DispatchPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
-            TeeFilter<TOutput, TKey> outputFilter)
+        protected OutputPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
+            ITeeFilter<TOutput, TKey> outputFilter)
             : base(filters, contextConverter, outputFilter)
         {
             _outputFilter = outputFilter;

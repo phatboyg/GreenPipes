@@ -30,12 +30,12 @@ namespace GreenPipes.Filters
         where T : class, PipeContext
     {
         readonly KeyAccessor<T, TKey> _keyAccessor;
-        readonly ConcurrentDictionary<TKey, KeyPipeFilter<T, TKey>> _pipes;
+        readonly ConcurrentDictionary<TKey, IPipe<T>> _pipes;
 
         public KeyFilter(KeyAccessor<T, TKey> keyAccessor)
         {
             _keyAccessor = keyAccessor;
-            _pipes = new ConcurrentDictionary<TKey, KeyPipeFilter<T, TKey>>();
+            _pipes = new ConcurrentDictionary<TKey, IPipe<T>>();
         }
 
         public ConnectHandle ConnectPipe(TKey key, IPipe<T> pipe)
@@ -43,7 +43,7 @@ namespace GreenPipes.Filters
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var added = _pipes.TryAdd(key, new KeyPipeFilter<T, TKey>(key, pipe));
+            var added = _pipes.TryAdd(key, pipe);
             if (!added)
                 throw new DuplicateKeyPipeConfigurationException($"A pipe with the specified key already exists: {key}");
 
@@ -52,13 +52,13 @@ namespace GreenPipes.Filters
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("request");
+            var scope = context.CreateScope("key");
 
-            ICollection<KeyPipeFilter<T, TKey>> filters = _pipes.Values;
-            scope.Add("count", filters.Count);
+            ICollection<IPipe<T>> pipes = _pipes.Values;
+            scope.Add("count", pipes.Count);
 
-            foreach (IProbeSite filter in filters)
-                filter.Probe(scope);
+            foreach (IPipe<T> pipe in pipes)
+                pipe.Probe(scope);
         }
 
         [DebuggerNonUserCode]
@@ -66,15 +66,17 @@ namespace GreenPipes.Filters
         {
             var key = _keyAccessor(context);
 
-            KeyPipeFilter<T, TKey> filter;
-            if (_pipes.TryGetValue(key, out filter))
-                await filter.Send(context, next).ConfigureAwait(false);
+            IPipe<T> pipe;
+            if (_pipes.TryGetValue(key, out pipe))
+                await pipe.Send(context).ConfigureAwait(false);
+
+            await next.Send(context).ConfigureAwait(false);
         }
 
         void RemovePipe(TKey key)
         {
-            KeyPipeFilter<T, TKey> filter;
-            _pipes.TryRemove(key, out filter);
+            IPipe<T> pipe;
+            _pipes.TryRemove(key, out pipe);
         }
 
 

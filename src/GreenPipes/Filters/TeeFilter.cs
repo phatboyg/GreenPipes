@@ -23,8 +23,7 @@ namespace GreenPipes.Filters
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class TeeFilter<T> :
-        IFilter<T>,
-        IPipeConnector<T>
+        ITeeFilter<T>
         where T : class, PipeContext
     {
         readonly Connectable<IPipe<T>> _connections;
@@ -67,7 +66,7 @@ namespace GreenPipes.Filters
     /// <typeparam name="TKey">The key type</typeparam>
     public class TeeFilter<T, TKey> :
         TeeFilter<T>,
-        IPipeConnector<T, TKey>
+        ITeeFilter<T, TKey>
         where T : class, PipeContext
     {
         readonly KeyAccessor<T, TKey> _keyAccessor;
@@ -77,7 +76,7 @@ namespace GreenPipes.Filters
         {
             _keyAccessor = keyAccessor;
 
-            _keyConnections = new Lazy<IPipeConnector<T, TKey>>(ConnectRequestFilter);
+            _keyConnections = new Lazy<IPipeConnector<T, TKey>>(ConnectKeyFilter);
         }
 
         public ConnectHandle ConnectPipe(TKey key, IPipe<T> pipe)
@@ -85,7 +84,7 @@ namespace GreenPipes.Filters
             return _keyConnections.Value.ConnectPipe(key, pipe);
         }
 
-        IPipeConnector<T, TKey> ConnectRequestFilter()
+        IPipeConnector<T, TKey> ConnectKeyFilter()
         {
             var filter = new KeyFilter<T, TKey>(_keyAccessor);
 

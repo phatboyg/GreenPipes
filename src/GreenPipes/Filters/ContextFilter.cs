@@ -43,7 +43,7 @@ namespace GreenPipes.Filters
 
         public void Probe(ProbeContext context)
         {
-            context.CreateFilterScope("contentFilter");
+            context.CreateFilterScope("context");
         }
     }
 }

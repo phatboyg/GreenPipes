@@ -21,15 +21,15 @@ namespace GreenPipes.Specifications
         IPipeSpecification<T>
         where T : class, PipeContext
     {
-        readonly IControlPipe _controlPipe;
+        readonly ICommandRouter _router;
         readonly TimeSpan _interval;
         readonly int _rateLimit;
 
-        public RateLimitPipeSpecification(int rateLimit, TimeSpan interval, IControlPipe controlPipe = null)
+        public RateLimitPipeSpecification(int rateLimit, TimeSpan interval, ICommandRouter router = null)
         {
             _rateLimit = rateLimit;
             _interval = interval;
-            _controlPipe = controlPipe;
+            _router = router;
         }
 
         public void Apply(IPipeBuilder<T> builder)
@@ -38,7 +38,7 @@ namespace GreenPipes.Specifications
 
             builder.AddFilter(filter);
 
-            _controlPipe?.ConnectPipe(filter);
+            _router?.ConnectPipe(filter);
         }
 
         public IEnumerable<ValidationResult> Validate()

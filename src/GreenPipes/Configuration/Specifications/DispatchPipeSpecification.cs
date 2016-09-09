@@ -45,7 +45,7 @@ namespace GreenPipes.Specifications
 
         public void Apply(IPipeBuilder<TInput> builder)
         {
-            var dispatchFilter = new DispatchFilter<TInput>(_pipeContextConverterFactory);
+            var dispatchFilter = new DynamicFilter<TInput>(_pipeContextConverterFactory);
 
             foreach (Action<IPipeConnector> action in _connectActions)
             {

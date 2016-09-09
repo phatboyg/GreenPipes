@@ -17,6 +17,7 @@ namespace GreenPipes.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Control;
     using NUnit.Framework;
     using Pipes;
 
@@ -55,18 +56,18 @@ namespace GreenPipes.Tests
         [Test, Explicit]
         public async Task Should_allow_dynamic_reconfiguration_up()
         {
-            var controlPipe = new ControlPipe();
+            var router = new CommandRouter();
             int count = 0;
             IPipe<Input> pipe = Pipe.New<Input>(x =>
             {
-                x.UseRateLimit(10, TimeSpan.FromSeconds(1), controlPipe);
+                x.UseRateLimit(10, TimeSpan.FromSeconds(1), router);
                 x.UseExecute(payload =>
                 {
                     Interlocked.Increment(ref count);
                 });
             });
 
-            await controlPipe.SetRateLimit(100);
+            await router.SetRateLimit(100);
 
             var context = new Input("Hello");
 
@@ -86,18 +87,18 @@ namespace GreenPipes.Tests
         [Test, Explicit]
         public async Task Should_allow_dynamic_reconfiguration_down()
         {
-            var controlPipe = new ControlPipe();
+            var router = new CommandRouter();
             int count = 0;
             IPipe<Input> pipe = Pipe.New<Input>(x =>
             {
-                x.UseRateLimit(100, TimeSpan.FromSeconds(1), controlPipe);
+                x.UseRateLimit(100, TimeSpan.FromSeconds(1), router);
                 x.UseExecute(payload =>
                 {
                     Interlocked.Increment(ref count);
                 });
             });
 
-            await controlPipe.SetRateLimit(10);
+            await router.SetRateLimit(10);
 
             var context = new Input("Hello");
 

@@ -29,6 +29,10 @@ namespace GreenPipes
     }
 
 
+    /// <summary>
+    /// Connect a pipe of the same type as the target pipe
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IPipeConnector<out T>
         where T : class, PipeContext
     {

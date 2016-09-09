@@ -64,11 +64,11 @@ namespace GreenPipes.Tests
             var currentCount = 0;
             var maxCount = 0;
 
-            IControlPipe controlPipe = new ControlPipe();
+            ICommandRouter dynamicRouter = new CommandRouter();
 
             IPipe<Input> pipe = Pipe.New<Input>(x =>
             {
-                x.UseConcurrencyLimit(1, controlPipe);
+                x.UseConcurrencyLimit(1, dynamicRouter);
                 x.UseExecuteAsync(async payload =>
                 {
                     var current = Interlocked.Increment(ref currentCount);
@@ -81,7 +81,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            await controlPipe.SendCommand<SetConcurrencyLimit>(new
+            await dynamicRouter.SendCommand<SetConcurrencyLimit>(new
             {
                 ConcurrencyLimit = 32
             });

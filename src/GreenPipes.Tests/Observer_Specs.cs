@@ -15,6 +15,7 @@ namespace GreenPipes.Tests
     using System;
     using System.Threading.Tasks;
     using Contracts;
+    using Control;
     using NUnit.Framework;
     using Pipes;
     using Util;
@@ -26,19 +27,19 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Should_be_called_post_send()
         {
-            IControlPipe pipe = new ControlPipe();
+            ICommandRouter router = new CommandRouter();
 
-            pipe.ConnectPipe(Pipe.Empty<CommandContext<SetConcurrencyLimit>>());
+            router.ConnectPipe(Pipe.Empty<CommandContext<SetConcurrencyLimit>>());
 
             var observer = new Observer<CommandContext<SetConcurrencyLimit>>();
 
-            pipe.ConnectObserver(observer);
+            router.ConnectObserver(observer);
 
             var observer2 = new Observer();
 
-            pipe.ConnectObserver(observer2);
+            router.ConnectObserver(observer2);
 
-            await pipe.SetConcurrencyLimit(32);
+            await router.SetConcurrencyLimit(32);
 
             await observer.PostSent;
 
@@ -48,19 +49,19 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Should_be_called_pre_send()
         {
-            IControlPipe pipe = new ControlPipe();
+            ICommandRouter router = new CommandRouter();
 
-            pipe.ConnectPipe(Pipe.Empty<CommandContext<SetConcurrencyLimit>>());
+            router.ConnectPipe(Pipe.Empty<CommandContext<SetConcurrencyLimit>>());
 
             var observer = new Observer<CommandContext<SetConcurrencyLimit>>();
 
-            pipe.ConnectObserver(observer);
+            router.ConnectObserver(observer);
 
             var observer2 = new Observer();
 
-            pipe.ConnectObserver(observer2);
+            router.ConnectObserver(observer2);
 
-            await pipe.SetConcurrencyLimit(32);
+            await router.SetConcurrencyLimit(32);
 
             await observer.PreSent;
 
@@ -70,9 +71,9 @@ namespace GreenPipes.Tests
         [Test]
         public void Should_be_called_when_send_faulted()
         {
-            IControlPipe pipe = new ControlPipe();
+            ICommandRouter router = new CommandRouter();
 
-            pipe.ConnectPipe(Pipe.New<CommandContext<SetConcurrencyLimit>>(x =>
+            router.ConnectPipe(Pipe.New<CommandContext<SetConcurrencyLimit>>(x =>
             {
                 x.UseExecute(context =>
                 {
@@ -82,13 +83,13 @@ namespace GreenPipes.Tests
 
             var observer = new Observer<CommandContext<SetConcurrencyLimit>>();
 
-            pipe.ConnectObserver(observer);
+            router.ConnectObserver(observer);
 
             var observer2 = new Observer();
 
-            pipe.ConnectObserver(observer2);
+            router.ConnectObserver(observer2);
 
-            Assert.That(async () => await pipe.SetConcurrencyLimit(32), Throws.TypeOf<IntentionalTestException>());
+            Assert.That(async () => await router.SetConcurrencyLimit(32), Throws.TypeOf<IntentionalTestException>());
 
             Assert.That(async () => await observer.SendFaulted, Throws.TypeOf<IntentionalTestException>());
 

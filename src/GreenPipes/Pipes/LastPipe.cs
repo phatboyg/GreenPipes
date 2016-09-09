@@ -14,6 +14,7 @@ namespace GreenPipes.Pipes
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Util;
 
 
     /// <summary>
@@ -56,8 +57,9 @@ namespace GreenPipes.Pipes
             {
             }
 
-            async Task IPipe<T>.Send(T context)
+            Task IPipe<T>.Send(T context)
             {
+                return TaskUtil.Completed;
             }
         }
     }

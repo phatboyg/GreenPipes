@@ -25,14 +25,14 @@ namespace GreenPipes
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="rateLimit">The number of messages allowed per interval</param>
-        /// <param name="controlPipe">The control pipe used to adjust the rate limit dynamically</param>
-        public static void UseRateLimit<T>(this IPipeConfigurator<T> configurator, int rateLimit, IControlPipe controlPipe = null)
+        /// <param name="router">The control pipe used to adjust the rate limit dynamically</param>
+        public static void UseRateLimit<T>(this IPipeConfigurator<T> configurator, int rateLimit, ICommandRouter router = null)
             where T : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new RateLimitPipeSpecification<T>(rateLimit, TimeSpan.FromSeconds(1), controlPipe);
+            var specification = new RateLimitPipeSpecification<T>(rateLimit, TimeSpan.FromSeconds(1), router);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -45,14 +45,14 @@ namespace GreenPipes
         /// <param name="configurator"></param>
         /// <param name="rateLimit">The number of messages allowed per interval</param>
         /// <param name="interval">The reset interval for each set of messages</param>
-        /// <param name="controlPipe">The control pipe used to adjust the rate limit dynamically</param>
-        public static void UseRateLimit<T>(this IPipeConfigurator<T> configurator, int rateLimit, TimeSpan interval, IControlPipe controlPipe = null)
+        /// <param name="router">The control pipe used to adjust the rate limit dynamically</param>
+        public static void UseRateLimit<T>(this IPipeConfigurator<T> configurator, int rateLimit, TimeSpan interval, ICommandRouter router = null)
             where T : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new RateLimitPipeSpecification<T>(rateLimit, interval, controlPipe);
+            var specification = new RateLimitPipeSpecification<T>(rateLimit, interval, router);
 
             configurator.AddPipeSpecification(specification);
         }

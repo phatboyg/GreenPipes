@@ -27,13 +27,13 @@ namespace GreenPipes.Specifications
     {
         readonly int _concurrencyLimit;
 
-        readonly IControlPipe _controlPipe;
+        readonly ICommandRouter _router;
 
-        public ConcurrencyLimitPipeSpecification(int concurrencyLimit, IControlPipe controlPipe = null)
+        public ConcurrencyLimitPipeSpecification(int concurrencyLimit, ICommandRouter router = null)
         {
             _concurrencyLimit = concurrencyLimit;
 
-            _controlPipe = controlPipe;
+            _router = router;
         }
 
         public void Apply(IPipeBuilder<T> builder)
@@ -42,7 +42,7 @@ namespace GreenPipes.Specifications
 
             builder.AddFilter(filter);
 
-            _controlPipe?.ConnectPipe(filter);
+            _router?.ConnectPipe(filter);
         }
 
         public IEnumerable<ValidationResult> Validate()
