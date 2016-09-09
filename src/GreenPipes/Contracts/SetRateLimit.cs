@@ -10,23 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes
+namespace GreenPipes.Contracts
 {
-    using System.Threading.Tasks;
-    using Contracts;
-
-
-    public static class ConcurrencyLimitExtensions
+    /// <summary>
+    /// Set the rate limit of the RateLimitFilter
+    /// </summary>
+    public interface SetRateLimit
     {
         /// <summary>
-        /// Set the concurrency limit of the filter
+        /// The new rate limit for the filter
         /// </summary>
-        /// <param name="pipe"></param>
-        /// <param name="concurrencyLimit"></param>
-        /// <returns></returns>
-        public static Task SetConcurrencyLimit(this IPipe<CommandContext> pipe, int concurrencyLimit)
-        {
-            return pipe.SendCommand<SetConcurrencyLimit>(new {ConcurrencyLimit = concurrencyLimit});
-        }
+        int RateLimit { get; }
     }
 }

@@ -14,6 +14,7 @@ namespace GreenPipes
 {
     using System;
     using System.Threading.Tasks;
+    using Contracts;
     using Control;
     using Internals.Extensions;
     using Payloads;

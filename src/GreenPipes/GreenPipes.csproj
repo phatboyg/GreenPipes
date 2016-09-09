@@ -69,6 +69,7 @@
     <Compile Include="Configuration\IPipeSpecification.cs" />
     <Compile Include="Configuration\LogConfigurationExtensions.cs" />
     <Compile Include="Configuration\PartitionerConfigurationExtensions.cs" />
+    <Compile Include="Configuration\RateLimitConfigurationExtensions.cs" />
     <Compile Include="Configuration\RescueConfigurationExtensions.cs" />
     <Compile Include="Configuration\RetryConfigurationExtensions.cs" />
     <Compile Include="Configuration\Specifications\AsyncDelegatePipeSpecification.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Configuration\Specifications\ForkPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\LogPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\PartitionerPipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\RateLimitPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\RescuePipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\RetryPipeSpecification.cs" />
     <Compile Include="Configuration\ValidationResult.cs" />
@@ -89,6 +91,7 @@
     <Compile Include="Configuration\Validation\ConfigurationValidationResult.cs" />
     <Compile Include="Configuration\Validation\PipeConfigurationResult.cs" />
     <Compile Include="ConnectHandle.cs" />
+    <Compile Include="Contracts\SetRateLimit.cs" />
     <Compile Include="Exceptions\DuplicateKeyPipeConfigurationException.cs" />
     <Compile Include="Exceptions\PayloadException.cs" />
     <Compile Include="Exceptions\PayloadFactoryException.cs" />
@@ -96,7 +99,7 @@
     <Compile Include="Exceptions\PipeConfigurationException.cs" />
     <Compile Include="Filters\AsyncDelegateFilter.cs" />
     <Compile Include="Filters\ConcurrencyLimitFilter.cs" />
-    <Compile Include="Filters\ConcurrencyLimit\SetConcurrencyLimit.cs" />
+    <Compile Include="Contracts\SetConcurrencyLimit.cs" />
     <Compile Include="Filters\IPipeContextProviderFactory.cs" />
     <Compile Include="Filters\KeyFilter.cs" />
     <Compile Include="Filters\KeyPipeFilter.cs" />
@@ -118,6 +121,7 @@
     <Compile Include="Filters\CircuitBreaker\HalfOpenBehavior.cs" />
     <Compile Include="Filters\CircuitBreaker\ICircuitBreaker.cs" />
     <Compile Include="Filters\CircuitBreaker\OpenBehavior.cs" />
+    <Compile Include="Filters\RateLimitFilter.cs" />
     <Compile Include="Filters\RescueContextFactory.cs" />
     <Compile Include="Filters\RescueFilter.cs" />
     <Compile Include="Filters\RetryFilter.cs" />
@@ -148,7 +152,7 @@
     <Compile Include="IObserverConnector.cs" />
     <Compile Include="IPipeConnector.cs" />
     <Compile Include="KeyAccessor.cs" />
-    <Compile Include="Control\CommandContext.cs" />
+    <Compile Include="Contracts\CommandContext.cs" />
     <Compile Include="Control\CommandContextConverterFactory.cs" />
     <Compile Include="Payloads\PipeContextPayloadAdapter.cs" />
     <Compile Include="Pipes\ControlPipe.cs" />
@@ -206,6 +210,7 @@
     <Compile Include="Policies\NoRetryPolicyContext.cs" />
     <Compile Include="ProbeContext.cs" />
     <Compile Include="ProbeContextExtensions.cs" />
+    <Compile Include="RateLimitExtensions.cs" />
     <Compile Include="RetryContext.cs" />
     <Compile Include="RetryPolicyContext.cs" />
     <Compile Include="Util\Connectable.cs" />

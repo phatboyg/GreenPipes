@@ -14,6 +14,7 @@ namespace GreenPipes.Control
 {
     using System;
     using System.Linq;
+    using Contracts;
     using Filters;
     using Internals.Extensions;
 

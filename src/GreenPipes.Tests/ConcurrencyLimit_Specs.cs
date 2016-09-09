@@ -16,9 +16,9 @@ namespace GreenPipes.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contracts;
     using Control;
     using Filters;
-    using Filters.ConcurrencyLimit;
     using NUnit.Framework;
     using Pipes;
 

@@ -13,6 +13,7 @@
 namespace GreenPipes.Pipes
 {
     using System.Threading.Tasks;
+    using Contracts;
     using Control;
     using Filters;
 

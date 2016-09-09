@@ -16,8 +16,7 @@ namespace GreenPipes.Filters
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using ConcurrencyLimit;
-    using Control;
+    using Contracts;
 
 
     /// <summary>
