@@ -13,35 +13,34 @@
 namespace GreenPipes.Specifications
 {
     using System.Collections.Generic;
-    using System.IO;
     using Filters;
-    using Filters.Log;
+    using Filters.Profile;
 
 
-    public class LogPipeSpecification<T> :
+    public class ProfilePipeSpecification<T> :
         IPipeSpecification<T>
         where T : class, PipeContext
     {
-        readonly LogFormatter<T> _formatter;
-        readonly TextWriter _writer;
+        readonly ReportProfileData _reportProfileData;
+        readonly long _trivialThreshold;
 
-        public LogPipeSpecification(TextWriter writer, LogFormatter<T> formatter)
+        public ProfilePipeSpecification(ReportProfileData reportProfileData, long trivialThreshold)
         {
-            _writer = writer;
-            _formatter = formatter;
+            _reportProfileData = reportProfileData;
+            _trivialThreshold = trivialThreshold;
         }
 
         void IPipeSpecification<T>.Apply(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new LogFilter<T>(_writer, _formatter));
+            builder.AddFilter(new ProfileFilter<T>(_reportProfileData, _trivialThreshold));
         }
 
         IEnumerable<ValidationResult> ISpecification.Validate()
         {
-            if (_writer == null)
-                yield return this.Failure("TextWriter", "must not be null");
-            if (_formatter == null)
-                yield return this.Failure("Formatter", "must not be null");
+            if (_reportProfileData == null)
+                yield return this.Failure("ReportProfileData", "must not be null");
+            if (_trivialThreshold < 0)
+                yield return this.Failure("TrivialThreshold", "must not >= 0");
         }
     }
 }
