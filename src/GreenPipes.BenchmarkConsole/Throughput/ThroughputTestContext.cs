@@ -1,6 +1,7 @@
 namespace GreenPipes.BenchmarkConsole.Throughput
 {
     using System;
+    using System.Threading;
     using Payloads;
 
 
@@ -9,12 +10,12 @@ namespace GreenPipes.BenchmarkConsole.Throughput
         TestContext
     {
         public ThroughputTestContext()
-            : base(new PayloadCache())
+            : base(new PayloadCache(), CancellationToken.None)
         {
         }
 
         public ThroughputTestContext(Guid correlationId, string payload)
-            : base(new PayloadCache())
+            : base(new PayloadCache(), CancellationToken.None)
 
         {
             CorrelationId = correlationId;

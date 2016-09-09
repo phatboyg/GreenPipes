@@ -24,5 +24,11 @@ namespace GreenPipes.Payloads.Collections
         {
             return new SinglePayloadCollection(payload, Parent);
         }
+
+
+        internal static class Shared
+        {
+            public static EmptyPayloadCollection Empty = new EmptyPayloadCollection();
+        }
     }
 }

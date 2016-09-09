@@ -24,7 +24,7 @@ namespace GreenPipes.Payloads
 
         public PayloadCache()
         {
-            _collection = new EmptyPayloadCollection();
+            _collection = EmptyPayloadCollection.Shared.Empty;
         }
 
         PayloadCache(IReadOnlyPayloadCollection collection)
