@@ -15,12 +15,10 @@ namespace GreenPipes.Configurators
     using System.ComponentModel;
 
 
-    public interface IRetryConfigurator
+    public interface IRetryConfigurator :
+        IExceptionConfigurator
     {
         [EditorBrowsable(EditorBrowsableState.Never)]
         void SetRetryPolicy(RetryPolicyFactory factory);
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void SetExceptionFilter(IExceptionFilter filter);
     }
 }

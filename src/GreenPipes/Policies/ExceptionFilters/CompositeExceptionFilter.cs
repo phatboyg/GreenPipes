@@ -15,17 +15,24 @@ namespace GreenPipes.Policies.ExceptionFilters
     using System;
 
 
-    public class AllExceptionFilter :
+    class CompositeExceptionFilter :
         IExceptionFilter
     {
-        void IProbeSite.Probe(ProbeContext context)
+        readonly CompositeFilter<Exception> _filter;
+
+        public CompositeExceptionFilter(CompositeFilter<Exception> filter)
         {
-            context.CreateScope("all");
+            _filter = filter;
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            context.Add("filter", "composite");
         }
 
         public bool Match(Exception exception)
         {
-            return true;
+            return _filter.Matches(exception);
         }
     }
 }

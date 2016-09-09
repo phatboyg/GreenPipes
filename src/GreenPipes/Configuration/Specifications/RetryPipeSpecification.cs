@@ -15,33 +15,25 @@ namespace GreenPipes.Specifications
     using System.Collections.Generic;
     using Configurators;
     using Filters;
-    using Policies;
 
 
-    public class RetryPipeSpecification<T> :
+    public class RetryPipeSpecification<TContext> :
+        ExceptionSpecification,
         IRetryConfigurator,
-        IPipeSpecification<T>
-        where T : class, PipeContext
+        IPipeSpecification<TContext>
+        where TContext : class, PipeContext
     {
-        IExceptionFilter _filter;
         RetryPolicyFactory _policyFactory;
 
-        public RetryPipeSpecification()
+        public void Apply(IPipeBuilder<TContext> builder)
         {
-            _filter = new AllExceptionFilter();
-        }
+            var retryPolicy = _policyFactory(Filter);
 
-        public void Apply(IPipeBuilder<T> builder)
-        {
-            var retryPolicy = _policyFactory(_filter);
-
-            builder.AddFilter(new RetryFilter<T>(retryPolicy));
+            builder.AddFilter(new RetryFilter<TContext>(retryPolicy));
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_filter == null)
-                yield return this.Failure("ExceptionFilter", "must not be null");
             if (_policyFactory == null)
                 yield return this.Failure("RetryPolicy", "must not be null");
         }
@@ -49,11 +41,6 @@ namespace GreenPipes.Specifications
         public void SetRetryPolicy(RetryPolicyFactory factory)
         {
             _policyFactory = factory;
-        }
-
-        public void SetExceptionFilter(IExceptionFilter filter)
-        {
-            _filter = filter;
         }
     }
 }

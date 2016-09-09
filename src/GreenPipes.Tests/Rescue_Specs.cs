@@ -60,7 +60,7 @@ namespace GreenPipes.Tests
                 x.UseRescue(Pipe.New<AX>(r =>
                 {
                     r.UseExecute(c => Interlocked.Increment(ref count));
-                }), (a, ex) => new AX(a, ex));
+                }), (a, ex) => new AX(a, ex), r => r.Handle<IntentionalTestException>());
 
                 x.UseExecute(payload =>
                 {
@@ -73,6 +73,28 @@ namespace GreenPipes.Tests
             await pipe.Send(context);
 
             Assert.That(count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task Should_skip_if_filtered_exception()
+        {
+            int count = 0;
+            IPipe<A> pipe = Pipe.New<A>(x =>
+            {
+                x.UseRescue(Pipe.New<AX>(r =>
+                {
+                    r.UseExecute(c => Interlocked.Increment(ref count));
+                }), (a, ex) => new AX(a, ex), r => r.Ignore<IntentionalTestException>());
+
+                x.UseExecute(payload =>
+                {
+                    throw new IntentionalTestException("Kaboom!");
+                });
+            });
+
+            var context = new A();
+
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
         }
     }
 }

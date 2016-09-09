@@ -53,6 +53,8 @@
     <Compile Include="Configuration\CircuitBreakerConfigurationExtensions.cs" />
     <Compile Include="Configuration\ConcurrencyLimitConfigurationExtensions.cs" />
     <Compile Include="Configuration\Configurators\IDispatchConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\IExceptionConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\IRescueConfigurator.cs" />
     <Compile Include="Configuration\Configurators\IRetryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RetryPolicyFactory.cs" />
     <Compile Include="Configuration\DispatchConfigurationExtensions.cs" />
@@ -78,6 +80,7 @@
     <Compile Include="Configuration\Specifications\ContextFilterPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\DelegatePipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\DispatchPipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\ExceptionSpecification.cs" />
     <Compile Include="Configuration\Specifications\FilterPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\ForkPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\LogPipeSpecification.cs" />
@@ -157,6 +160,9 @@
     <Compile Include="Payloads\PipeContextPayloadAdapter.cs" />
     <Compile Include="Pipes\ControlPipe.cs" />
     <Compile Include="Policies\ExceptionFilters\AllExceptionFilter.cs" />
+    <Compile Include="Policies\ExceptionFilters\CompositeExceptionFilter.cs" />
+    <Compile Include="Policies\ExceptionFilters\CompositeFilter.cs" />
+    <Compile Include="Policies\ExceptionFilters\CompositePredicate.cs" />
     <Compile Include="Policies\ExponentialRetryContext.cs" />
     <Compile Include="Policies\ExponentialRetryPolicy.cs" />
     <Compile Include="Policies\ExceptionFilters\FilterExceptionFilter.cs" />
@@ -172,8 +178,8 @@
     <Compile Include="Policies\IntervalRetryPolicyContext.cs" />
     <Compile Include="Policies\NoRetryContext.cs" />
     <Compile Include="Policies\NoRetryPolicy.cs" />
-    <Compile Include="Policies\ExceptionFilters\ExceptExceptionFilter.cs" />
-    <Compile Include="Policies\ExceptionFilters\SelectedExceptionFilter.cs" />
+    <Compile Include="Policies\ExceptionFilters\IgnoreExceptionFilter.cs" />
+    <Compile Include="Policies\ExceptionFilters\HandleExceptionFilter.cs" />
     <Compile Include="IRetryPolicy.cs" />
     <Compile Include="Partitioning\IHashGenerator.cs" />
     <Compile Include="Partitioning\IPartitioner.cs" />

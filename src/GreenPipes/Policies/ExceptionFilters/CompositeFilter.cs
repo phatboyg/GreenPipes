@@ -12,20 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Policies.ExceptionFilters
 {
-    using System;
-
-
-    public class AllExceptionFilter :
-        IExceptionFilter
+    class CompositeFilter<T>
     {
-        void IProbeSite.Probe(ProbeContext context)
+        readonly CompositePredicate<T> _excludes = new CompositePredicate<T>();
+        readonly CompositePredicate<T> _includes = new CompositePredicate<T>();
+
+        public CompositePredicate<T> Includes
         {
-            context.CreateScope("all");
+            get { return _includes; }
+            set { }
         }
 
-        public bool Match(Exception exception)
+        public CompositePredicate<T> Excludes
         {
-            return true;
+            get { return _excludes; }
+            set { }
+        }
+
+        public bool Matches(T target)
+        {
+            return Includes.MatchesAny(target) && Excludes.DoesNotMatchAny(target);
         }
     }
 }

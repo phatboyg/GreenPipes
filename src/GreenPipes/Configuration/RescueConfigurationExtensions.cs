@@ -13,6 +13,7 @@
 namespace GreenPipes
 {
     using System;
+    using Configurators;
     using Filters;
     using Specifications;
 
@@ -27,18 +28,20 @@ namespace GreenPipes
         /// <param name="configurator"></param>
         /// <param name="rescuePipe"></param>
         /// <param name="rescueContextFactory">Factory method to convert the pipe context to the rescue pipe context</param>
-        /// <param name="exceptionFilter"></param>
+        /// <param name="configure"></param>
         public static void UseRescue<T, TRescue>(this IPipeConfigurator<T> configurator, IPipe<TRescue> rescuePipe,
-            RescueContextFactory<T, TRescue> rescueContextFactory, IExceptionFilter exceptionFilter = null)
+            RescueContextFactory<T, TRescue> rescueContextFactory, Action<IRescueConfigurator> configure = null)
             where T : class, PipeContext
             where TRescue : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var rescueConfigurator = new RescuePipeSpecification<T, TRescue>(rescuePipe, rescueContextFactory, exceptionFilter);
+            var specification = new RescuePipeSpecification<T, TRescue>(rescuePipe, rescueContextFactory);
 
-            configurator.AddPipeSpecification(rescueConfigurator);
+            configure?.Invoke(specification);
+
+            configurator.AddPipeSpecification(specification);
         }
     }
 }

@@ -16,14 +16,11 @@ namespace GreenPipes
     using System.Linq;
     using Configurators;
     using Policies;
-    using Policies.ExceptionFilters;
     using Specifications;
 
 
     public static class RetryConfigurationExtensions
     {
-        static readonly IExceptionFilter _all = new AllExceptionFilter();
-
         public static void UseRetry<T>(this IPipeConfigurator<T> configurator, Action<IRetryConfigurator> configure)
             where T : class, PipeContext
         {
@@ -174,154 +171,6 @@ namespace GreenPipes
                 throw new ArgumentNullException(nameof(configurator));
 
             configurator.SetRetryPolicy(filter => new IncrementalRetryPolicy(filter, retryLimit, initialInterval, intervalIncrement));
-
-            return configurator;
-        }
-
-        /// <summary>
-        /// Retry all exceptions except for the exception types specified
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="exceptionTypes"></param>
-        /// <returns></returns>
-        public static IRetryConfigurator Except(this IRetryConfigurator configurator, params Type[] exceptionTypes)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            configurator.SetExceptionFilter(new ExceptExceptionFilter(exceptionTypes));
-
-            return configurator;
-        }
-
-        /// <summary>
-        /// Retry all exceptions except for the exception types specified
-        /// </summary>
-        /// <returns></returns>
-        public static IRetryConfigurator Except<T1>(this IRetryConfigurator configurator)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            configurator.SetExceptionFilter(new ExceptExceptionFilter(typeof(T1)));
-
-            return configurator;
-        }
-
-        /// <summary>
-        /// Retry all exceptions except for the exception types specified
-        /// </summary>
-        /// <returns></returns>
-        public static IRetryConfigurator Except<T1, T2>(this IRetryConfigurator configurator)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            configurator.SetExceptionFilter(new ExceptExceptionFilter(typeof(T1), typeof(T2)));
-
-            return configurator;
-        }
-
-        /// <summary>
-        /// Retry all exceptions except for the exception types specified
-        /// </summary>
-        /// <returns></returns>
-        public static IRetryConfigurator Except<T1, T2, T3>(this IRetryConfigurator configurator)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            configurator.SetExceptionFilter(new ExceptExceptionFilter(typeof(T1), typeof(T2), typeof(T3)));
-
-            return configurator;
-        }
-
-        /// <summary>
-        /// Retry only the exception types specified
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="exceptionTypes"></param>
-        /// <returns></returns>
-        public static IRetryConfigurator Selected(this IRetryConfigurator configurator, params Type[] exceptionTypes)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            configurator.SetExceptionFilter(new SelectedExceptionFilter(exceptionTypes));
-
-            return configurator;
-        }
-
-        /// <summary>
-        /// Retry only the exception types specified
-        /// </summary>
-        /// <returns></returns>
-        public static IRetryConfigurator Selected<T1>(this IRetryConfigurator configurator)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            configurator.SetExceptionFilter(new SelectedExceptionFilter(typeof(T1)));
-
-            return configurator;
-        }
-
-        /// <summary>
-        /// Retry only the exception types specified
-        /// </summary>
-        /// <returns></returns>
-        public static IRetryConfigurator Selected<T1, T2>(this IRetryConfigurator configurator)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            configurator.SetExceptionFilter(new SelectedExceptionFilter(typeof(T1), typeof(T2)));
-
-            return configurator;
-        }
-
-        /// <summary>
-        /// Retry only the exception types specified
-        /// </summary>
-        /// <returns></returns>
-        public static IRetryConfigurator Selected<T1, T2, T3>(this IRetryConfigurator configurator)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            configurator.SetExceptionFilter(new SelectedExceptionFilter(typeof(T1), typeof(T2), typeof(T3)));
-
-            return configurator;
-        }
-
-        /// <summary>
-        /// Retry all exceptions
-        /// </summary>
-        /// <returns></returns>
-        public static IRetryConfigurator All(this IRetryConfigurator configurator)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            configurator.SetExceptionFilter(_all);
-
-            return configurator;
-        }
-
-        /// <summary>
-        /// Filter an exception type
-        /// </summary>
-        /// <typeparam name="T">The exception type</typeparam>
-        /// <param name="configurator"></param>
-        /// <param name="filter">The filter expression</param>
-        /// <returns>True if the exception should be retried, otherwise false</returns>
-        public static IRetryConfigurator Filter<T>(this IRetryConfigurator configurator, Func<T, bool> filter)
-            where T : Exception
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            configurator.SetExceptionFilter(new FilterExceptionFilter<T>(filter));
 
             return configurator;
         }

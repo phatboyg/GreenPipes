@@ -10,18 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Policies
+namespace GreenPipes.Policies.ExceptionFilters
 {
     using System;
     using System.Linq;
 
 
-    public class SelectedExceptionFilter :
+    public class HandleExceptionFilter :
         IExceptionFilter
     {
         readonly Type[] _exceptionTypes;
 
-        public SelectedExceptionFilter(params Type[] exceptionTypes)
+        public HandleExceptionFilter(params Type[] exceptionTypes)
         {
             _exceptionTypes = exceptionTypes;
         }

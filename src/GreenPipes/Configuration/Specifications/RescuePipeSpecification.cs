@@ -13,29 +13,29 @@
 namespace GreenPipes.Specifications
 {
     using System.Collections.Generic;
+    using Configurators;
     using Filters;
-    using Policies;
 
 
     public class RescuePipeSpecification<TContext, TRescue> :
-        IPipeSpecification<TContext>
+        ExceptionSpecification,
+        IPipeSpecification<TContext>,
+        IRescueConfigurator
         where TContext : class, PipeContext
         where TRescue : class, PipeContext
     {
-        readonly IExceptionFilter _exceptionFilter;
         readonly RescueContextFactory<TContext, TRescue> _rescueContextFactory;
         readonly IPipe<TRescue> _rescuePipe;
 
-        public RescuePipeSpecification(IPipe<TRescue> rescuePipe, RescueContextFactory<TContext, TRescue> rescueContextFactory, IExceptionFilter exceptionFilter)
+        public RescuePipeSpecification(IPipe<TRescue> rescuePipe, RescueContextFactory<TContext, TRescue> rescueContextFactory)
         {
             _rescuePipe = rescuePipe;
             _rescueContextFactory = rescueContextFactory;
-            _exceptionFilter = exceptionFilter;
         }
 
         public void Apply(IPipeBuilder<TContext> builder)
         {
-            builder.AddFilter(new RescueFilter<TContext, TRescue>(_rescuePipe, _exceptionFilter ?? new AllExceptionFilter(), _rescueContextFactory));
+            builder.AddFilter(new RescueFilter<TContext, TRescue>(_rescuePipe, Filter, _rescueContextFactory));
         }
 
         public IEnumerable<ValidationResult> Validate()
