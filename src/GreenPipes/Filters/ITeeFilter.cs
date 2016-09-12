@@ -23,7 +23,7 @@ namespace GreenPipes.Filters
 
     public interface ITeeFilter<T, in TKey> :
         ITeeFilter<T>,
-        IPipeConnector<T, TKey>
+        IKeyPipeConnector<TKey>
         where T : class, PipeContext
     {
     }

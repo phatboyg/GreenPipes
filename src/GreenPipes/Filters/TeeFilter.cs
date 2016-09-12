@@ -62,33 +62,34 @@ namespace GreenPipes.Filters
     /// <summary>
     /// Connects multiple output pipes to a single input pipe
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TInput"></typeparam>
     /// <typeparam name="TKey">The key type</typeparam>
-    public class TeeFilter<T, TKey> :
-        TeeFilter<T>,
-        ITeeFilter<T, TKey>
-        where T : class, PipeContext
+    public class TeeFilter<TInput, TKey> :
+        TeeFilter<TInput>,
+        ITeeFilter<TInput, TKey>
+        where TInput : class, PipeContext
     {
-        readonly KeyAccessor<T, TKey> _keyAccessor;
-        readonly Lazy<IPipeConnector<T, TKey>> _keyConnections;
+        readonly KeyAccessor<TInput, TKey> _keyAccessor;
+        readonly Lazy<IKeyPipeConnector<TKey>> _keyConnections;
 
-        public TeeFilter(KeyAccessor<T, TKey> keyAccessor)
+        public TeeFilter(KeyAccessor<TInput, TKey> keyAccessor)
         {
             _keyAccessor = keyAccessor;
 
-            _keyConnections = new Lazy<IPipeConnector<T, TKey>>(ConnectKeyFilter);
+            _keyConnections = new Lazy<IKeyPipeConnector<TKey>>(ConnectKeyFilter);
         }
 
-        public ConnectHandle ConnectPipe(TKey key, IPipe<T> pipe)
+        public ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe)
+            where T : class, PipeContext
         {
             return _keyConnections.Value.ConnectPipe(key, pipe);
         }
 
-        IPipeConnector<T, TKey> ConnectKeyFilter()
+        IKeyPipeConnector<TKey> ConnectKeyFilter()
         {
-            var filter = new KeyFilter<T, TKey>(_keyAccessor);
+            var filter = new KeyFilter<TInput, TKey>(_keyAccessor);
 
-            IPipe<T> pipe = Pipe.New<T>(x => x.UseFilter(filter));
+            IPipe<TInput> pipe = Pipe.New<TInput>(x => x.UseFilter(filter));
 
             ConnectPipe(pipe);
 

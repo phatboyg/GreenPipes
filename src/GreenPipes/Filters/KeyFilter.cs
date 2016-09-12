@@ -17,33 +17,39 @@ namespace GreenPipes.Filters
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Internals.Extensions;
 
 
     /// <summary>
     /// Handles the registration of requests and connecting them to the consume pipe
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TInput"></typeparam>
     /// <typeparam name="TKey"></typeparam>
-    public class KeyFilter<T, TKey> :
-        IFilter<T>,
-        IPipeConnector<T, TKey>
-        where T : class, PipeContext
+    public class KeyFilter<TInput, TKey> :
+        IFilter<TInput>,
+        IKeyPipeConnector<TKey>
+        where TInput : class, PipeContext
     {
-        readonly KeyAccessor<T, TKey> _keyAccessor;
-        readonly ConcurrentDictionary<TKey, IPipe<T>> _pipes;
+        readonly KeyAccessor<TInput, TKey> _keyAccessor;
+        readonly ConcurrentDictionary<TKey, IPipe<TInput>> _pipes;
 
-        public KeyFilter(KeyAccessor<T, TKey> keyAccessor)
+        public KeyFilter(KeyAccessor<TInput, TKey> keyAccessor)
         {
             _keyAccessor = keyAccessor;
-            _pipes = new ConcurrentDictionary<TKey, IPipe<T>>();
+            _pipes = new ConcurrentDictionary<TKey, IPipe<TInput>>();
         }
 
-        public ConnectHandle ConnectPipe(TKey key, IPipe<T> pipe)
+        public ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe)
+            where T : class, PipeContext
         {
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var added = _pipes.TryAdd(key, pipe);
+            var keyPipe = pipe as IPipe<TInput>;
+            if (keyPipe == null)
+                throw new ArgumentException($"The pipe must match the input type: {TypeNameCache<TInput>.ShortName}", nameof(pipe));
+
+            var added = _pipes.TryAdd(key, keyPipe);
             if (!added)
                 throw new DuplicateKeyPipeConfigurationException($"A pipe with the specified key already exists: {key}");
 
@@ -54,19 +60,19 @@ namespace GreenPipes.Filters
         {
             var scope = context.CreateScope("key");
 
-            ICollection<IPipe<T>> pipes = _pipes.Values;
+            ICollection<IPipe<TInput>> pipes = _pipes.Values;
             scope.Add("count", pipes.Count);
 
-            foreach (IPipe<T> pipe in pipes)
+            foreach (IPipe<TInput> pipe in pipes)
                 pipe.Probe(scope);
         }
 
         [DebuggerNonUserCode]
-        public async Task Send(T context, IPipe<T> next)
+        public async Task Send(TInput context, IPipe<TInput> next)
         {
             var key = _keyAccessor(context);
 
-            IPipe<T> pipe;
+            IPipe<TInput> pipe;
             if (_pipes.TryGetValue(key, out pipe))
                 await pipe.Send(context).ConfigureAwait(false);
 
@@ -75,7 +81,7 @@ namespace GreenPipes.Filters
 
         void RemovePipe(TKey key)
         {
-            IPipe<T> pipe;
+            IPipe<TInput> pipe;
             _pipes.TryRemove(key, out pipe);
         }
 

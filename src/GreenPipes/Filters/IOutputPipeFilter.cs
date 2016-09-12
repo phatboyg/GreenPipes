@@ -23,10 +23,8 @@ namespace GreenPipes.Filters
 
 
     public interface IOutputPipeFilter<TInput, out TOutput, in TKey> :
-        IFilter<TInput>,
-        IPipeConnector<TOutput>,
-        IPipeConnector<TOutput, TKey>,
-        IObserverConnector<TOutput>
+        IOutputPipeFilter<TInput, TOutput>,
+        IKeyPipeConnector<TKey>
         where TInput : class, PipeContext
         where TOutput : class, PipeContext
     {

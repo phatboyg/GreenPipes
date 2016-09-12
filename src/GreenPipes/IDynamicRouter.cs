@@ -24,4 +24,17 @@ namespace GreenPipes
         where T : class, PipeContext
     {
     }
+
+
+    /// <summary>
+    /// A dynamic router is a pipe on which additional pipes can be connected and context is 
+    /// routed through the pipe based upon the output requirements of the connected pipes. It is built
+    /// around the dynamic filter, which is the central point of the router.
+    /// </summary>
+    public interface IDynamicRouter<T, in TKey> :
+        IDynamicRouter<T>,
+        IKeyPipeConnector<TKey>
+        where T : class, PipeContext
+    {
+    }
 }

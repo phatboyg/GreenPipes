@@ -115,12 +115,12 @@ namespace GreenPipes.Filters
         OutputPipeFilter<TInput, TOutput>,
         IOutputPipeFilter<TInput, TOutput, TKey>
         where TInput : class, PipeContext
-        where TOutput : class, PipeContext
+        where TOutput : class, PipeContext, TInput
     {
         readonly ITeeFilter<TOutput, TKey> _outputFilter;
 
         public OutputPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
-            KeyAccessor<TOutput, TKey> keyAccessor)
+            KeyAccessor<TInput, TKey> keyAccessor)
             : this(filters, contextConverter, new TeeFilter<TOutput, TKey>(keyAccessor))
         {
         }
@@ -132,7 +132,8 @@ namespace GreenPipes.Filters
             _outputFilter = outputFilter;
         }
 
-        public ConnectHandle ConnectPipe(TKey key, IPipe<TOutput> pipe)
+        public ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe) 
+            where T : class, PipeContext
         {
             return _outputFilter.ConnectPipe(key, pipe);
         }

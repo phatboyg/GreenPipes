@@ -46,8 +46,7 @@ namespace GreenPipes
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <typeparam name="TKey"></typeparam>
-    public interface IPipeConnector<out T, in TKey>
-        where T : class, PipeContext
+    public interface IKeyPipeConnector<in TKey>
     {
         /// <summary>
         /// Connect a pipe to the filter using the specified key
@@ -55,6 +54,7 @@ namespace GreenPipes
         /// <param name="key"></param>
         /// <param name="pipe"></param>
         /// <returns></returns>
-        ConnectHandle ConnectPipe(TKey key, IPipe<T> pipe);
+        ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe)
+            where T : class, PipeContext;
     }
 }

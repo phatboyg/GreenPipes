@@ -19,4 +19,13 @@ namespace GreenPipes.Filters
         where TInput : class, PipeContext
     {
     }
+
+    public interface IDynamicFilter<TInput, in TKey> :
+        IFilter<TInput>,
+        IPipeConnector,
+        IKeyPipeConnector<TKey>,
+        IObserverConnector
+        where TInput : class, PipeContext
+    {
+    }
 }

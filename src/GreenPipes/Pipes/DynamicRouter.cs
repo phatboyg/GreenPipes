@@ -46,7 +46,8 @@ namespace GreenPipes.Pipes
             return _pipe.Send(context);
         }
 
-        ConnectHandle IPipeConnector.ConnectPipe<T>(IPipe<T> pipe)
+        public ConnectHandle ConnectPipe<T>(IPipe<T> pipe)
+            where T : class, PipeContext
         {
             return _filter.ConnectPipe(pipe);
         }
@@ -59,6 +60,55 @@ namespace GreenPipes.Pipes
         ConnectHandle IObserverConnector.ConnectObserver(IFilterObserver observer)
         {
             return _filter.ConnectObserver(observer);
+        }
+    }
+
+
+    public class DynamicRouter<TContext, TKey> :
+        IDynamicRouter<TContext, TKey>
+        where TContext : class, PipeContext
+    {
+        readonly IDynamicFilter<TContext, TKey> _filter;
+        readonly IPipe<TContext> _pipe;
+
+        public DynamicRouter(IPipeContextConverterFactory<TContext> converterFactory, KeyAccessor<TContext, TKey> keyAccessor)
+        {
+            _filter = new DynamicFilter<TContext, TKey>(converterFactory, keyAccessor);
+            _pipe = Pipe.New<TContext>(x => x.UseFilter(_filter));
+        }
+
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("dynamicRouter");
+
+            _pipe.Probe(scope);
+        }
+
+        Task IPipe<TContext>.Send(TContext context)
+        {
+            return _pipe.Send(context);
+        }
+
+        public ConnectHandle ConnectPipe<T>(IPipe<T> pipe)
+            where T : class, PipeContext
+        {
+            return _filter.ConnectPipe(pipe);
+        }
+
+        ConnectHandle IObserverConnector.ConnectObserver<T>(IFilterObserver<T> observer)
+        {
+            return _filter.ConnectObserver(observer);
+        }
+
+        ConnectHandle IObserverConnector.ConnectObserver(IFilterObserver observer)
+        {
+            return _filter.ConnectObserver(observer);
+        }
+
+        public ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe)
+            where T : class, PipeContext
+        {
+            return _filter.ConnectPipe(key, pipe);
         }
     }
 }
