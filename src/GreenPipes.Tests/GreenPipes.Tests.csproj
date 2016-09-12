@@ -36,15 +36,10 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authentication_Specs.cs" />
     <Compile Include="ConcurrencyLimit_Specs.cs" />
-    <Compile Include="DataFlow_Specs.cs" />
     <Compile Include="InterfaceExtensions.cs" />
     <Compile Include="Dispatch_Specs.cs" />
     <Compile Include="Clone_a_payload_cache.cs" />
@@ -60,10 +55,6 @@
     <Compile Include="Retry_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GreenPipes.DataFlow\GreenPipes.DataFlow.csproj">
-      <Project>{30e93851-d755-4ba8-a057-d22fd39ad157}</Project>
-      <Name>GreenPipes.DataFlow</Name>
-    </ProjectReference>
     <ProjectReference Include="..\GreenPipes\GreenPipes.csproj">
       <Project>{59052db9-b527-4683-a56a-56c4d8fb6584}</Project>
       <Name>GreenPipes</Name>
