@@ -26,29 +26,29 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Dispatching_a_pipe_by_type()
         {
-            IPipe<Input> pipe = Pipe.New<Input>(x =>
+            IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {
                 // this needs to be moved from Factory() to some type of management glue that
                 // includes the factory, and hooks to connect/add/review
-                x.UseDispatch(new InputConverterFactory(), d =>
+                cfg.UseDispatch(new InputConverterFactory(), d =>
                 {
-                    d.Pipe<Input<string>>(p =>
+                    d.Pipe<InputContext<string>>(p =>
                     {
-                        p.UseExecute(context => Console.WriteLine(context.Value));
+                        p.UseExecute(cxt => Console.WriteLine(cxt.Value));
                     });
                 });
             });
 
-            await pipe.Send(new Input("Hello"));
+            await pipe.Send(new InputContext("Hello"));
         }
     }
 
 
-    public class Input :
+    public class InputContext :
         BasePipeContext,
         PipeContext
     {
-        public Input(object value)
+        public InputContext(object value)
             : base(new PayloadCache())
         {
             Value = value;
@@ -59,9 +59,9 @@ namespace GreenPipes.Tests
         public bool TryGetContext<T>(out T result)
             where T : class
         {
-            if (typeof(T).IsAssignableFrom(typeof(Input<string>)))
+            if (typeof(T).IsAssignableFrom(typeof(InputContext<string>)))
             {
-                result = new Input<string>(Value.ToString()) as T;
+                result = new InputContext<string>(Value.ToString()) as T;
 
                 return result != null;
             }
@@ -72,12 +72,12 @@ namespace GreenPipes.Tests
     }
 
 
-    public class Input<T> :
+    public class InputContext<T> :
         BasePipeContext,
         PipeContext
         where T : class
     {
-        public Input(T value)
+        public InputContext(T value)
             : base(new PayloadCache())
         {
             Value = value;
@@ -88,23 +88,23 @@ namespace GreenPipes.Tests
 
 
     class InputConverterFactory :
-        IPipeContextConverterFactory<Input>
+        IPipeContextConverterFactory<InputContext>
     {
-        IPipeContextConverter<Input, TOutput> IPipeContextConverterFactory<Input>.GetConverter<TOutput>()
+        IPipeContextConverter<InputContext, TOutput> IPipeContextConverterFactory<InputContext>.GetConverter<TOutput>()
         {
-            var innerType = typeof(TOutput).GetClosingArguments(typeof(Input<>)).Single();
+            var innerType = typeof(TOutput).GetClosingArguments(typeof(InputContext<>)).Single();
 
-            return (IPipeContextConverter<Input, TOutput>)Activator.CreateInstance(typeof(Converter<>).MakeGenericType(innerType));
+            return (IPipeContextConverter<InputContext, TOutput>)Activator.CreateInstance(typeof(Converter<>).MakeGenericType(innerType));
         }
 
 
         class Converter<T> :
-            IPipeContextConverter<Input, Input<T>>
+            IPipeContextConverter<InputContext, InputContext<T>>
             where T : class
         {
-            bool IPipeContextConverter<Input, Input<T>>.TryConvert(Input input, out Input<T> output)
+            bool IPipeContextConverter<InputContext, InputContext<T>>.TryConvert(InputContext inputContext, out InputContext<T> output)
             {
-                return input.TryGetContext(out output);
+                return inputContext.TryGetContext(out output);
             }
         }
     }

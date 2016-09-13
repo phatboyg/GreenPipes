@@ -25,7 +25,7 @@ namespace GreenPipes.Tests
         public async Task Should_allow_the_first_call()
         {
             var count = 0;
-            IPipe<A> pipe = Pipe.New<A>(x =>
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
                 x.UseCircuitBreaker(v => v.ResetInterval(TimeSpan.FromSeconds(60)));
                 x.UseExecute(payload =>
@@ -36,7 +36,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            var context = new A();
+            var context = new TestContext();
 
             for (var i = 0; i < 100; i++)
                 Assert.That(async () => await pipe.Send(context).ConfigureAwait(false), Throws.TypeOf<IntentionalTestException>());
@@ -45,11 +45,11 @@ namespace GreenPipes.Tests
         }
 
 
-        class A :
+        class TestContext :
             BasePipeContext,
             PipeContext
         {
-            public A()
+            public TestContext()
                 : base(new PayloadCache())
             {
             }

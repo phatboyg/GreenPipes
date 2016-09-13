@@ -17,13 +17,13 @@ namespace GreenPipes.Tests
             var count1 = 0;
             var count2 = 0;
 
-            var pipe2 = Pipe.New<InitialContext>(x =>
+            var pipe2 = Pipe.New<InitialContext>(cfg =>
             {
-                x.UseExecuteAsync(async payload =>
+                cfg.UseExecuteAsync(async cxt =>
                 {
-                    var pipe1 = Pipe.New<SubContext>(xx =>
+                    var pipe1 = Pipe.New<SubContext>(subCfg =>
                     {
-                        xx.UseExecute(p =>
+                        subCfg.UseExecute(subCxt =>
                         {
                             Interlocked.Increment(ref count1);
                         });
@@ -52,19 +52,19 @@ namespace GreenPipes.Tests
             var count1 = 0;
             var count2 = 0;
 
-            var pipe1 = Pipe.New<InitialContext>(xx =>
+            var pipe1 = Pipe.New<InitialContext>(cfg =>
             {
-                xx.UseExecute(p =>
+                cfg.UseExecute(cxt =>
                 {
                     Interlocked.Increment(ref count1);
                 });
             });
 
-            var pipe2 = Pipe.New<InitialContext>(x =>
+            var pipe2 = Pipe.New<InitialContext>(cfg =>
             {
-                x.UseFork(pipe1);
+                cfg.UseFork(pipe1);
 
-                x.UseExecuteAsync(async payload =>
+                cfg.UseExecuteAsync(async cxt =>
                 {
                     Interlocked.Increment(ref count2);
                 });

@@ -22,16 +22,16 @@ namespace GreenPipes
         /// <summary>
         /// Executes a synchronous method on the pipe
         /// </summary>
-        /// <typeparam name="T">The context type</typeparam>
+        /// <typeparam name="TContext">The context type</typeparam>
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="callback">The callback to invoke</param>
-        public static void UseExecute<T>(this IPipeConfigurator<T> configurator, Action<T> callback)
-            where T : class, PipeContext
+        public static void UseExecute<TContext>(this IPipeConfigurator<TContext> configurator, Action<TContext> callback)
+            where TContext : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new DelegatePipeSpecification<T>(callback);
+            var pipeBuilderConfigurator = new DelegatePipeSpecification<TContext>(callback);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
@@ -39,16 +39,16 @@ namespace GreenPipes
         /// <summary>
         /// Executes an asynchronous method on the pipe
         /// </summary>
-        /// <typeparam name="T">The context type</typeparam>
+        /// <typeparam name="TContext">The context type</typeparam>
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="callback">The callback to invoke</param>
-        public static void UseExecuteAsync<T>(this IPipeConfigurator<T> configurator, Func<T, Task> callback)
-            where T : class, PipeContext
+        public static void UseExecuteAsync<TContext>(this IPipeConfigurator<TContext> configurator, Func<TContext, Task> callback)
+            where TContext : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new AsyncDelegatePipeSpecification<T>(callback);
+            var pipeBuilderConfigurator = new AsyncDelegatePipeSpecification<TContext>(callback);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

@@ -22,26 +22,26 @@ namespace GreenPipes.Tests
     [TestFixture]
     public class Using_the_rescue_filter
     {
-        class A :
+        class TestContext :
             BasePipeContext,
             PipeContext
         {
-            public A()
+            public TestContext()
                 : base(new PayloadCache())
             {
             }
 
-            public A(A a)
-                : base(a)
+            public TestContext(TestContext testContext)
+                : base(testContext)
             {
             }
         }
 
 
-        class AX :
-            A
+        class TestExceptionContext :
+            TestContext
         {
-            public AX(A context, Exception exception)
+            public TestExceptionContext(TestContext context, Exception exception)
                 : base(context)
             {
                 Exception = exception;
@@ -55,20 +55,20 @@ namespace GreenPipes.Tests
         public async Task Should_invoke_the_rescue_pipe()
         {
             int count = 0;
-            IPipe<A> pipe = Pipe.New<A>(x =>
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
-                x.UseRescue(Pipe.New<AX>(r =>
+                x.UseRescue(Pipe.New<TestExceptionContext>(r =>
                 {
                     r.UseExecute(c => Interlocked.Increment(ref count));
-                }), (a, ex) => new AX(a, ex), r => r.Handle<IntentionalTestException>());
+                }), (cxt, ex) => new TestExceptionContext(cxt, ex), r => r.Handle<IntentionalTestException>());
 
-                x.UseExecute(payload =>
+                x.UseExecute(cxt =>
                 {
                     throw new IntentionalTestException("Kaboom!");
                 });
             });
 
-            var context = new A();
+            var context = new TestContext();
 
             await pipe.Send(context);
 
@@ -79,20 +79,20 @@ namespace GreenPipes.Tests
         public async Task Should_skip_if_filtered_exception()
         {
             int count = 0;
-            IPipe<A> pipe = Pipe.New<A>(x =>
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
-                x.UseRescue(Pipe.New<AX>(r =>
+                x.UseRescue(Pipe.New<TestExceptionContext>(r =>
                 {
                     r.UseExecute(c => Interlocked.Increment(ref count));
-                }), (a, ex) => new AX(a, ex), r => r.Ignore<IntentionalTestException>());
+                }), (cxt, ex) => new TestExceptionContext(cxt, ex), r => r.Ignore<IntentionalTestException>());
 
-                x.UseExecute(payload =>
+                x.UseExecute(cxt =>
                 {
                     throw new IntentionalTestException("Kaboom!");
                 });
             });
 
-            var context = new A();
+            var context = new TestContext();
 
             Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
         }

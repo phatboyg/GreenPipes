@@ -17,7 +17,6 @@ namespace GreenPipes.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Control;
     using NUnit.Framework;
     using Pipes;
 
@@ -29,16 +28,16 @@ namespace GreenPipes.Tests
         public async Task Should_only_do_n_messages_per_interval()
         {
             int count = 0;
-            IPipe<Input> pipe = Pipe.New<Input>(x =>
+            IPipe<InputContext> pipe = Pipe.New<InputContext>(x =>
             {
                 x.UseRateLimit(10, TimeSpan.FromSeconds(1));
-                x.UseExecute(payload =>
+                x.UseExecute(cxt =>
                 {
                     Interlocked.Increment(ref count);
                 });
             });
 
-            var context = new Input("Hello");
+            var context = new InputContext("Hello");
 
             var timer = Stopwatch.StartNew();
 
@@ -58,10 +57,10 @@ namespace GreenPipes.Tests
         {
             var router = new CommandRouter();
             int count = 0;
-            IPipe<Input> pipe = Pipe.New<Input>(x =>
+            IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {
-                x.UseRateLimit(10, TimeSpan.FromSeconds(1), router);
-                x.UseExecute(payload =>
+                cfg.UseRateLimit(10, TimeSpan.FromSeconds(1), router);
+                cfg.UseExecute(cxt =>
                 {
                     Interlocked.Increment(ref count);
                 });
@@ -69,7 +68,7 @@ namespace GreenPipes.Tests
 
             await router.SetRateLimit(100);
 
-            var context = new Input("Hello");
+            var context = new InputContext("Hello");
 
             var timer = Stopwatch.StartNew();
 
@@ -89,10 +88,10 @@ namespace GreenPipes.Tests
         {
             var router = new CommandRouter();
             int count = 0;
-            IPipe<Input> pipe = Pipe.New<Input>(x =>
+            IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {
-                x.UseRateLimit(100, TimeSpan.FromSeconds(1), router);
-                x.UseExecute(payload =>
+                cfg.UseRateLimit(100, TimeSpan.FromSeconds(1), router);
+                cfg.UseExecute(cxt =>
                 {
                     Interlocked.Increment(ref count);
                 });
@@ -100,7 +99,7 @@ namespace GreenPipes.Tests
 
             await router.SetRateLimit(10);
 
-            var context = new Input("Hello");
+            var context = new InputContext("Hello");
 
             var timer = Stopwatch.StartNew();
 
@@ -119,10 +118,10 @@ namespace GreenPipes.Tests
         public async Task Should_count_success_and_failure_as_same()
         {
             int count = 0;
-            IPipe<Input> pipe = Pipe.New<Input>(x =>
+            IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {
-                x.UseRateLimit(10, TimeSpan.FromSeconds(1));
-                x.UseExecute(payload =>
+                cfg.UseRateLimit(10, TimeSpan.FromSeconds(1));
+                cfg.UseExecute(cxt =>
                 {
                     var index = Interlocked.Increment(ref count);
                     if (index % 2 == 0)
@@ -130,7 +129,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            var context = new Input("Hello");
+            var context = new InputContext("Hello");
 
             var timer = Stopwatch.StartNew();
 

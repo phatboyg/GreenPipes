@@ -23,13 +23,13 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Should_write_to_the_console()
         {
-            IPipe<Input> pipe = Pipe.New<Input>(x =>
+            IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {
-                x.UseConsoleProfile();
-                x.UseExecuteAsync(context => Task.Delay(10));
+                cfg.UseConsoleProfile();
+                cfg.UseExecuteAsync(cxt => Task.Delay(10));
             });
 
-            await Task.WhenAll(Enumerable.Range(0, 100).Select(x => pipe.Send(new Input("Hello"))));
+            await Task.WhenAll(Enumerable.Range(0, 100).Select(x => pipe.Send(new InputContext("Hello"))));
         }
     }
 }

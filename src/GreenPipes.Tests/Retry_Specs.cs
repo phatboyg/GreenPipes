@@ -20,11 +20,11 @@ namespace GreenPipes.Tests
     [TestFixture]
     public class Using_the_retry_filter
     {
-        class A :
+        class TestContext :
             BasePipeContext,
             PipeContext
         {
-            public A()
+            public TestContext()
                 : base(new PayloadCache())
             {                
             }
@@ -35,7 +35,7 @@ namespace GreenPipes.Tests
         public void Should_retry_the_specified_times_and_fail()
         {
             int count = 0;
-            IPipe<A> pipe = Pipe.New<A>(x =>
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
                 x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
                 x.UseExecute(payload =>
@@ -45,7 +45,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            var context = new A();
+            var context = new TestContext();
 
             Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
 
@@ -56,7 +56,7 @@ namespace GreenPipes.Tests
         public void Should_support_overloading_downstream()
         {
             int count = 0;
-            IPipe<A> pipe = Pipe.New<A>(x =>
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
                 x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
                 x.UseRetry(r => r.None());
@@ -67,7 +67,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            var context = new A();
+            var context = new TestContext();
 
             Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
 
@@ -78,7 +78,7 @@ namespace GreenPipes.Tests
         public void Should_support_overloading_downstream_either_way()
         {
             int count = 0;
-            IPipe<A> pipe = Pipe.New<A>(x =>
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
                 x.UseRetry(r => r.None());
                 x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
@@ -89,7 +89,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            var context = new A();
+            var context = new TestContext();
 
             Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
 

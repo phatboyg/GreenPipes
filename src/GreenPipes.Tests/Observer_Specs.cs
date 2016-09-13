@@ -15,7 +15,6 @@ namespace GreenPipes.Tests
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using Control;
     using NUnit.Framework;
     using Pipes;
     using Util;
@@ -73,9 +72,9 @@ namespace GreenPipes.Tests
         {
             ICommandRouter router = new CommandRouter();
 
-            router.ConnectPipe(Pipe.New<CommandContext<SetConcurrencyLimit>>(x =>
+            router.ConnectPipe(Pipe.New<CommandContext<SetConcurrencyLimit>>(cfg =>
             {
-                x.UseExecute(context =>
+                cfg.UseExecute(cxt =>
                 {
                     throw new IntentionalTestException("Wow!");
                 });
@@ -97,40 +96,40 @@ namespace GreenPipes.Tests
         }
 
 
-        class Observer<T> :
-            IFilterObserver<T>
-            where T : class, PipeContext
+        class Observer<TContext> :
+            IFilterObserver<TContext>
+            where TContext : class, PipeContext
         {
-            readonly TaskCompletionSource<T> _consumeFaulted;
-            readonly TaskCompletionSource<T> _postConsumed;
-            readonly TaskCompletionSource<T> _preConsumed;
+            readonly TaskCompletionSource<TContext> _consumeFaulted;
+            readonly TaskCompletionSource<TContext> _postConsumed;
+            readonly TaskCompletionSource<TContext> _preConsumed;
 
             public Observer()
             {
-                _preConsumed = new TaskCompletionSource<T>();
-                _postConsumed = new TaskCompletionSource<T>();
-                _consumeFaulted = new TaskCompletionSource<T>();
+                _preConsumed = new TaskCompletionSource<TContext>();
+                _postConsumed = new TaskCompletionSource<TContext>();
+                _consumeFaulted = new TaskCompletionSource<TContext>();
             }
 
-            public Task<T> PreSent => _preConsumed.Task;
-            public Task<T> PostSent => _postConsumed.Task;
-            public Task<T> SendFaulted => _consumeFaulted.Task;
+            public Task<TContext> PreSent => _preConsumed.Task;
+            public Task<TContext> PostSent => _postConsumed.Task;
+            public Task<TContext> SendFaulted => _consumeFaulted.Task;
 
-            Task IFilterObserver<T>.PreSend(T context)
+            Task IFilterObserver<TContext>.PreSend(TContext context)
             {
                 _preConsumed.TrySetResult(context);
 
                 return TaskUtil.Completed;
             }
 
-            Task IFilterObserver<T>.PostSend(T context)
+            Task IFilterObserver<TContext>.PostSend(TContext context)
             {
                 _postConsumed.TrySetResult(context);
 
                 return TaskUtil.Completed;
             }
 
-            Task IFilterObserver<T>.SendFault(T context, Exception exception)
+            Task IFilterObserver<TContext>.SendFault(TContext context, Exception exception)
             {
                 _consumeFaulted.TrySetException(exception);
 

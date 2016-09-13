@@ -32,10 +32,10 @@ namespace GreenPipes.Tests
             var currentCount = 0;
             var maxCount = 0;
 
-            IPipe<Input> pipe = Pipe.New<Input>(x =>
+            IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {
-                x.UseConcurrencyLimit(32);
-                x.UseExecuteAsync(async payload =>
+                cfg.UseConcurrencyLimit(32);
+                cfg.UseExecuteAsync(async cxt =>
                 {
                     var current = Interlocked.Increment(ref currentCount);
                     while (current > maxCount)
@@ -47,7 +47,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            var context = new Input("Hello");
+            var context = new InputContext("Hello");
 
             Task[] tasks = Enumerable.Range(0, 500)
                 .Select(index => Task.Run(async () => await pipe.Send(context)))
@@ -66,10 +66,10 @@ namespace GreenPipes.Tests
 
             ICommandRouter dynamicRouter = new CommandRouter();
 
-            IPipe<Input> pipe = Pipe.New<Input>(x =>
+            IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {
-                x.UseConcurrencyLimit(1, dynamicRouter);
-                x.UseExecuteAsync(async payload =>
+                cfg.UseConcurrencyLimit(1, dynamicRouter);
+                cfg.UseExecuteAsync(async cxt =>
                 {
                     var current = Interlocked.Increment(ref currentCount);
                     while (current > maxCount)
@@ -86,7 +86,7 @@ namespace GreenPipes.Tests
                 ConcurrencyLimit = 32
             });
 
-            var context = new Input("Hello");
+            var context = new InputContext("Hello");
 
             Task[] tasks = Enumerable.Range(0, 500)
                 .Select(index => Task.Run(async () => await pipe.Send(context)))
@@ -103,10 +103,10 @@ namespace GreenPipes.Tests
             var currentCount = 0;
             var maxCount = 0;
 
-            IPipe<Input> pipe = Pipe.New<Input>(x =>
+            IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {
-                x.UseConcurrencyLimit(1);
-                x.UseExecuteAsync(async payload =>
+                cfg.UseConcurrencyLimit(1);
+                cfg.UseExecuteAsync(async cxt =>
                 {
                     var current = Interlocked.Increment(ref currentCount);
                     while (current > maxCount)
@@ -118,7 +118,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            var context = new Input("Hello");
+            var context = new InputContext("Hello");
 
             Task[] tasks = Enumerable.Range(0, 50)
                 .Select(index => Task.Run(async () => await pipe.Send(context)))
@@ -135,7 +135,7 @@ namespace GreenPipes.Tests
         {
             IPipeContextConverter<CommandContext, TOutput> IPipeContextConverterFactory<CommandContext>.GetConverter<TOutput>()
             {
-                var innerType = typeof(TOutput).GetClosingArguments(typeof(Input<>)).Single();
+                var innerType = typeof(TOutput).GetClosingArguments(typeof(InputContext<>)).Single();
 
                 return (IPipeContextConverter<CommandContext, TOutput>)Activator.CreateInstance(typeof(Converter<>).MakeGenericType(innerType));
             }

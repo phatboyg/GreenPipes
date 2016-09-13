@@ -46,15 +46,15 @@ namespace GreenPipes
     }
 
 
-    public interface IFilterObserver<in T>
-        where T : class, PipeContext
+    public interface IFilterObserver<in TContext>
+        where TContext : class, PipeContext
     {
         /// <summary>
         /// Called before a message is dispatched to any consumers
         /// </summary>
         /// <param name="context">The consume context</param>
         /// <returns></returns>
-        Task PreSend(T context);
+        Task PreSend(TContext context);
 
         /// <summary>
         /// Called after the message has been dispatched to all consumers - note that in the case of an exception
@@ -62,7 +62,7 @@ namespace GreenPipes
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        Task PostSend(T context);
+        Task PostSend(TContext context);
 
         /// <summary>
         /// Called after the message has been dispatched to all consumers when one or more exceptions have occurred
@@ -70,6 +70,6 @@ namespace GreenPipes
         /// <param name="context"></param>
         /// <param name="exception"></param>
         /// <returns></returns>
-        Task SendFault(T context, Exception exception);
+        Task SendFault(TContext context, Exception exception);
     }
 }
