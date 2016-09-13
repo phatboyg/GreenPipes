@@ -12,20 +12,23 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes
 {
+    using Internals.Extensions;
+
+
     public static class PipeExtensions
     {
         /// <summary>
         /// Get a payload from the pipe context
         /// </summary>
-        /// <typeparam name="T">The payload type</typeparam>
+        /// <typeparam name="TPayload">The payload type</typeparam>
         /// <param name="context">The pipe context</param>
         /// <returns>The payload, or throws a PayloadNotFoundException if the payload is not present</returns>
-        public static T GetPayload<T>(this PipeContext context)
-            where T : class
+        public static TPayload GetPayload<TPayload>(this PipeContext context)
+            where TPayload : class
         {
-            T payload;
+            TPayload payload;
             if (!context.TryGetPayload(out payload))
-                throw new PayloadNotFoundException($"The payload was not found: {typeof(T).Name}");
+                throw new PayloadNotFoundException($"The payload was not found: {TypeNameCache<TPayload>.ShortName}");
 
             return payload;
         }

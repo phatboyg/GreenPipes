@@ -15,7 +15,7 @@ namespace GreenPipes.Configurators
     using System;
 
 
-    public interface IDispatchConfigurator<TInput>
+    public interface IDispatchConfigurator<TContext>
     {
         void Pipe<T>(Action<IPipeConfigurator<T>> configurePipe)
             where T : class, PipeContext;

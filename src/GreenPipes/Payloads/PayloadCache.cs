@@ -15,6 +15,7 @@ namespace GreenPipes.Payloads
     using System;
     using System.Threading;
     using Collections;
+    using Internals.Extensions;
 
 
     public class PayloadCache :
@@ -32,14 +33,14 @@ namespace GreenPipes.Payloads
             _collection = new EmptyPayloadCollection(collection);
         }
 
-        bool IReadOnlyPayloadCollection.HasPayloadType(Type propertyType)
+        bool IReadOnlyPayloadCollection.HasPayloadType(Type payloadType)
         {
-            return _collection.HasPayloadType(propertyType);
+            return _collection.HasPayloadType(payloadType);
         }
 
-        bool IReadOnlyPayloadCollection.TryGetPayload<T>(out T value)
+        bool IReadOnlyPayloadCollection.TryGetPayload<T>(out T payload)
         {
-            return _collection.TryGetPayload(out value);
+            return _collection.TryGetPayload(out payload);
         }
 
         T IPayloadCache.GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
@@ -67,7 +68,7 @@ namespace GreenPipes.Payloads
             }
             catch (Exception exception)
             {
-                throw new PayloadFactoryException($"The payload factory faulted: {typeof(T).Name}", exception);
+                throw new PayloadFactoryException($"The payload factory faulted: {TypeNameCache<T>.ShortName}", exception);
             }
         }
 

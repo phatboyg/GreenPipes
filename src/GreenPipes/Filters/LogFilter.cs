@@ -19,14 +19,14 @@ namespace GreenPipes.Filters
     using Log;
 
 
-    public class LogFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    public class LogFilter<TContext> :
+        IFilter<TContext>
+        where TContext : class, PipeContext
     {
-        readonly LogFormatter<T> _formatter;
+        readonly LogFormatter<TContext> _formatter;
         readonly TextWriter _writer;
 
-        public LogFilter(TextWriter writer, LogFormatter<T> formatter)
+        public LogFilter(TextWriter writer, LogFormatter<TContext> formatter)
         {
             _writer = writer;
             _formatter = formatter;
@@ -38,7 +38,7 @@ namespace GreenPipes.Filters
         }
 
         [DebuggerNonUserCode]
-        async Task IFilter<T>.Send(T context, IPipe<T> next)
+        async Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
             DateTime startTime = DateTime.UtcNow;
             Stopwatch timer = Stopwatch.StartNew();

@@ -12,5 +12,5 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Partitioning
 {
-    public delegate byte[] PartitionKeyProvider<in T>(T value);
+    public delegate byte[] PartitionKeyProvider<in TContext>(TContext context);
 }

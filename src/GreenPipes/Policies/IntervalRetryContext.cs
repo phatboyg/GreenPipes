@@ -17,14 +17,14 @@ namespace GreenPipes.Policies
     using Util;
 
 
-    public class IntervalRetryContext<T> :
-        RetryContext<T>
-        where T : class
+    public class IntervalRetryContext<TContext> :
+        RetryContext<TContext>
+        where TContext : class
     {
         readonly IntervalRetryPolicy _policy;
         readonly int _retryCount;
 
-        public IntervalRetryContext(IntervalRetryPolicy policy, T context, Exception exception, int retryCount)
+        public IntervalRetryContext(IntervalRetryPolicy policy, TContext context, Exception exception, int retryCount)
         {
             _policy = policy;
             _retryCount = retryCount;
@@ -32,7 +32,7 @@ namespace GreenPipes.Policies
             Exception = exception;
         }
 
-        public T Context { get; }
+        public TContext Context { get; }
 
         public Exception Exception { get; }
 
@@ -52,9 +52,9 @@ namespace GreenPipes.Policies
             return TaskUtil.Completed;
         }
 
-        public bool CanRetry(Exception exception, out RetryContext<T> retryContext)
+        public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
-            retryContext = new IntervalRetryContext<T>(_policy, Context, Exception, _retryCount + 1);
+            retryContext = new IntervalRetryContext<TContext>(_policy, Context, Exception, _retryCount + 1);
 
             return _retryCount < _policy.Intervals.Length && _policy.Matches(exception);
         }

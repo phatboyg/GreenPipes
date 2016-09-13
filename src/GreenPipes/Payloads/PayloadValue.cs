@@ -13,6 +13,7 @@
 namespace GreenPipes.Payloads
 {
     using System;
+    using Internals.Extensions;
 
 
     /// <summary>
@@ -28,7 +29,7 @@ namespace GreenPipes.Payloads
         public PayloadValue(TPayload value)
         {
             if (value == default(TPayload))
-                throw new PayloadNotFoundException($"The payload was not found: {typeof(TPayload).Name}");
+                throw new PayloadNotFoundException($"The payload was not found: {TypeNameCache<TPayload>.ShortName}");
 
             _value = value;
         }

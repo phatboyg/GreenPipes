@@ -17,11 +17,11 @@ namespace GreenPipes
     /// routed through the pipe based upon the output requirements of the connected pipes. It is built
     /// around the dynamic filter, which is the central point of the router.
     /// </summary>
-    public interface IDynamicRouter<in T> :
-        IPipe<T>,
+    public interface IDynamicRouter<in TContext> :
+        IPipe<TContext>,
         IPipeConnector,
         IObserverConnector
-        where T : class, PipeContext
+        where TContext : class, PipeContext
     {
     }
 
@@ -31,10 +31,10 @@ namespace GreenPipes
     /// routed through the pipe based upon the output requirements of the connected pipes. It is built
     /// around the dynamic filter, which is the central point of the router.
     /// </summary>
-    public interface IDynamicRouter<T, in TKey> :
-        IDynamicRouter<T>,
+    public interface IDynamicRouter<in TContext, in TKey> :
+        IDynamicRouter<TContext>,
         IKeyPipeConnector<TKey>
-        where T : class, PipeContext
+        where TContext : class, PipeContext
     {
     }
 }

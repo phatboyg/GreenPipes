@@ -27,17 +27,18 @@ namespace GreenPipes.Payloads.Collections
 
         protected IReadOnlyPayloadCollection Parent => _parent;
 
-        public virtual bool HasPayloadType(Type propertyType)
+        public virtual bool HasPayloadType(Type payloadType)
         {
-            return _parent?.HasPayloadType(propertyType) ?? false;
+            return _parent?.HasPayloadType(payloadType) ?? false;
         }
 
-        public virtual bool TryGetPayload<T>(out T value) where T : class
+        public virtual bool TryGetPayload<TPayload>(out TPayload payload)
+            where TPayload : class
         {
             if (_parent != null)
-                return _parent.TryGetPayload(out value);
+                return _parent.TryGetPayload(out payload);
 
-            value = null;
+            payload = null;
             return false;
         }
 

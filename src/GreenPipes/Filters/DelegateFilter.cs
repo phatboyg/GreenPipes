@@ -17,13 +17,13 @@ namespace GreenPipes.Filters
     using System.Threading.Tasks;
 
 
-    public class DelegateFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    public class DelegateFilter<TContext> :
+        IFilter<TContext>
+        where TContext : class, PipeContext
     {
-        readonly Action<T> _callback;
+        readonly Action<TContext> _callback;
 
-        public DelegateFilter(Action<T> callback)
+        public DelegateFilter(Action<TContext> callback)
         {
             _callback = callback;
         }
@@ -35,7 +35,7 @@ namespace GreenPipes.Filters
 
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        public Task Send(T context, IPipe<T> next)
+        public Task Send(TContext context, IPipe<TContext> next)
         {
             _callback(context);
 

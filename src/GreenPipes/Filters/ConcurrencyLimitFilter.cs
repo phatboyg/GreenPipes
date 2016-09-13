@@ -23,12 +23,12 @@ namespace GreenPipes.Filters
     /// Limits the concurrency of the next section of the pipeline based on the concurrency limit
     /// specified.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class ConcurrencyLimitFilter<T> :
-        IFilter<T>,
+    /// <typeparam name="TContext"></typeparam>
+    public class ConcurrencyLimitFilter<TContext> :
+        IFilter<TContext>,
         IPipe<CommandContext<SetConcurrencyLimit>>,
         IDisposable
-        where T : class, PipeContext
+        where TContext : class, PipeContext
     {
         readonly int _concurrencyLimit;
         readonly SemaphoreSlim _limit;
@@ -53,7 +53,7 @@ namespace GreenPipes.Filters
         }
 
         [DebuggerNonUserCode]
-        public async Task Send(T context, IPipe<T> next)
+        public async Task Send(TContext context, IPipe<TContext> next)
         {
             await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
 

@@ -17,14 +17,14 @@ namespace GreenPipes.Policies
     using Util;
 
 
-    public class ExponentialRetryContext<T> :
-        RetryContext<T>
-        where T : class
+    public class ExponentialRetryContext<TContext> :
+        RetryContext<TContext>
+        where TContext : class
     {
         readonly ExponentialRetryPolicy _policy;
         readonly int _retryCount;
 
-        public ExponentialRetryContext(ExponentialRetryPolicy policy, T context, Exception exception, int retryCount)
+        public ExponentialRetryContext(ExponentialRetryPolicy policy, TContext context, Exception exception, int retryCount)
         {
             _policy = policy;
             _retryCount = retryCount;
@@ -32,7 +32,7 @@ namespace GreenPipes.Policies
             Exception = exception;
         }
 
-        public T Context { get; }
+        public TContext Context { get; }
 
         public Exception Exception { get; }
 
@@ -52,9 +52,9 @@ namespace GreenPipes.Policies
             return TaskUtil.Completed;
         }
 
-        bool RetryPolicyContext<T>.CanRetry(Exception exception, out RetryContext<T> retryContext)
+        bool RetryPolicyContext<TContext>.CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
-            retryContext = new ExponentialRetryContext<T>(_policy, Context, Exception, _retryCount + 1);
+            retryContext = new ExponentialRetryContext<TContext>(_policy, Context, Exception, _retryCount + 1);
 
             return _retryCount < _policy.Intervals.Length && _policy.Matches(exception);
         }

@@ -17,16 +17,16 @@ namespace GreenPipes.Policies
     using Util;
 
 
-    public class IncrementalRetryContext<T> :
-        RetryContext<T>
-        where T : class
+    public class IncrementalRetryContext<TContext> :
+        RetryContext<TContext>
+        where TContext : class
     {
         readonly TimeSpan _delay;
         readonly TimeSpan _delayIncrement;
         readonly IncrementalRetryPolicy _policy;
         readonly int _retryCount;
 
-        public IncrementalRetryContext(IncrementalRetryPolicy policy, T context, Exception exception, int retryCount, TimeSpan delay, TimeSpan delayIncrement)
+        public IncrementalRetryContext(IncrementalRetryPolicy policy, TContext context, Exception exception, int retryCount, TimeSpan delay, TimeSpan delayIncrement)
         {
             _policy = policy;
             _retryCount = retryCount;
@@ -36,7 +36,7 @@ namespace GreenPipes.Policies
             Exception = exception;
         }
 
-        public T Context { get; }
+        public TContext Context { get; }
 
         public Exception Exception { get; }
 
@@ -56,9 +56,9 @@ namespace GreenPipes.Policies
             return TaskUtil.Completed;
         }
 
-        public bool CanRetry(Exception exception, out RetryContext<T> retryContext)
+        public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
-            retryContext = new IncrementalRetryContext<T>(_policy, Context, Exception, _retryCount + 1, _delay + _delayIncrement, _delayIncrement);
+            retryContext = new IncrementalRetryContext<TContext>(_policy, Context, Exception, _retryCount + 1, _delay + _delayIncrement, _delayIncrement);
 
             return _retryCount < _policy.RetryLimit && _policy.Matches(exception);
         }

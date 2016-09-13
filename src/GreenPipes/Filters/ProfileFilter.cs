@@ -20,9 +20,9 @@ namespace GreenPipes.Filters
     using Profile;
 
 
-    public class ProfileFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    public class ProfileFilter<TContext> :
+        IFilter<TContext>
+        where TContext : class, PipeContext
     {
         readonly ReportProfileData _reportProfileData;
         readonly long _trivialThreshold;
@@ -41,7 +41,7 @@ namespace GreenPipes.Filters
         }
 
         [DebuggerNonUserCode]
-        async Task IFilter<T>.Send(T context, IPipe<T> next)
+        async Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
             var timingId = Interlocked.Increment(ref _nextTimingId);
 

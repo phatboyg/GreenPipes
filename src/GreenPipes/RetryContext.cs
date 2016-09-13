@@ -25,10 +25,10 @@ namespace GreenPipes
     }
 
 
-    public interface RetryContext<T> :
-        RetryPolicyContext<T>,
+    public interface RetryContext<TContext> :
+        RetryPolicyContext<TContext>,
         RetryContext
-        where T : class
+        where TContext : class
     {
         /// <summary>
         /// The exception that originally caused the retry to be initiated
@@ -50,12 +50,5 @@ namespace GreenPipes
         /// </summary>
         /// <returns></returns>
         Task PreRetry();
-
-        /// <summary>
-        /// Called after the retry attempt has failed
-        /// </summary>
-        /// <param name="exception"></param>
-        /// <returns></returns>
-        Task RetryFaulted(Exception exception);
     }
 }

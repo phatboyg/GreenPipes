@@ -21,16 +21,16 @@ namespace GreenPipes.Filters
     /// <summary>
     /// Connects multiple output pipes to a single input pipe
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class TeeFilter<T> :
-        ITeeFilter<T>
-        where T : class, PipeContext
+    /// <typeparam name="TContext"></typeparam>
+    public class TeeFilter<TContext> :
+        ITeeFilter<TContext>
+        where TContext : class, PipeContext
     {
-        readonly Connectable<IPipe<T>> _connections;
+        readonly Connectable<IPipe<TContext>> _connections;
 
         public TeeFilter()
         {
-            _connections = new Connectable<IPipe<T>>();
+            _connections = new Connectable<IPipe<TContext>>();
         }
 
         public int Count => _connections.Count;
@@ -45,14 +45,14 @@ namespace GreenPipes.Filters
         }
 
         [DebuggerNonUserCode]
-        public async Task Send(T context, IPipe<T> next)
+        public async Task Send(TContext context, IPipe<TContext> next)
         {
             await _connections.ForEachAsync(async pipe => await pipe.Send(context).ConfigureAwait(false)).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
         }
 
-        public ConnectHandle ConnectPipe(IPipe<T> pipe)
+        public ConnectHandle ConnectPipe(IPipe<TContext> pipe)
         {
             return _connections.Connect(pipe);
         }
@@ -62,17 +62,17 @@ namespace GreenPipes.Filters
     /// <summary>
     /// Connects multiple output pipes to a single input pipe
     /// </summary>
-    /// <typeparam name="TInput"></typeparam>
+    /// <typeparam name="TContext"></typeparam>
     /// <typeparam name="TKey">The key type</typeparam>
-    public class TeeFilter<TInput, TKey> :
-        TeeFilter<TInput>,
-        ITeeFilter<TInput, TKey>
-        where TInput : class, PipeContext
+    public class TeeFilter<TContext, TKey> :
+        TeeFilter<TContext>,
+        ITeeFilter<TContext, TKey>
+        where TContext : class, PipeContext
     {
-        readonly KeyAccessor<TInput, TKey> _keyAccessor;
+        readonly KeyAccessor<TContext, TKey> _keyAccessor;
         readonly Lazy<IKeyPipeConnector<TKey>> _keyConnections;
 
-        public TeeFilter(KeyAccessor<TInput, TKey> keyAccessor)
+        public TeeFilter(KeyAccessor<TContext, TKey> keyAccessor)
         {
             _keyAccessor = keyAccessor;
 
@@ -87,9 +87,9 @@ namespace GreenPipes.Filters
 
         IKeyPipeConnector<TKey> ConnectKeyFilter()
         {
-            var filter = new KeyFilter<TInput, TKey>(_keyAccessor);
+            var filter = new KeyFilter<TContext, TKey>(_keyAccessor);
 
-            IPipe<TInput> pipe = Pipe.New<TInput>(x => x.UseFilter(filter));
+            IPipe<TContext> pipe = Pipe.New<TContext>(x => x.UseFilter(filter));
 
             ConnectPipe(pipe);
 

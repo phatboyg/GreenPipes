@@ -80,10 +80,10 @@ namespace GreenPipes
         }
 
 
-        static class Cache<T>
-            where T : class, PipeContext
+        static class Cache<TContext>
+            where TContext : class, PipeContext
         {
-            internal static readonly IPipe<T> EmptyPipe = new EmptyPipe<T>();
+            internal static readonly IPipe<TContext> EmptyPipe = new EmptyPipe<TContext>();
         }
     }
 }

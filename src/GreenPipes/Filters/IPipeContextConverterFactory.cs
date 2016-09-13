@@ -12,15 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Filters
 {
-    /// <summary>
-    /// Given the input PipeContext, return the resulting PipeContext
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="TResult"></typeparam>
-    public interface IPipeContextProvider<in T, TResult>
-        where T : class, PipeContext
-        where TResult : class, PipeContext
+    public interface IPipeContextConverterFactory<in TInput>
+        where TInput : class, PipeContext
     {
-        bool TryGetContext(T context, out TResult result);
+        IPipeContextConverter<TInput, TOutput> GetConverter<TOutput>()
+            where TOutput : class, PipeContext;
     }
 }

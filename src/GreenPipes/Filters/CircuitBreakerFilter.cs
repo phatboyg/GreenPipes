@@ -20,10 +20,10 @@ namespace GreenPipes.Filters
     using CircuitBreaker;
 
 
-    public class CircuitBreakerFilter<T> :
-        IFilter<T>,
+    public class CircuitBreakerFilter<TContext> :
+        IFilter<TContext>,
         ICircuitBreaker
-        where T : class, PipeContext
+        where TContext : class, PipeContext
     {
         readonly IExceptionFilter _exceptionFilter;
         readonly CircuitBreakerSettings _settings;
@@ -61,7 +61,7 @@ namespace GreenPipes.Filters
 
         public int ActiveThreshold => _settings.ActiveThreshold;
 
-        public async Task Send(T context, IPipe<T> next)
+        public async Task Send(TContext context, IPipe<TContext> next)
         {
             try
             {

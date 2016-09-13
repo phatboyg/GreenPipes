@@ -31,14 +31,14 @@ namespace GreenPipes
     }
 
 
-    public interface IObserverConnector<out T>
-        where T : class, PipeContext
+    public interface IObserverConnector<out TContext>
+        where TContext : class, PipeContext
     {
         /// <summary>
         /// Connect an observer to the filter and/or pipe
         /// </summary>
         /// <param name="observer"></param>
         /// <returns></returns>
-        ConnectHandle ConnectObserver(IFilterObserver<T> observer);
+        ConnectHandle ConnectObserver(IFilterObserver<TContext> observer);
     }
 }

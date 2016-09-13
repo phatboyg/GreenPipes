@@ -17,13 +17,13 @@ namespace GreenPipes.Filters
     using System.Threading.Tasks;
 
 
-    public class AsyncDelegateFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    public class AsyncDelegateFilter<TContext> :
+        IFilter<TContext>
+        where TContext : class, PipeContext
     {
-        readonly Func<T, Task> _callback;
+        readonly Func<TContext, Task> _callback;
 
-        public AsyncDelegateFilter(Func<T, Task> callback)
+        public AsyncDelegateFilter(Func<TContext, Task> callback)
         {
             _callback = callback;
         }
@@ -35,7 +35,7 @@ namespace GreenPipes.Filters
 
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        public async Task Send(T context, IPipe<T> next)
+        public async Task Send(TContext context, IPipe<TContext> next)
         {
             await _callback(context).ConfigureAwait(false);
 

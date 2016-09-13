@@ -23,17 +23,17 @@ namespace GreenPipes.Partitioning
     }
 
 
-    public interface IPartitioner<T> :
+    public interface IPartitioner<TContext> :
         IProbeSite
-        where T : class, PipeContext
+        where TContext : class, PipeContext
     {
         /// <summary>
         /// Sends the context through the partitioner
         /// </summary>
-        /// <typeparam name="T">The context type</typeparam>
+        /// <typeparam name="TContext">The context type</typeparam>
         /// <param name="context">The context</param>
         /// <param name="next">The next pipe</param>
         /// <returns></returns>
-        Task Send(T context, IPipe<T> next);
+        Task Send(TContext context, IPipe<TContext> next);
     }
 }

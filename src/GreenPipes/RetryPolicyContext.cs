@@ -19,14 +19,14 @@ namespace GreenPipes
     /// <summary>
     /// An initial context acquired to begin a retry filter
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface RetryPolicyContext<T>
-        where T : class
+    /// <typeparam name="TContext"></typeparam>
+    public interface RetryPolicyContext<TContext>
+        where TContext : class
     {
         /// <summary>
         /// The context being managed by the retry policy
         /// </summary>
-        T Context { get; }
+        TContext Context { get; }
 
         /// <summary>
         /// Determines if the exception can be retried
@@ -34,7 +34,7 @@ namespace GreenPipes
         /// <param name="exception">The exception that occurred</param>
         /// <param name="retryContext">The retry context for the retry</param>
         /// <returns>True if the task should be retried</returns>
-        bool CanRetry(Exception exception, out RetryContext<T> retryContext);
+        bool CanRetry(Exception exception, out RetryContext<TContext> retryContext);
 
         /// <summary>
         /// Called after the retry attempt has failed

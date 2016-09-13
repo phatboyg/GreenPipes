@@ -17,13 +17,13 @@ namespace GreenPipes.Policies
     using Util;
 
 
-    public class ImmediateRetryContext<T> :
-        RetryContext<T>
-        where T : class
+    public class ImmediateRetryContext<TContext> :
+        RetryContext<TContext>
+        where TContext : class
     {
         readonly ImmediateRetryPolicy _policy;
 
-        public ImmediateRetryContext(ImmediateRetryPolicy policy, T context, Exception exception, int retryCount)
+        public ImmediateRetryContext(ImmediateRetryPolicy policy, TContext context, Exception exception, int retryCount)
         {
             _policy = policy;
             Context = context;
@@ -31,7 +31,7 @@ namespace GreenPipes.Policies
             Exception = exception;
         }
 
-        public T Context { get; }
+        public TContext Context { get; }
 
         public Exception Exception { get; }
 
@@ -51,9 +51,9 @@ namespace GreenPipes.Policies
             return TaskUtil.Completed;
         }
 
-        public bool CanRetry(Exception exception, out RetryContext<T> retryContext)
+        public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
-            retryContext = new ImmediateRetryContext<T>(_policy, Context, Exception, RetryCount + 1);
+            retryContext = new ImmediateRetryContext<TContext>(_policy, Context, Exception, RetryCount + 1);
 
             return RetryCount < _policy.RetryLimit && _policy.Matches(exception);
         }

@@ -69,20 +69,20 @@ namespace GreenPipes.Partitioning
         }
 
 
-        class ContextPartitioner<T> :
-            IPartitioner<T>
-            where T : class, PipeContext
+        class ContextPartitioner<TContext> :
+            IPartitioner<TContext>
+            where TContext : class, PipeContext
         {
-            readonly PartitionKeyProvider<T> _keyProvider;
+            readonly PartitionKeyProvider<TContext> _keyProvider;
             readonly Partitioner _partitioner;
 
-            public ContextPartitioner(Partitioner partitioner, PartitionKeyProvider<T> keyProvider)
+            public ContextPartitioner(Partitioner partitioner, PartitionKeyProvider<TContext> keyProvider)
             {
                 _partitioner = partitioner;
                 _keyProvider = keyProvider;
             }
 
-            public Task Send(T context, IPipe<T> next)
+            public Task Send(TContext context, IPipe<TContext> next)
             {
                 byte[] key = _keyProvider(context);
                 if (key == null)

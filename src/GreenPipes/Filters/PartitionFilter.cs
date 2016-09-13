@@ -16,18 +16,18 @@ namespace GreenPipes.Filters
     using Partitioning;
 
 
-    public class PartitionFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    public class PartitionFilter<TContext> :
+        IFilter<TContext>
+        where TContext : class, PipeContext
     {
-        readonly IPartitioner<T> _partitioner;
+        readonly IPartitioner<TContext> _partitioner;
 
-        public PartitionFilter(PartitionKeyProvider<T> keyProvider, IPartitioner partitioner)
+        public PartitionFilter(PartitionKeyProvider<TContext> keyProvider, IPartitioner partitioner)
         {
             _partitioner = partitioner.GetPartitioner(keyProvider);
         }
 
-        Task IFilter<T>.Send(T context, IPipe<T> next)
+        Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
             return _partitioner.Send(context, next);
         }

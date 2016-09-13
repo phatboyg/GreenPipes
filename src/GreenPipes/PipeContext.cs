@@ -30,9 +30,9 @@ namespace GreenPipes
         /// <summary>
         /// Checks if a payload is present in the context
         /// </summary>
-        /// <param name="contextType"></param>
+        /// <param name="payloadType"></param>
         /// <returns></returns>
-        bool HasPayloadType(Type contextType);
+        bool HasPayloadType(Type payloadType);
 
         /// <summary>
         /// Retrieves a payload from the pipe context

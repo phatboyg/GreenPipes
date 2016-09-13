@@ -16,9 +16,9 @@ namespace GreenPipes.Filters
     using System.Threading.Tasks;
 
 
-    public class ObservableAdapter<T> :
-        IFilterObserver<T>
-        where T : class, PipeContext
+    public class ObservableAdapter<TContext> :
+        IFilterObserver<TContext>
+        where TContext : class, PipeContext
     {
         readonly IFilterObserver _observer;
 
@@ -27,17 +27,17 @@ namespace GreenPipes.Filters
             _observer = observer;
         }
 
-        public Task PreSend(T context)
+        public Task PreSend(TContext context)
         {
             return _observer.PreSend(context);
         }
 
-        public Task PostSend(T context)
+        public Task PostSend(TContext context)
         {
             return _observer.PostSend(context);
         }
 
-        public Task SendFault(T context, Exception exception)
+        public Task SendFault(TContext context, Exception exception)
         {
             return _observer.SendFault(context, exception);
         }

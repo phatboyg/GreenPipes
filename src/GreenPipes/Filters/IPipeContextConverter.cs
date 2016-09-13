@@ -13,27 +13,6 @@
 namespace GreenPipes.Filters
 {
     /// <summary>
-    /// A factory for obtaining pipe context providers for the dispatchFilter
-    /// </summary>
-    /// <typeparam name="TContext"></typeparam>
-    /// <typeparam name="TKey"></typeparam>
-    public interface IPipeContextProviderFactory<in TContext, in TKey>
-        where TContext : class, PipeContext
-    {
-        IPipeContextProvider<TContext, TResult> GetPipeContextFactory<TResult>(TKey key)
-            where TResult : class, PipeContext;
-    }
-
-
-    public interface IPipeContextConverterFactory<in TInput>
-        where TInput : class, PipeContext
-    {
-        IPipeContextConverter<TInput, TOutput> GetConverter<TOutput>()
-            where TOutput : class, PipeContext;
-    }
-
-
-    /// <summary>
     /// Converts the input context to the output context
     /// </summary>
     /// <typeparam name="TInput"></typeparam>

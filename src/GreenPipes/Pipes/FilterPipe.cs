@@ -16,14 +16,14 @@ namespace GreenPipes.Pipes
     using System.Threading.Tasks;
 
 
-    public class FilterPipe<T> :
-        IPipe<T>
-        where T : class, PipeContext
+    public class FilterPipe<TContext> :
+        IPipe<TContext>
+        where TContext : class, PipeContext
     {
-        readonly IFilter<T> _filter;
-        readonly IPipe<T> _next;
+        readonly IFilter<TContext> _filter;
+        readonly IPipe<TContext> _next;
 
-        public FilterPipe(IFilter<T> filter, IPipe<T> next)
+        public FilterPipe(IFilter<TContext> filter, IPipe<TContext> next)
         {
             _filter = filter;
             _next = next;
@@ -36,7 +36,7 @@ namespace GreenPipes.Pipes
         }
 
         [DebuggerStepThrough]
-        public Task Send(T context)
+        public Task Send(TContext context)
         {
             return _filter.Send(context, _next);
         }

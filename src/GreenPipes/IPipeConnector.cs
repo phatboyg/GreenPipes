@@ -32,11 +32,11 @@ namespace GreenPipes
     /// <summary>
     /// Connect a pipe of the same type as the target pipe
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IPipeConnector<out T>
-        where T : class, PipeContext
+    /// <typeparam name="TContext"></typeparam>
+    public interface IPipeConnector<out TContext>
+        where TContext : class, PipeContext
     {
-        ConnectHandle ConnectPipe(IPipe<T> pipe);
+        ConnectHandle ConnectPipe(IPipe<TContext> pipe);
     }
 
 

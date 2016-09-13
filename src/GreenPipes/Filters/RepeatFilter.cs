@@ -21,10 +21,10 @@ namespace GreenPipes.Filters
     /// Uses a retry policy to handle exceptions, retrying the operation in according
     /// with the policy
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class RepeatFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    /// <typeparam name="TContext"></typeparam>
+    public class RepeatFilter<TContext> :
+        IFilter<TContext>
+        where TContext : class, PipeContext
     {
         readonly CancellationToken _cancellationToken;
 
@@ -40,7 +40,7 @@ namespace GreenPipes.Filters
 
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        public async Task Send(T context, IPipe<T> next)
+        public async Task Send(TContext context, IPipe<TContext> next)
         {
             while (_cancellationToken.IsCancellationRequested == false)
             {

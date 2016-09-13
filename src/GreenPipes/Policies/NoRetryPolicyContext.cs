@@ -17,22 +17,22 @@ namespace GreenPipes.Policies
     using Util;
 
 
-    public class NoRetryPolicyContext<T> :
-        RetryPolicyContext<T>
-        where T : class
+    public class NoRetryPolicyContext<TContext> :
+        RetryPolicyContext<TContext>
+        where TContext : class
     {
-        readonly T _context;
+        readonly TContext _context;
 
-        public NoRetryPolicyContext(T context)
+        public NoRetryPolicyContext(TContext context)
         {
             _context = context;
         }
 
-        public T Context => _context;
+        public TContext Context => _context;
 
-        public bool CanRetry(Exception exception, out RetryContext<T> retryContext)
+        public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
-            retryContext = new NoRetryContext<T>(_context, exception);
+            retryContext = new NoRetryContext<TContext>(_context, exception);
 
             return false;
         }

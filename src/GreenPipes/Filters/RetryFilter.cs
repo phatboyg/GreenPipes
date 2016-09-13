@@ -21,9 +21,9 @@ namespace GreenPipes.Filters
     /// Uses a retry policy to handle exceptions, retrying the operation in according
     /// with the policy
     /// </summary>
-    public class RetryFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    public class RetryFilter<TContext> :
+        IFilter<TContext>
+        where TContext : class, PipeContext
     {
         readonly IRetryPolicy _retryPolicy;
 
@@ -41,9 +41,9 @@ namespace GreenPipes.Filters
 
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        async Task IFilter<T>.Send(T context, IPipe<T> next)
+        async Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
-            RetryPolicyContext<T> policyContext = _retryPolicy.CreatePolicyContext(context);
+            RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context);
 
             try
             {
@@ -51,14 +51,14 @@ namespace GreenPipes.Filters
             }
             catch (Exception exception)
             {
-                RetryContext<T> payloadRetryContext;
+                RetryContext<TContext> payloadRetryContext;
                 if (context.TryGetPayload(out payloadRetryContext) && !payloadRetryContext.CanRetry(exception, out payloadRetryContext))
                 {
                     await policyContext.RetryFaulted(exception).ConfigureAwait(false);
                     throw;
                 }
 
-                RetryContext<T> retryContext;
+                RetryContext<TContext> retryContext;
                 if (!policyContext.CanRetry(exception, out retryContext))
                 {
                     await retryContext.RetryFaulted(exception).ConfigureAwait(false);
@@ -73,7 +73,7 @@ namespace GreenPipes.Filters
 
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        async Task Attempt(RetryContext<T> retryContext, IPipe<T> next)
+        async Task Attempt(RetryContext<TContext> retryContext, IPipe<TContext> next)
         {
             await retryContext.PreRetry().ConfigureAwait(false);
 
@@ -83,14 +83,14 @@ namespace GreenPipes.Filters
             }
             catch (Exception exception)
             {
-                RetryContext<T> payloadRetryContext;
+                RetryContext<TContext> payloadRetryContext;
                 if (retryContext.Context.TryGetPayload(out payloadRetryContext) && !payloadRetryContext.CanRetry(exception, out payloadRetryContext))
                 {
                     await retryContext.RetryFaulted(exception).ConfigureAwait(false);
                     throw;
                 }
 
-                RetryContext<T> nextRetryContext;
+                RetryContext<TContext> nextRetryContext;
                 if (!retryContext.CanRetry(exception, out nextRetryContext))
                 {
                     await nextRetryContext.RetryFaulted(exception).ConfigureAwait(false);

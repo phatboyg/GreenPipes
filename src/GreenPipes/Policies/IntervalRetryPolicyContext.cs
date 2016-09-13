@@ -17,24 +17,24 @@ namespace GreenPipes.Policies
     using Util;
 
 
-    public class IntervalRetryPolicyContext<T> :
-        RetryPolicyContext<T>
-        where T : class
+    public class IntervalRetryPolicyContext<TContext> :
+        RetryPolicyContext<TContext>
+        where TContext : class
     {
-        readonly T _context;
+        readonly TContext _context;
         readonly IntervalRetryPolicy _policy;
 
-        public IntervalRetryPolicyContext(IntervalRetryPolicy policy, T context)
+        public IntervalRetryPolicyContext(IntervalRetryPolicy policy, TContext context)
         {
             _policy = policy;
             _context = context;
         }
 
-        public T Context => _context;
+        public TContext Context => _context;
 
-        public bool CanRetry(Exception exception, out RetryContext<T> retryContext)
+        public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
-            retryContext = new IntervalRetryContext<T>(_policy, _context, exception, 1);
+            retryContext = new IntervalRetryContext<TContext>(_policy, _context, exception, 1);
 
             return _policy.Matches(exception);
         }

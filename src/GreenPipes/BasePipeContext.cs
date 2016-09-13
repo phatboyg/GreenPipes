@@ -17,11 +17,20 @@ namespace GreenPipes
     using Payloads;
 
 
+    /// <summary>
+    /// The base for a pipe context, with the underlying support for managing paylaods (out-of-band data
+    /// that is carried along with the context).
+    /// </summary>
     public abstract class BasePipeContext
     {
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly IPayloadCache _payloadCache;
 
+        /// <summary>
+        /// Uses the specified payloadCache and cancellationToken for the context
+        /// </summary>
+        /// <param name="payloadCache">A payload cache</param>
+        /// <param name="cancellationToken">A cancellation token</param>
         protected BasePipeContext(IPayloadCache payloadCache, CancellationToken cancellationToken)
         {
             CancellationToken = cancellationToken;
@@ -29,6 +38,12 @@ namespace GreenPipes
             _payloadCache = payloadCache;
         }
 
+        /// <summary>
+        /// A new pipe context with an existing payload cache -- includes a new CancellationTokenSource. If 
+        /// cancellation is not supported, use the above constructor with CancellationToken.None to avoid
+        /// creating a token source.
+        /// </summary>
+        /// <param name="payloadCache"></param>
         protected BasePipeContext(IPayloadCache payloadCache)
         {
             _cancellationTokenSource = new CancellationTokenSource();
@@ -37,31 +52,53 @@ namespace GreenPipes
             _payloadCache = payloadCache;
         }
 
+        /// <summary>
+        /// A new pipe context based off an existing pipe context, which delegates the payloadCache
+        /// to the existing pipe context.
+        /// </summary>
+        /// <param name="context"></param>
         protected BasePipeContext(PipeContext context)
             : this(new PayloadCacheProxy(context), context.CancellationToken)
         {            
         }
 
+        /// <summary>
+        /// Returns the CancellationToken for the context (implicit interface)
+        /// </summary>
         public CancellationToken CancellationToken { get; }
 
-        public virtual bool HasPayloadType(Type contextType)
+        /// <summary>
+        /// Returns true if the payload type is included with or supported by the context type
+        /// </summary>
+        /// <param name="payloadType"></param>
+        /// <returns></returns>
+        public virtual bool HasPayloadType(Type payloadType)
         {
-            if (contextType.IsInstanceOfType(this))
-                return true;
-
-            return _payloadCache.HasPayloadType(contextType);
+            return payloadType.IsInstanceOfType(this) || _payloadCache.HasPayloadType(payloadType);
         }
 
-        public virtual bool TryGetPayload<TPayload>(out TPayload context)
+        /// <summary>
+        /// Attemts 
+        /// </summary>
+        /// <param name="payload"></param>
+        /// <typeparam name="TPayload"></typeparam>
+        /// <returns></returns>
+        public virtual bool TryGetPayload<TPayload>(out TPayload payload)
             where TPayload : class
         {
-            context = this as TPayload;
-            if (context != null)
+            payload = this as TPayload;
+            if (payload != null)
                 return true;
 
-            return _payloadCache.TryGetPayload(out context);
+            return _payloadCache.TryGetPayload(out payload);
         }
 
+        /// <summary>
+        /// Get or add a payload to the context, using the provided payload factory.
+        /// </summary>
+        /// <param name="payloadFactory">The payload factory, which is only invoked if the payload is not present.</param>
+        /// <typeparam name="TPayload">The payload type</typeparam>
+        /// <returns></returns>
         public virtual TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
             where TPayload : class
         {

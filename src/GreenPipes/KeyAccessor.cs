@@ -12,5 +12,5 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes
 {
-    public delegate TKey KeyAccessor<in T, out TKey>(T value);
+    public delegate TKey KeyAccessor<in TContext, out TKey>(TContext context);
 }

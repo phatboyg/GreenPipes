@@ -40,14 +40,14 @@ namespace GreenPipes.Payloads
     /// <summary>
     /// A property value with the generic type applied
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IPayloadValue<out T> :
+    /// <typeparam name="TPayload"></typeparam>
+    public interface IPayloadValue<out TPayload> :
         IPayloadValue
-        where T : class
+        where TPayload : class
     {
         /// <summary>
         /// The value of the property, already assigned to T
         /// </summary>
-        T Value { get; }
+        TPayload Value { get; }
     }
 }

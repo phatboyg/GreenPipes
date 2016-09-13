@@ -18,19 +18,19 @@ namespace GreenPipes.Filters
     /// <summary>
     /// Forks a single pipe into two pipes, which are executed concurrently
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class ForkFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    /// <typeparam name="TContext"></typeparam>
+    public class ForkFilter<TContext> :
+        IFilter<TContext>
+        where TContext : class, PipeContext
     {
-        readonly IPipe<T> _pipe;
+        readonly IPipe<TContext> _pipe;
 
-        public ForkFilter(IPipe<T> pipe)
+        public ForkFilter(IPipe<TContext> pipe)
         {
             _pipe = pipe;
         }
 
-        Task IFilter<T>.Send(T context, IPipe<T> next)
+        Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
             return Task.WhenAll(next.Send(context), _pipe.Send(context));
         }

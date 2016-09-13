@@ -23,20 +23,20 @@ namespace GreenPipes.Filters
     /// <summary>
     /// Handles the registration of requests and connecting them to the consume pipe
     /// </summary>
-    /// <typeparam name="TInput"></typeparam>
+    /// <typeparam name="TContext"></typeparam>
     /// <typeparam name="TKey"></typeparam>
-    public class KeyFilter<TInput, TKey> :
-        IFilter<TInput>,
+    public class KeyFilter<TContext, TKey> :
+        IFilter<TContext>,
         IKeyPipeConnector<TKey>
-        where TInput : class, PipeContext
+        where TContext : class, PipeContext
     {
-        readonly KeyAccessor<TInput, TKey> _keyAccessor;
-        readonly ConcurrentDictionary<TKey, IPipe<TInput>> _pipes;
+        readonly KeyAccessor<TContext, TKey> _keyAccessor;
+        readonly ConcurrentDictionary<TKey, IPipe<TContext>> _pipes;
 
-        public KeyFilter(KeyAccessor<TInput, TKey> keyAccessor)
+        public KeyFilter(KeyAccessor<TContext, TKey> keyAccessor)
         {
             _keyAccessor = keyAccessor;
-            _pipes = new ConcurrentDictionary<TKey, IPipe<TInput>>();
+            _pipes = new ConcurrentDictionary<TKey, IPipe<TContext>>();
         }
 
         public ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe)
@@ -45,9 +45,9 @@ namespace GreenPipes.Filters
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var keyPipe = pipe as IPipe<TInput>;
+            var keyPipe = pipe as IPipe<TContext>;
             if (keyPipe == null)
-                throw new ArgumentException($"The pipe must match the input type: {TypeNameCache<TInput>.ShortName}", nameof(pipe));
+                throw new ArgumentException($"The pipe must match the input type: {TypeNameCache<TContext>.ShortName}", nameof(pipe));
 
             var added = _pipes.TryAdd(key, keyPipe);
             if (!added)
@@ -60,19 +60,19 @@ namespace GreenPipes.Filters
         {
             var scope = context.CreateScope("key");
 
-            ICollection<IPipe<TInput>> pipes = _pipes.Values;
+            ICollection<IPipe<TContext>> pipes = _pipes.Values;
             scope.Add("count", pipes.Count);
 
-            foreach (IPipe<TInput> pipe in pipes)
+            foreach (IPipe<TContext> pipe in pipes)
                 pipe.Probe(scope);
         }
 
         [DebuggerNonUserCode]
-        public async Task Send(TInput context, IPipe<TInput> next)
+        public async Task Send(TContext context, IPipe<TContext> next)
         {
             var key = _keyAccessor(context);
 
-            IPipe<TInput> pipe;
+            IPipe<TContext> pipe;
             if (_pipes.TryGetValue(key, out pipe))
                 await pipe.Send(context).ConfigureAwait(false);
 
@@ -81,7 +81,7 @@ namespace GreenPipes.Filters
 
         void RemovePipe(TKey key)
         {
-            IPipe<TInput> pipe;
+            IPipe<TContext> pipe;
             _pipes.TryRemove(key, out pipe);
         }
 

@@ -28,24 +28,24 @@ namespace GreenPipes.Payloads.Collections
             _parent = parent;
         }
 
-        public override bool HasPayloadType(Type propertyType)
+        public override bool HasPayloadType(Type payloadType)
         {
-            if (propertyType.IsAssignableFrom(_payload.ValueType))
+            if (payloadType.IsAssignableFrom(_payload.ValueType))
                 return true;
 
-            return base.HasPayloadType(propertyType);
+            return base.HasPayloadType(payloadType);
         }
 
-        public override bool TryGetPayload<T>(out T value)
+        public override bool TryGetPayload<TPayload>(out TPayload payload)
         {
-            T payloadValue;
+            TPayload payloadValue;
             if (_payload.TryGetValue(out payloadValue))
             {
-                value = payloadValue;
+                payload = payloadValue;
                 return true;
             }
 
-            return base.TryGetPayload(out value);
+            return base.TryGetPayload(out payload);
         }
 
         public override IPayloadCollection Add(IPayloadValue payload)

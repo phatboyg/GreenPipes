@@ -18,19 +18,19 @@ namespace GreenPipes.Filters
     /// <summary>
     /// Intercepts the pipe and executes an adjacent pipe prior to executing the next filter in the main pipe
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class InterceptFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    /// <typeparam name="TContext"></typeparam>
+    public class InterceptFilter<TContext> :
+        IFilter<TContext>
+        where TContext : class, PipeContext
     {
-        readonly IPipe<T> _pipe;
+        readonly IPipe<TContext> _pipe;
 
-        public InterceptFilter(IPipe<T> pipe)
+        public InterceptFilter(IPipe<TContext> pipe)
         {
             _pipe = pipe;
         }
 
-        async Task IFilter<T>.Send(T context, IPipe<T> next)
+        async Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
             await _pipe.Send(context).ConfigureAwait(false);
 

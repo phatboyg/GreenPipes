@@ -25,22 +25,22 @@ namespace GreenPipes.Payloads
             _context = context;
         }
 
-        public bool HasPayloadType(Type propertyType)
+        bool IReadOnlyPayloadCollection.HasPayloadType(Type payloadType)
         {
-            return _context.HasPayloadType(propertyType);
+            return _context.HasPayloadType(payloadType);
         }
 
-        public bool TryGetPayload<T>(out T value) where T : class
+        bool IReadOnlyPayloadCollection.TryGetPayload<T>(out T payload)
         {
-            return _context.TryGetPayload(out value);
+            return _context.TryGetPayload(out payload);
         }
 
-        public T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory) where T : class
+        T IPayloadCache.GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        public IPayloadCache CreateScope()
+        IPayloadCache IPayloadCache.CreateScope()
         {
             throw new NotImplementedException();
         }

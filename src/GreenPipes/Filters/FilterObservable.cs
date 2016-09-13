@@ -41,29 +41,29 @@ namespace GreenPipes.Filters
     }
 
 
-    public class FilterObservable<T> :
-        Connectable<IFilterObserver<T>>,
-        IFilterObserver<T>
-        where T : class, PipeContext
+    public class FilterObservable<TContext> :
+        Connectable<IFilterObserver<TContext>>,
+        IFilterObserver<TContext>
+        where TContext : class, PipeContext
     {
-        public Task PreSend(T context)
+        public Task PreSend(TContext context)
         {
             return ForEachAsync(x => x.PreSend(context));
         }
 
-        public Task PostSend(T context)
+        public Task PostSend(TContext context)
         {
             return ForEachAsync(x => x.PostSend(context));
         }
 
-        public Task SendFault(T context, Exception exception)
+        public Task SendFault(TContext context, Exception exception)
         {
             return ForEachAsync(x => x.SendFault(context, exception));
         }
 
         public ConnectHandle Connect(IFilterObserver observer)
         {
-            return base.Connect(new ObservableAdapter<T>(observer));
+            return base.Connect(new ObservableAdapter<TContext>(observer));
         }
     }
 }

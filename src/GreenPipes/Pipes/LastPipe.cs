@@ -20,14 +20,14 @@ namespace GreenPipes.Pipes
     /// <summary>
     /// The last pipe in a pipeline is always an end pipe that does nothing and returns synchronously
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class LastPipe<T> :
-        IPipe<T>
-        where T : class, PipeContext
+    /// <typeparam name="TContext"></typeparam>
+    public class LastPipe<TContext> :
+        IPipe<TContext>
+        where TContext : class, PipeContext
     {
-        readonly IFilter<T> _filter;
+        readonly IFilter<TContext> _filter;
 
-        public LastPipe(IFilter<T> filter)
+        public LastPipe(IFilter<TContext> filter)
         {
             _filter = filter;
         }
@@ -38,7 +38,7 @@ namespace GreenPipes.Pipes
         }
 
         [DebuggerStepThrough]
-        public Task Send(T context)
+        public Task Send(TContext context)
         {
             return _filter.Send(context, Cache.LastPipe);
         }
@@ -46,18 +46,18 @@ namespace GreenPipes.Pipes
 
         static class Cache
         {
-            internal static readonly IPipe<T> LastPipe = new Last();
+            internal static readonly IPipe<TContext> LastPipe = new Last();
         }
 
 
         class Last :
-            IPipe<T>
+            IPipe<TContext>
         {
             void IProbeSite.Probe(ProbeContext context)
             {
             }
 
-            Task IPipe<T>.Send(T context)
+            Task IPipe<TContext>.Send(TContext context)
             {
                 return TaskUtil.Completed;
             }

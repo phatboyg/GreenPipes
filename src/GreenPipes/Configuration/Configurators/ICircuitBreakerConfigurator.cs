@@ -18,10 +18,10 @@ namespace GreenPipes.Configurators
     /// <summary>
     /// Configure the settings on the circuit breaker
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface ICircuitBreakerConfigurator<T> :
+    /// <typeparam name="TContext"></typeparam>
+    public interface ICircuitBreakerConfigurator<TContext> :
         IExceptionConfigurator
-        where T : class, PipeContext
+        where TContext : class, PipeContext
     {
         /// <summary>
         /// The period after which the attempt/failure counts are reset.

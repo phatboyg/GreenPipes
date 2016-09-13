@@ -17,17 +17,17 @@ namespace GreenPipes.Policies
     using Util;
 
 
-    public class NoRetryContext<T> :
-        RetryContext<T>
-        where T : class
+    public class NoRetryContext<TContext> :
+        RetryContext<TContext>
+        where TContext : class
     {
-        public NoRetryContext(T context, Exception exception)
+        public NoRetryContext(TContext context, Exception exception)
         {
             Context = context;
             Exception = exception;
         }
 
-        public T Context { get; }
+        public TContext Context { get; }
         public Exception Exception { get; }
 
         public int RetryCount => 1;
@@ -45,7 +45,7 @@ namespace GreenPipes.Policies
             return TaskUtil.Completed;
         }
 
-        public bool CanRetry(Exception exception, out RetryContext<T> retryContext)
+        public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
             retryContext = this;
 

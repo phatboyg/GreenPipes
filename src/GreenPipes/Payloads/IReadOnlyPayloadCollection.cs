@@ -23,17 +23,17 @@ namespace GreenPipes.Payloads
         /// <summary>
         /// Checks if the property exists in the cache
         /// </summary>
-        /// <param name="propertyType">The property type</param>
+        /// <param name="payloadType">The property type</param>
         /// <returns>True if the property exists in the cache, otherwise false</returns>
-        bool HasPayloadType(Type propertyType);
+        bool HasPayloadType(Type payloadType);
         
         /// <summary>
         /// Returns the value of the property if it exists in the cache
         /// </summary>
-        /// <typeparam name="T">The property type</typeparam>
-        /// <param name="value">The property value</param>
+        /// <typeparam name="TPayload">The property type</typeparam>
+        /// <param name="payload">The property value</param>
         /// <returns>True if the value was returned, otherwise false</returns>
-        bool TryGetPayload<T>(out T value)
-            where T : class;
+        bool TryGetPayload<TPayload>(out TPayload payload)
+            where TPayload : class;
     }
 }

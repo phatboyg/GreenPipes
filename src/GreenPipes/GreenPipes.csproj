@@ -113,11 +113,11 @@
     <Compile Include="Filters\IDynamicFilter.cs" />
     <Compile Include="Filters\IOutputPipeFilter.cs" />
     <Compile Include="Filters\InterceptFilter.cs" />
-    <Compile Include="Filters\IPipeContextProviderFactory.cs" />
+    <Compile Include="Filters\IPipeContextConverterFactory.cs" />
+    <Compile Include="Filters\IPipeContextConverter.cs" />
     <Compile Include="Filters\ITeeFilter.cs" />
     <Compile Include="Filters\KeyFilter.cs" />
     <Compile Include="Filters\ObservableAdapter.cs" />
-    <Compile Include="Filters\PipeContextFactory.cs" />
     <Compile Include="Filters\OutputPipeFilter.cs" />
     <Compile Include="Filters\FilterObservable.cs" />
     <Compile Include="Filters\ContextFilter.cs" />

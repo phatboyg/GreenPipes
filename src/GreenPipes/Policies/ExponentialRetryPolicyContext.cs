@@ -17,24 +17,24 @@ namespace GreenPipes.Policies
     using Util;
 
 
-    public class ExponentialRetryPolicyContext<T> :
-        RetryPolicyContext<T>
-        where T : class
+    public class ExponentialRetryPolicyContext<TContext> :
+        RetryPolicyContext<TContext>
+        where TContext : class
     {
-        readonly T _context;
+        readonly TContext _context;
         readonly ExponentialRetryPolicy _policy;
 
-        public ExponentialRetryPolicyContext(ExponentialRetryPolicy policy, T context)
+        public ExponentialRetryPolicyContext(ExponentialRetryPolicy policy, TContext context)
         {
             _policy = policy;
             _context = context;
         }
 
-        public T Context => _context;
+        public TContext Context => _context;
 
-        public bool CanRetry(Exception exception, out RetryContext<T> retryContext)
+        public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
-            retryContext = new ExponentialRetryContext<T>(_policy, _context, exception, 1);
+            retryContext = new ExponentialRetryContext<TContext>(_policy, _context, exception, 1);
 
             return _policy.Matches(exception);
         }

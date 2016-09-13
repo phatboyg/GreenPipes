@@ -42,15 +42,15 @@ namespace GreenPipes.Payloads
 
         public CancellationToken CancellationToken { get; }
 
-        public bool HasPayloadType(Type contextType)
+        public bool HasPayloadType(Type payloadType)
         {
-            return _payloadCache.HasPayloadType(contextType) || _parentCache.HasPayloadType(contextType);
+            return _payloadCache.HasPayloadType(payloadType) || _parentCache.HasPayloadType(payloadType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload context)
+        public bool TryGetPayload<TPayload>(out TPayload payload)
             where TPayload : class
         {
-            return _payloadCache.TryGetPayload(out context) || _parentCache.TryGetPayload(out context);
+            return _payloadCache.TryGetPayload(out payload) || _parentCache.TryGetPayload(out payload);
         }
 
         public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)

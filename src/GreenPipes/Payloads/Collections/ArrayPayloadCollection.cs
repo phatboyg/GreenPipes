@@ -39,25 +39,25 @@ namespace GreenPipes.Payloads.Collections
             Array.Copy(payloads, 0, _payloads, 1, payloads.Length);
         }
 
-        public override bool HasPayloadType(Type propertyType)
+        public override bool HasPayloadType(Type payloadType)
         {
-            if (_payloads.Any(x => propertyType.IsAssignableFrom(x.ValueType)))
+            if (_payloads.Any(x => payloadType.IsAssignableFrom(x.ValueType)))
                 return true;
 
-            return base.HasPayloadType(propertyType);
+            return base.HasPayloadType(payloadType);
         }
 
-        public override bool TryGetPayload<T>(out T value)
+        public override bool TryGetPayload<TPayload>(out TPayload payload)
         {
             for (var i = 0; i < _payloads.Length; i++)
             {
-                if (_payloads[i].TryGetValue(out value))
+                if (_payloads[i].TryGetValue(out payload))
                 {
                     return true;
                 }
             }
 
-            return base.TryGetPayload(out value);
+            return base.TryGetPayload(out payload);
         }
 
         public override IPayloadCollection Add(IPayloadValue payload)

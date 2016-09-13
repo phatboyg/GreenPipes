@@ -12,19 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Filters
 {
-    public interface ITeeFilter<T> :
-        IFilter<T>,
-        IPipeConnector<T>
-        where T : class, PipeContext
+    public interface ITeeFilter<TContext> :
+        IFilter<TContext>,
+        IPipeConnector<TContext>
+        where TContext : class, PipeContext
     {
         int Count { get; }
     }
 
 
-    public interface ITeeFilter<T, in TKey> :
-        ITeeFilter<T>,
+    public interface ITeeFilter<TContext, in TKey> :
+        ITeeFilter<TContext>,
         IKeyPipeConnector<TKey>
-        where T : class, PipeContext
+        where TContext : class, PipeContext
     {
     }
 }

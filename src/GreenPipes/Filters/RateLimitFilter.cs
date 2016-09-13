@@ -23,12 +23,12 @@ namespace GreenPipes.Filters
     /// Limits the number of calls through the filter to a specified count per time interval
     /// specified.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class RateLimitFilter<T> :
-        IFilter<T>,
+    /// <typeparam name="TContext"></typeparam>
+    public class RateLimitFilter<TContext> :
+        IFilter<TContext>,
         IPipe<CommandContext<SetRateLimit>>,
         IDisposable
-        where T : class, PipeContext
+        where TContext : class, PipeContext
     {
         readonly TimeSpan _interval;
         readonly SemaphoreSlim _limit;
@@ -59,7 +59,7 @@ namespace GreenPipes.Filters
         }
 
         [DebuggerNonUserCode]
-        public async Task Send(T context, IPipe<T> next)
+        public async Task Send(TContext context, IPipe<TContext> next)
         {
             await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
 

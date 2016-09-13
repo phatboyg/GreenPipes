@@ -12,6 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes
 {
-    public delegate T PayloadFactory<out T>()
-        where T : class;
+    public delegate TPayload PayloadFactory<out TPayload>()
+        where TPayload : class;
 }

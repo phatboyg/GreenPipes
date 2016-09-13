@@ -17,12 +17,12 @@ namespace GreenPipes.Pipes
     using Util;
 
 
-    public class EmptyPipe<T> :
-        IPipe<T>
-        where T : class, PipeContext
+    public class EmptyPipe<TContext> :
+        IPipe<TContext>
+        where TContext : class, PipeContext
     {
         [DebuggerNonUserCode]
-        public Task Send(T context)
+        public Task Send(TContext context)
         {
             return TaskUtil.Completed;
         }
