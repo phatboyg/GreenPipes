@@ -68,6 +68,8 @@ namespace GreenPipes.Tests
             public IPipeContextConverter<VendorContext, TOutput> GetConverter<TOutput>()
                 where TOutput : class, PipeContext
             {
+                //Look at the output context type (which should come from this base interface)
+                //find the generic argument, then make a converter with the right closed type.
                 var innerType = typeof(TOutput).GetClosingArguments(typeof(VendorContext<>)).Single();
 
                 return
@@ -82,6 +84,9 @@ namespace GreenPipes.Tests
                 bool IPipeContextConverter<VendorContext, VendorContext<TVendor>>.TryConvert(VendorContext input,
                     out VendorContext<TVendor> output)
                 {
+                    //now that we have the correct TVendor, we simply cast the input to the right
+                    //type, in a more complex scenario we would use dependencies to build
+                    //and bind data
                     output = input as VendorContext<TVendor>;
 
                     return output != null;
