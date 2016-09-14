@@ -40,6 +40,7 @@
   <ItemGroup>
     <Compile Include="Authentication_Specs.cs" />
     <Compile Include="ConcurrencyLimit_Specs.cs" />
+    <Compile Include="DynamicRouter_Specs.cs" />
     <Compile Include="InterfaceExtensions.cs" />
     <Compile Include="Dispatch_Specs.cs" />
     <Compile Include="Clone_a_payload_cache.cs" />
