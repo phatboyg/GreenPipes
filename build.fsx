@@ -118,11 +118,6 @@ Target "Package" (fun _ ->
                   PackageFile = @".\src\GreenPipes\packages.config"
                   Files = [ (@"..\src\GreenPipes\bin\Release\GreenPipes.*", Some @"lib\net452", None);
                             (@"..\src\GreenPipes\**\*.cs", Some "src", None) ] }
-                { Project = "GreenPipes.Visualizer"
-                  Summary = "GreenPipes Visualizer Support"
-                  PackageFile = @".\src\GreenPipes.Visualizer\packages.config"
-                  Files = [ (@"..\src\GreenPipes.Visualizer\bin\Release\GreenPipes.Visualizer.*", Some @"lib\net452", None);
-                            (@"..\src\GreenPipes.Visualizer\**\*.cs", Some @"src", None) ] } 
              |]
 
   nugs
