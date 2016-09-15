@@ -12,7 +12,7 @@ let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./GreenPipes.snk"
 
 let assemblyVersion = "1.0.0.0"
-let baseVersion = "1.0.0"
+let baseVersion = "1.0.1"
 
 let semVersion : SemVerInfo = parse baseVersion
 
