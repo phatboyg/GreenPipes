@@ -37,11 +37,13 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SolutionVersion.cs">
+      <Link>Properties\SolutionVersion.cs</Link>
+    </Compile>
     <Compile Include="Analytics.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProgramOptionSet.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Throughput\IThroughputSettings.cs" />
     <Compile Include="Throughput\IReportConsumerMetric.cs" />
     <Compile Include="Throughput\TestContext.cs" />

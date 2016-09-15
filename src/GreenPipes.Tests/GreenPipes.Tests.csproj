@@ -38,6 +38,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SolutionVersion.cs">
+      <Link>Properties\SolutionVersion.cs</Link>
+    </Compile>
     <Compile Include="Authentication_Specs.cs" />
     <Compile Include="Bind_Specs.cs" />
     <Compile Include="ConcurrencyLimit_Specs.cs" />
@@ -51,7 +54,6 @@
     <Compile Include="Observer_Specs.cs" />
     <Compile Include="Parent_Child_Pipes.cs" />
     <Compile Include="Profile_Specs.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RateLimit_Specs.cs" />
     <Compile Include="Rescue_Specs.cs" />
     <Compile Include="Retry_Specs.cs" />

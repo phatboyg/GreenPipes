@@ -42,7 +42,7 @@
     <Reference Include="System.Transactions" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\MassTransit\src\SolutionVersion.cs">
+    <Compile Include="..\SolutionVersion.cs">
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="BasePipeContext.cs" />
