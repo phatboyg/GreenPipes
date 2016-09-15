@@ -46,12 +46,16 @@
       <Link>Properties\SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="BasePipeContext.cs" />
+    <Compile Include="BindContext.cs" />
     <Compile Include="CommandExtensions.cs" />
     <Compile Include="ConcurrencyLimitExtensions.cs" />
+    <Compile Include="Configuration\BindConfigurationExtensions.cs" />
     <Compile Include="Configuration\Builders\IBuildPipeConfigurator.cs" />
     <Compile Include="Configuration\Builders\PipeBuilder.cs" />
     <Compile Include="Configuration\CircuitBreakerConfigurationExtensions.cs" />
     <Compile Include="Configuration\ConcurrencyLimitConfigurationExtensions.cs" />
+    <Compile Include="Configuration\Configurators\BindConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\IBindConfigurator.cs" />
     <Compile Include="Configuration\Configurators\IDispatchConfigurator.cs" />
     <Compile Include="Configuration\Configurators\IExceptionConfigurator.cs" />
     <Compile Include="Configuration\Configurators\IRescueConfigurator.cs" />
@@ -78,6 +82,8 @@
     <Compile Include="Configuration\RescueConfigurationExtensions.cs" />
     <Compile Include="Configuration\RetryConfigurationExtensions.cs" />
     <Compile Include="Configuration\Specifications\AsyncDelegatePipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\BindPipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\SplitFilterPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\CircuitBreakerPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\ConcurrencyLimitPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\ContextFilterPipeSpecification.cs" />
@@ -108,6 +114,7 @@
     <Compile Include="Exceptions\PayloadNotFoundException.cs" />
     <Compile Include="Exceptions\PipeConfigurationException.cs" />
     <Compile Include="Filters\AsyncDelegateFilter.cs" />
+    <Compile Include="Filters\BindFilter.cs" />
     <Compile Include="Filters\ConcurrencyLimitFilter.cs" />
     <Compile Include="Contracts\SetConcurrencyLimit.cs" />
     <Compile Include="Filters\IDynamicFilter.cs" />
@@ -141,7 +148,10 @@
     <Compile Include="Filters\RescueContextFactory.cs" />
     <Compile Include="Filters\RescueFilter.cs" />
     <Compile Include="Filters\RetryFilter.cs" />
+    <Compile Include="Filters\FactoryTargetFilter.cs" />
+    <Compile Include="Filters\SplitFilter.cs" />
     <Compile Include="Filters\TeeFilter.cs" />
+    <Compile Include="ITargetFilter.cs" />
     <Compile Include="ICommandRouter.cs" />
     <Compile Include="IExceptionFilter.cs" />
     <Compile Include="IFilterObserver.cs" />
@@ -167,12 +177,16 @@
     <Compile Include="Introspection\ProbeResultBuilder.cs" />
     <Compile Include="IObserverConnector.cs" />
     <Compile Include="IPipeConnector.cs" />
+    <Compile Include="ITargetFactory.cs" />
     <Compile Include="KeyAccessor.cs" />
     <Compile Include="Contracts\CommandContext.cs" />
     <Compile Include="Control\CommandContextConverterFactory.cs" />
+    <Compile Include="FilterContextProvider.cs" />
+    <Compile Include="MergeFilterContextProvider.cs" />
     <Compile Include="Payloads\PipeContextPayloadAdapter.cs" />
     <Compile Include="Pipes\CommandRouter.cs" />
     <Compile Include="Pipes\DynamicRouter.cs" />
+    <Compile Include="Pipes\MergePipe.cs" />
     <Compile Include="Policies\ExceptionFilters\AllExceptionFilter.cs" />
     <Compile Include="Policies\ExceptionFilters\CompositeExceptionFilter.cs" />
     <Compile Include="Policies\ExceptionFilters\CompositeFilter.cs" />

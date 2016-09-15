@@ -20,8 +20,7 @@ namespace GreenPipes.Configurators
 
 
     public class PipeConfigurator<TContext> :
-        IBuildPipeConfigurator<TContext>,
-        ISpecification
+        IBuildPipeConfigurator<TContext>
         where TContext : class, PipeContext
     {
         readonly List<IPipeSpecification<TContext>> _specifications;

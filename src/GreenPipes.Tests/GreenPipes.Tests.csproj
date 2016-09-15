@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authentication_Specs.cs" />
+    <Compile Include="Bind_Specs.cs" />
     <Compile Include="ConcurrencyLimit_Specs.cs" />
     <Compile Include="DynamicRouter_Specs.cs" />
     <Compile Include="InterfaceExtensions.cs" />
