@@ -6,13 +6,12 @@
     <authors>@authors@</authors>
     <owners>@authors@</owners>
     <summary>@summary@</summary>
-    <licenseUrl>https://github.com/MassTransit/MassTransit/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/MassTransit/MassTransit</projectUrl>
-    <iconUrl>http://MassTransit-project.com/wp-content/themes/pandora/slide.1.png</iconUrl>
+    <licenseUrl>https://github.com/phatboyg/GreenPipes/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/phatboyg/GreenPipes</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>@description@</description>
     <releaseNotes>@releaseNotes@</releaseNotes>
-    <tags>MassTransit</tags>
+    <tags>GreenPipes MassTransit</tags>
     @dependencies@
     @references@
   </metadata>
