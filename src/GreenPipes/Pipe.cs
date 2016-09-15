@@ -37,6 +37,24 @@ namespace GreenPipes
         }
 
         /// <summary>
+        /// Create a new pipe using the pipe configurator to add filters, etc.
+        /// </summary>
+        /// <typeparam name="T">The pipe context type</typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="callback">The configuration callback</param>
+        /// <returns>An initialized pipe ready for use</returns>
+        public static IPipe<T, TResult> New<T, TResult>(Action<IPipeConfigurator<T, TResult>> callback)
+            where T : class, PipeContext
+            where TResult : class
+        {
+            var configurator = new PipeConfigurator<T, TResult>();
+
+            callback(configurator);
+
+            return configurator.Build();
+        }
+
+        /// <summary>
         /// Constructs a simple pipe that executes the specified action
         /// </summary>
         /// <typeparam name="T">The pipe context type</typeparam>

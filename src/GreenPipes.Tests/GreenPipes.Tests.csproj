@@ -57,6 +57,7 @@
     <Compile Include="Profile_Specs.cs" />
     <Compile Include="RateLimit_Specs.cs" />
     <Compile Include="Rescue_Specs.cs" />
+    <Compile Include="Result_Specs.cs" />
     <Compile Include="Retry_Specs.cs" />
   </ItemGroup>
   <ItemGroup>

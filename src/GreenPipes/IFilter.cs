@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2013-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,5 +32,21 @@ namespace GreenPipes
         /// <param name="next">The next pipe in the pipeline</param>
         /// <returns>An awaitable Task</returns>
         Task Send(TContext context, IPipe<TContext> next);
+    }
+
+
+    public interface IFilter<TContext, TResult> :
+        IProbeSite
+        where TContext : class, PipeContext
+        where TResult : class
+    {
+        /// <summary>
+        /// Sends a context to a filter, such that it can be processed and then passed to the
+        /// specified output pipe for further processing.
+        /// </summary>
+        /// <param name="context">The pipe context type</param>
+        /// <param name="next">The next pipe in the pipeline</param>
+        /// <returns>An awaitable Task</returns>
+        Task<TResult> Send(TContext context, IPipe<TContext, TResult> next);
     }
 }

@@ -27,4 +27,23 @@ namespace GreenPipes
         /// <param name="builder">The pipe builder</param>
         void Apply(IPipeBuilder<TContext> builder);
     }
+
+
+    /// <summary>
+    /// Configures a pipe builder (typically by adding filters), but allows late binding to the
+    /// pipe builder with pre-validation that the operations will succeed.
+    /// </summary>
+    /// <typeparam name="TContext"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    public interface IPipeSpecification<TContext, TResult> :
+        ISpecification
+        where TContext : class, PipeContext
+        where TResult : class
+    {
+        /// <summary>
+        /// Apply the specification to the builder
+        /// </summary>
+        /// <param name="builder">The pipe builder</param>
+        void Apply(IPipeBuilder<TContext, TResult> builder);
+    }
 }

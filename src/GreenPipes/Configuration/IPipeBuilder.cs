@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2013-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,5 +25,23 @@ namespace GreenPipes
         /// </summary>
         /// <param name="filter">The filter to add</param>
         void AddFilter(IFilter<TContext> filter);
+    }
+
+
+    /// <summary>
+    /// A pipe builder constructs a pipe by adding filter to the end of the chain, after
+    /// while the builder completes the pipe/filter combination.
+    /// </summary>
+    /// <typeparam name="TContext">The pipe context type</typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    public interface IPipeBuilder<TContext, TResult>
+        where TContext : class, PipeContext
+        where TResult : class
+    {
+        /// <summary>
+        /// Add a filter to the pipe after any existing filters
+        /// </summary>
+        /// <param name="filter">The filter to add</param>
+        void AddFilter(IFilter<TContext, TResult> filter);
     }
 }

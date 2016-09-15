@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2013-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace GreenPipes.Configurators
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
+    using Specifications;
     using Validation;
 
 
@@ -49,7 +50,7 @@ namespace GreenPipes.Configurators
 
             var builder = new PipeBuilder<TContext>();
 
-            foreach (IPipeSpecification<TContext> configurator in _specifications)
+            foreach (var configurator in _specifications)
                 configurator.Apply(builder);
 
             return builder.Build();
@@ -60,6 +61,78 @@ namespace GreenPipes.Configurators
             IPipeConfigurationResult result = new PipeConfigurationResult(_specifications.SelectMany(x => x.Validate()));
             if (result.ContainsFailure)
                 throw new PipeConfigurationException(result.GetMessage("The pipe configuration was invalid"));
+        }
+    }
+
+
+    public class PipeConfigurator<TContext, TResult> :
+        IBuildPipeConfigurator<TContext, TResult>
+        where TContext : class, PipeContext
+        where TResult : class
+    {
+        readonly List<IPipeSpecification<TContext, TResult>> _specifications;
+        IPipe<TContext, TResult> _handlerPipe;
+
+        public PipeConfigurator()
+        {
+            _specifications = new List<IPipeSpecification<TContext, TResult>>();
+        }
+
+        IEnumerable<ValidationResult> ISpecification.Validate()
+        {
+            return _specifications.SelectMany(x => x.Validate());
+        }
+
+        void IPipeConfigurator<TContext, TResult>.AddPipeSpecification(IPipeSpecification<TContext, TResult> specification)
+        {
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
+
+            _specifications.Add(specification);
+        }
+
+        public void AddPipeSpecification(IPipeSpecification<TContext> specification)
+        {
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
+
+            _specifications.Add(new ResultFilterPipeSpecification<TContext, TResult>(specification));
+        }
+
+        public void SetHandlerPipe(IPipe<TContext, TResult> handlerPipe)
+        {
+            _handlerPipe = handlerPipe;
+        }
+
+        public IPipe<TContext, TResult> Build()
+        {
+            ValidatePipeConfiguration();
+
+            var builder = new PipeBuilder<TContext, TResult>(_handlerPipe);
+
+            foreach (var configurator in _specifications)
+                configurator.Apply(builder);
+
+            return builder.Build();
+        }
+
+        void ValidatePipeConfiguration()
+        {
+            IPipeConfigurationResult result = new PipeConfigurationResult(Validate());
+            if (result.ContainsFailure)
+                throw new PipeConfigurationException(result.GetMessage("The pipe configuration was invalid"));
+        }
+
+        IEnumerable<ValidationResult> Validate()
+        {
+            if (_handlerPipe == null)
+                yield return this.Failure("HandlerPipe", "must not be null");
+
+            foreach (var result in _specifications.SelectMany(x => x.Validate()))
+            {
+                yield return result;
+            }
+            ;
         }
     }
 }

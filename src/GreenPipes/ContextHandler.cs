@@ -1,4 +1,4 @@
-// Copyright 2013-2016 Chris Patterson
+﻿// Copyright 2013-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,24 +15,7 @@ namespace GreenPipes
     using System.Threading.Tasks;
 
 
-    public interface IPipe<in TContext> :
-        IProbeSite
+    public delegate Task<TResult> ContextHandler<in TContext, TResult>(TContext context)
         where TContext : class, PipeContext
-    {
-        /// <summary>
-        /// The base primitive, Send delivers the pipe context of T to the pipe.
-        /// </summary>
-        /// <param name="context">The pipe context of type T</param>
-        /// <returns>A task which is completed once the pipe has processed the context</returns>
-        Task Send(TContext context);
-    }
-
-
-    public interface IPipe<in TContext, TResult> :
-        IProbeSite
-        where TContext : class, PipeContext
-        where TResult : class
-    {
-        Task<TResult> Send(TContext context);
-    }
+        where TResult : class;
 }

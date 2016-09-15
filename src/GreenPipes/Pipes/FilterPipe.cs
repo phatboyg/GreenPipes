@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2013-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -37,6 +37,34 @@ namespace GreenPipes.Pipes
 
         [DebuggerStepThrough]
         public Task Send(TContext context)
+        {
+            return _filter.Send(context, _next);
+        }
+    }
+
+
+    public class FilterPipe<TContext, TResult> :
+        IPipe<TContext, TResult>
+        where TContext : class, PipeContext
+        where TResult : class
+    {
+        readonly IFilter<TContext, TResult> _filter;
+        readonly IPipe<TContext, TResult> _next;
+
+        public FilterPipe(IFilter<TContext, TResult> filter, IPipe<TContext, TResult> next)
+        {
+            _filter = filter;
+            _next = next;
+        }
+
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            _filter.Probe(context);
+            _next.Probe(context);
+        }
+
+        [DebuggerStepThrough]
+        public Task<TResult> Send(TContext context)
         {
             return _filter.Send(context, _next);
         }

@@ -23,4 +23,17 @@ namespace GreenPipes.Builders
         /// <returns></returns>
         IPipe<TContext> Build();
     }
+
+    public interface IBuildPipeConfigurator<TContext, TResult> :
+        IPipeConfigurator<TContext, TResult>,
+        ISpecification
+        where TContext : class, PipeContext
+        where TResult : class
+    {
+        /// <summary>
+        /// Builds the pipe, applying any initial specifications to the front of the pipe
+        /// </summary>
+        /// <returns></returns>
+        IPipe<TContext, TResult> Build();
+    }
 }

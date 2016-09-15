@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2013-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -41,6 +41,40 @@ namespace GreenPipes.Builders
 
             for (var i = _filters.Count - 2; i >= 0; i--)
                 current = new FilterPipe<TContext>(_filters[i], current);
+
+            return current;
+        }
+    }
+
+
+    public class PipeBuilder<TContext, TResult> :
+        IPipeBuilder<TContext, TResult>
+        where TContext : class, PipeContext
+        where TResult : class
+    {
+        readonly List<IFilter<TContext, TResult>> _filters;
+        readonly IPipe<TContext, TResult> _handlerPipe;
+
+        public PipeBuilder(IPipe<TContext, TResult> handlerPipe)
+        {
+            _handlerPipe = handlerPipe;
+            _filters = new List<IFilter<TContext, TResult>>();
+        }
+
+        public void AddFilter(IFilter<TContext, TResult> filter)
+        {
+            _filters.Add(filter);
+        }
+        
+        public IPipe<TContext, TResult> Build()
+        {
+            if (_filters.Count == 0)
+                return new EmptyPipe<TContext, TResult>(_handlerPipe);
+
+            IPipe<TContext, TResult> current = new LastPipe<TContext, TResult>(_filters[_filters.Count - 1], _handlerPipe);
+
+            for (var i = _filters.Count - 2; i >= 0; i--)
+                current = new FilterPipe<TContext, TResult>(_filters[i], current);
 
             return current;
         }

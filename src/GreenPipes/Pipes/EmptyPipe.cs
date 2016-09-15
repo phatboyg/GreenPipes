@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2013-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -29,6 +29,31 @@ namespace GreenPipes.Pipes
 
         public void Probe(ProbeContext context)
         {
+        }
+    }
+
+
+    public class EmptyPipe<TContext, TResult> :
+        IPipe<TContext, TResult>
+        where TContext : class, PipeContext
+        where TResult : class
+    {
+        readonly IPipe<TContext, TResult> _handlerPipe;
+
+        public EmptyPipe(IPipe<TContext, TResult> handlerPipe)
+        {
+            _handlerPipe = handlerPipe;
+        }
+
+        [DebuggerNonUserCode]
+        public Task<TResult> Send(TContext context)
+        {
+            return _handlerPipe.Send(context);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            _handlerPipe.Probe(context);
         }
     }
 }
