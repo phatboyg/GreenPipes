@@ -58,6 +58,7 @@
     <Compile Include="RateLimit_Specs.cs" />
     <Compile Include="Rescue_Specs.cs" />
     <Compile Include="Retry_Specs.cs" />
+    <Compile Include="Source_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GreenPipes\GreenPipes.csproj">
