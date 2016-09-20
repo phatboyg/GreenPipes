@@ -29,18 +29,19 @@ namespace GreenPipes.Tests
 
             source.Fill(pipe, ts.Token);
 
-            await Task.Delay(1000);
+            await Task.Delay(100);
 
             ts.Cancel();
-
+            Console.WriteLine("Cancelled");
             //TODO: not sure how to best test that the cancel was propagated.
             int j = i;
 
-            await Task.Delay(1000);
+            await Task.Delay(100);
 
             Assert.That(ts.IsCancellationRequested, Is.True);
             Assert.That(i, Is.GreaterThan(1));
-            Assert.That(j, Is.EqualTo(i));
+            //should stop in a few cycles
+            Assert.That(j, Is.LessThan(i+2));
         }
 
     }
@@ -51,7 +52,7 @@ namespace GreenPipes.Tests
 
         public async Task Fill(IPipe<FileContext> pipe, CancellationToken token = new CancellationToken())
         {
-            _timer = new Timer(100);
+            _timer = new Timer(20);
             _timer.Start();
             _timer.Elapsed += (sender, args) =>
             {
@@ -66,11 +67,12 @@ namespace GreenPipes.Tests
                 if (token.IsCancellationRequested)
                     break;
 
-                await Task.Delay(10, token);
+                await Task.Delay(1);
+
             }
 
             _timer.Stop();
-
+           
         }
     }
     public class FileContextSource : IContextSource<FileContext>
