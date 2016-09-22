@@ -17,7 +17,7 @@ namespace GreenPipes.Internals.Mapping
     using System.Linq;
     using Extensions;
     using Reflection;
-
+    using System.Reflection;
 
     public class ObjectDictionaryConverter<T> :
         IDictionaryConverter
@@ -58,7 +58,7 @@ namespace GreenPipes.Internals.Mapping
                 return (IDictionaryMapper<T>)Activator.CreateInstance(converterType, property);
             }
 
-            if (valueType.IsEnum)
+            if (valueType.GetTypeInfo().IsEnum)
                 return new EnumDictionaryMapper<T>(property);
 
             if (valueType.IsArray)

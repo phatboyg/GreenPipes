@@ -14,9 +14,9 @@ namespace GreenPipes.Tests
 {
     using System;
     using System.Diagnostics;
-    using System.Runtime.Caching;
     using System.Threading.Tasks;
     using Contexts;
+    using Microsoft.Extensions.Caching.Memory;
     using NUnit.Framework;
 
 
@@ -140,7 +140,7 @@ namespace GreenPipes.Tests
 
             public InventoryCache()
             {
-                _cache = new MemoryCache("inventory");
+                _cache = new MemoryCache(new MemoryCacheOptions());
             }
 
             public void Set(CheckInventoryResult result)

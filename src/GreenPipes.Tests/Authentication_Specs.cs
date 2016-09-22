@@ -69,6 +69,7 @@ namespace GreenPipes.Tests
             Assert.That(rejected, Is.False);
         }
 
+#if !NETCOREAPP1_0
         [Test]
         public async Task Unauthenticated()
         {
@@ -81,6 +82,7 @@ namespace GreenPipes.Tests
             Assert.That(cleanUp, Is.True);
             Assert.That(rejected, Is.True);
         }
+#endif
 
         [Test]
         public async Task InvalidSetup()

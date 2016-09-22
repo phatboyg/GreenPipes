@@ -13,6 +13,7 @@
 namespace GreenPipes.Specifications
 {
     using System;
+    using System.Reflection;
     using Configurators;
     using Policies.ExceptionFilters;
 

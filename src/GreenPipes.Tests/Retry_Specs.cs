@@ -234,13 +234,13 @@ namespace GreenPipes.Tests
                 x.UseExecute(payload =>
                 {
                     count++;
-                    throw new ApplicationException("Inside is death", new IntentionalTestException("Kaboom!"));
+                    throw new Exception("Inside is death", new IntentionalTestException("Kaboom!"));
                 });
             });
 
             var context = new TestContext();
 
-            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<ApplicationException>());
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<Exception>());
 
             Assert.That(count, Is.EqualTo(1));
         }

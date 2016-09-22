@@ -14,7 +14,7 @@ namespace GreenPipes.Policies.ExceptionFilters
 {
     using System;
     using System.Linq;
-
+    using System.Reflection;
 
     public class IgnoreExceptionFilter :
         IExceptionFilter
@@ -41,10 +41,10 @@ namespace GreenPipes.Policies.ExceptionFilters
 
             for (var i = 0; i < _exceptionTypes.Length; i++)
             {
-                if (_exceptionTypes[i].IsInstanceOfType(exception))
+                if (_exceptionTypes[i].GetTypeInfo().IsInstanceOfType(exception))
                     return false;
 
-                if (_exceptionTypes[i].IsInstanceOfType(baseException))
+                if (_exceptionTypes[i].GetTypeInfo().IsInstanceOfType(baseException))
                     return false;
             }
 

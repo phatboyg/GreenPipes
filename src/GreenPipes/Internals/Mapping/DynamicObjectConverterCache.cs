@@ -15,6 +15,7 @@ namespace GreenPipes.Internals.Mapping
     using System;
     using System.Collections.Concurrent;
     using Reflection;
+    using System.Reflection;
 
 
     /// <summary>
@@ -40,7 +41,7 @@ namespace GreenPipes.Internals.Mapping
 
         IObjectConverter CreateMissingConverter(Type type)
         {
-            var implementationType = type.IsInterface ? _implementationBuilder.GetImplementationType(type) : type;
+            var implementationType = type.GetTypeInfo().IsInterface ? _implementationBuilder.GetImplementationType(type) : type;
             var converterType = typeof(DynamicObjectConverter<,>).MakeGenericType(type, implementationType);
 
             return (IObjectConverter)Activator.CreateInstance(converterType, this);

@@ -48,7 +48,7 @@ namespace GreenPipes.Internals.Reflection
 
         Type CreateImplementation(Type interfaceType)
         {
-            if (!interfaceType.IsInterface)
+            if (!interfaceType.GetTypeInfo().IsInterface)
                 throw new ArgumentException("Proxies can only be created for interfaces: " + interfaceType.Name, nameof(interfaceType));
 
             return GetModuleBuilderForType(interfaceType, moduleBuilder => CreateTypeFromInterface(moduleBuilder, interfaceType));
@@ -85,7 +85,7 @@ namespace GreenPipes.Internals.Reflection
                     propertyBuilder.SetSetMethod(setMethod);
                 }
 
-                return typeBuilder.CreateType();
+                return typeBuilder.CreateTypeInfo().AsType();
             }
             catch (Exception ex)
             {
@@ -135,7 +135,12 @@ namespace GreenPipes.Internals.Reflection
             var builder = _moduleBuilders.GetOrAdd(assemblyName, name =>
             {
                 const AssemblyBuilderAccess access = AssemblyBuilderAccess.RunAndCollect;
+
+#if NETCORE
+                var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(name), access);
+#else
                 var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(name), access);
+#endif
 
                 var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName);
 

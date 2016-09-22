@@ -17,7 +17,7 @@ namespace GreenPipes.Internals.Mapping
     using System.Linq;
     using Extensions;
     using Reflection;
-
+    using System.Reflection;
 
     public class DynamicObjectConverter<T, TImplementation> :
         IObjectConverter
@@ -55,7 +55,7 @@ namespace GreenPipes.Internals.Mapping
                 return (IObjectMapper<TImplementation>)Activator.CreateInstance(converterType, property);
             }
 
-            if (valueType.IsEnum)
+            if (valueType.GetTypeInfo().IsEnum)
                 return new EnumObjectMapper<TImplementation>(property);
 
             if (valueType.IsArray)
