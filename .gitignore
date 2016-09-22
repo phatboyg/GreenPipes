@@ -35,3 +35,5 @@ tests/*
 doc/*
 SolutionVersion.cs
 AppPackages/
+.vs/
+*.lock.json

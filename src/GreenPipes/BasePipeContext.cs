@@ -15,6 +15,7 @@ namespace GreenPipes
     using System;
     using System.Threading;
     using Payloads;
+    using System.Reflection;
 
 
     /// <summary>
@@ -84,7 +85,7 @@ namespace GreenPipes
         /// <returns></returns>
         public virtual bool HasPayloadType(Type payloadType)
         {
-            return payloadType.IsInstanceOfType(this) || _payloadCache.HasPayloadType(payloadType);
+            return payloadType.GetTypeInfo().IsInstanceOfType(this) || _payloadCache.HasPayloadType(payloadType);
         }
 
         /// <summary>

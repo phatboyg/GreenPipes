@@ -20,7 +20,7 @@ namespace GreenPipes.Tests
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
-
+    using System.Reflection;
 
     public static class SerializerCache
     {
@@ -78,7 +78,7 @@ namespace GreenPipes.Tests
 
             public override bool CanConvert(Type objectType)
             {
-                return objectType.IsInterface;
+                return objectType.GetTypeInfo().IsInterface;
             }
         }
     }
