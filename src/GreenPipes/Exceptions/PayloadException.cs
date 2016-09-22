@@ -34,9 +34,11 @@ namespace GreenPipes
         {
         }
 
+#if !NETCORE
         protected PayloadException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }

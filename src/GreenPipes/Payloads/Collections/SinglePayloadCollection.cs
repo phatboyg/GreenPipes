@@ -13,7 +13,7 @@
 namespace GreenPipes.Payloads.Collections
 {
     using System;
-
+    using System.Reflection;
 
     public class SinglePayloadCollection :
         BasePayloadCollection
@@ -30,7 +30,7 @@ namespace GreenPipes.Payloads.Collections
 
         public override bool HasPayloadType(Type payloadType)
         {
-            if (payloadType.IsAssignableFrom(_payload.ValueType))
+            if (payloadType.GetTypeInfo().IsAssignableFrom(_payload.ValueType))
                 return true;
 
             return base.HasPayloadType(payloadType);
