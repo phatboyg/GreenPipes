@@ -34,9 +34,11 @@ namespace GreenPipes.Tests
         {
         }
 
+#if !NETCORE
         protected IntentionalTestException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
+#endif
     }
 }

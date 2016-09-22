@@ -1,0 +1,32 @@
+{
+  "dependencies": {
+    "GreenPipes": { "target": "project" },
+    "NUnit": "3.4.1",
+    "dotnet-test-nunit": "3.4.0-beta-2"    
+  },
+  "testRunner": "nunit",
+  "frameworks": {
+    "net452": { },
+    "netcoreapp1.0": {
+      "imports": "portable-net45+win8",
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.0-*",
+          "type": "platform"
+        },
+        "System.Security.Claims": "4.0.1"
+      },
+      "buildOptions": {
+        "define": [ "NETCORE" ]
+      }
+    }
+  },
+  "buildOptions": {
+    "allowUnsafe": true,
+    "debugType": "portable",
+    "compile": {
+      "exclude": [
+      ]
+    }
+  }
+}
