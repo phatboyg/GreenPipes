@@ -6,7 +6,6 @@
   },
   "testRunner": "nunit",
   "frameworks": {
-    "net452": { },
     "netcoreapp1.0": {
       "imports": "portable-net45+win8",
       "dependencies": {
@@ -15,11 +14,9 @@
           "type": "platform"
         },
         "System.Security.Claims": "4.0.1"
-      },
-      "buildOptions": {
-        "define": [ "NETCORE" ]
       }
-    }
+    },
+    "net452": {}
   },
   "buildOptions": {
     "allowUnsafe": true,

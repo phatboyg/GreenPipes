@@ -34,7 +34,7 @@ namespace GreenPipes.Tests
         {
         }
 
-#if !NETCORE
+#if !NETCOREAPP1_0
         protected IntentionalTestException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
