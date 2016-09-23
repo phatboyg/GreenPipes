@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -23,13 +23,19 @@ namespace GreenPipes.Specifications
         IPipeSpecification<TContext>
         where TContext : class, PipeContext
     {
+        readonly RetryObservable _observers;
         RetryPolicyFactory _policyFactory;
+
+        public RetryPipeSpecification()
+        {
+            _observers = new RetryObservable();
+        }
 
         public void Apply(IPipeBuilder<TContext> builder)
         {
             var retryPolicy = _policyFactory(Filter);
 
-            builder.AddFilter(new RetryFilter<TContext>(retryPolicy));
+            builder.AddFilter(new RetryFilter<TContext>(retryPolicy, _observers));
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -41,6 +47,11 @@ namespace GreenPipes.Specifications
         public void SetRetryPolicy(RetryPolicyFactory factory)
         {
             _policyFactory = factory;
+        }
+
+        ConnectHandle IRetryObserverConnector.ConnectRetryObserver(IRetryObserver observer)
+        {
+            return _observers.Connect(observer);
         }
     }
 }

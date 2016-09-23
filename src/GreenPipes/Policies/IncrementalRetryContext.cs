@@ -18,8 +18,9 @@ namespace GreenPipes.Policies
 
 
     public class IncrementalRetryContext<TContext> :
+        BaseRetryContext,
         RetryContext<TContext>
-        where TContext : class
+        where TContext : class, PipeContext
     {
         readonly TimeSpan _delay;
         readonly TimeSpan _delayIncrement;
@@ -27,6 +28,7 @@ namespace GreenPipes.Policies
         readonly int _retryCount;
 
         public IncrementalRetryContext(IncrementalRetryPolicy policy, TContext context, Exception exception, int retryCount, TimeSpan delay, TimeSpan delayIncrement)
+            : base(context, retryCount)
         {
             _policy = policy;
             _retryCount = retryCount;
@@ -41,8 +43,6 @@ namespace GreenPipes.Policies
         public Exception Exception { get; }
 
         public int RetryCount => _retryCount;
-
-        public int RetryAttempt => _retryCount;
 
         public TimeSpan? Delay => _delay;
 

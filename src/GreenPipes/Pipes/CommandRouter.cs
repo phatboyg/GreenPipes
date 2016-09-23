@@ -13,7 +13,7 @@
 namespace GreenPipes.Pipes
 {
     using Contracts;
-    using Control;
+    using Routers;
 
 
     public class CommandRouter :

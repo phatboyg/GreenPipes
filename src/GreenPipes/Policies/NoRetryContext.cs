@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,10 +18,12 @@ namespace GreenPipes.Policies
 
 
     public class NoRetryContext<TContext> :
+        BaseRetryContext,
         RetryContext<TContext>
-        where TContext : class
+        where TContext : class, PipeContext
     {
         public NoRetryContext(TContext context, Exception exception)
+            : base(context, 0)
         {
             Context = context;
             Exception = exception;
@@ -31,7 +33,6 @@ namespace GreenPipes.Policies
         public Exception Exception { get; }
 
         public int RetryCount => 1;
-        public int RetryAttempt => 1;
 
         public TimeSpan? Delay => default(TimeSpan?);
 

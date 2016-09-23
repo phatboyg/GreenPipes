@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,13 +18,15 @@ namespace GreenPipes.Policies
 
 
     public class ExponentialRetryContext<TContext> :
+        BaseRetryContext,
         RetryContext<TContext>
-        where TContext : class
+        where TContext : class, PipeContext
     {
         readonly ExponentialRetryPolicy _policy;
         readonly int _retryCount;
 
         public ExponentialRetryContext(ExponentialRetryPolicy policy, TContext context, Exception exception, int retryCount)
+            : base(context, retryCount)
         {
             _policy = policy;
             _retryCount = retryCount;
@@ -37,8 +39,6 @@ namespace GreenPipes.Policies
         public Exception Exception { get; }
 
         public int RetryCount => _retryCount;
-
-        public int RetryAttempt => _retryCount;
 
         public TimeSpan? Delay => _policy.Intervals[_retryCount - 1];
 
@@ -56,7 +56,7 @@ namespace GreenPipes.Policies
         {
             retryContext = new ExponentialRetryContext<TContext>(_policy, Context, Exception, _retryCount + 1);
 
-            return _retryCount < _policy.Intervals.Length && _policy.Matches(exception);
+            return (_retryCount < _policy.Intervals.Length) && _policy.Matches(exception);
         }
     }
 }

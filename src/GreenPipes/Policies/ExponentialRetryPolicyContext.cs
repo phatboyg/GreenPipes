@@ -19,7 +19,7 @@ namespace GreenPipes.Policies
 
     public class ExponentialRetryPolicyContext<TContext> :
         RetryPolicyContext<TContext>
-        where TContext : class
+        where TContext : class, PipeContext
     {
         readonly TContext _context;
         readonly ExponentialRetryPolicy _policy;

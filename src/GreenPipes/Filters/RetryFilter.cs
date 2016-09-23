@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,11 +25,13 @@ namespace GreenPipes.Filters
         IFilter<TContext>
         where TContext : class, PipeContext
     {
+        readonly RetryObservable _observers;
         readonly IRetryPolicy _retryPolicy;
 
-        public RetryFilter(IRetryPolicy retryPolicy)
+        public RetryFilter(IRetryPolicy retryPolicy, RetryObservable observers)
         {
             _retryPolicy = retryPolicy;
+            _observers = observers;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -43,7 +45,9 @@ namespace GreenPipes.Filters
         [DebuggerStepThrough]
         async Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
-            RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context);
+            var policyContext = _retryPolicy.CreatePolicyContext(context);
+
+            await _observers.PostCreate(policyContext).ConfigureAwait(false);
 
             try
             {
@@ -54,7 +58,10 @@ namespace GreenPipes.Filters
                 RetryContext<TContext> payloadRetryContext;
                 if (context.TryGetPayload(out payloadRetryContext) && !payloadRetryContext.CanRetry(exception, out payloadRetryContext))
                 {
-                    await policyContext.RetryFaulted(exception).ConfigureAwait(false);
+                    await payloadRetryContext.RetryFaulted(exception).ConfigureAwait(false);
+
+                    await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
+
                     throw;
                 }
 
@@ -63,9 +70,13 @@ namespace GreenPipes.Filters
                 {
                     await retryContext.RetryFaulted(exception).ConfigureAwait(false);
 
+                    await _observers.RetryFault(retryContext).ConfigureAwait(false);
+
                     context.GetOrAddPayload(() => retryContext);
                     throw;
                 }
+
+                await _observers.PostFault(retryContext).ConfigureAwait(false);
 
                 await Attempt(retryContext, next).ConfigureAwait(false);
             }
@@ -77,6 +88,8 @@ namespace GreenPipes.Filters
         {
             await retryContext.PreRetry().ConfigureAwait(false);
 
+            await _observers.PreRetry(retryContext).ConfigureAwait(false);
+
             try
             {
                 await next.Send(retryContext.Context).ConfigureAwait(false);
@@ -86,7 +99,10 @@ namespace GreenPipes.Filters
                 RetryContext<TContext> payloadRetryContext;
                 if (retryContext.Context.TryGetPayload(out payloadRetryContext) && !payloadRetryContext.CanRetry(exception, out payloadRetryContext))
                 {
-                    await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+                    await payloadRetryContext.RetryFaulted(exception).ConfigureAwait(false);
+
+                    await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
+
                     throw;
                 }
 
@@ -95,9 +111,14 @@ namespace GreenPipes.Filters
                 {
                     await nextRetryContext.RetryFaulted(exception).ConfigureAwait(false);
 
+                    await _observers.RetryFault(nextRetryContext).ConfigureAwait(false);
+
                     retryContext.Context.GetOrAddPayload(() => nextRetryContext);
+
                     throw;
                 }
+
+                await _observers.PostFault(nextRetryContext).ConfigureAwait(false);
 
                 if (nextRetryContext.Delay.HasValue)
                     await Task.Delay(nextRetryContext.Delay.Value).ConfigureAwait(false);

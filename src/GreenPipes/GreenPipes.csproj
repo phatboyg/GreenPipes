@@ -151,8 +151,11 @@
     <Compile Include="Filters\RescueFilter.cs" />
     <Compile Include="Filters\RetryFilter.cs" />
     <Compile Include="Filters\FactoryTargetFilter.cs" />
+    <Compile Include="Filters\RetryObservable.cs" />
     <Compile Include="Filters\SplitFilter.cs" />
     <Compile Include="Filters\TeeFilter.cs" />
+    <Compile Include="IRetryObserver.cs" />
+    <Compile Include="IRetryObserverConnector.cs" />
     <Compile Include="ITargetFilter.cs" />
     <Compile Include="ICommandRouter.cs" />
     <Compile Include="IExceptionFilter.cs" />
@@ -182,7 +185,8 @@
     <Compile Include="ITargetFactory.cs" />
     <Compile Include="KeyAccessor.cs" />
     <Compile Include="Contracts\CommandContext.cs" />
-    <Compile Include="Control\CommandContextConverterFactory.cs" />
+    <Compile Include="Policies\BaseRetryContext.cs" />
+    <Compile Include="Routers\CommandContextConverterFactory.cs" />
     <Compile Include="FilterContextProvider.cs" />
     <Compile Include="MergeFilterContextProvider.cs" />
     <Compile Include="Payloads\PipeContextPayloadAdapter.cs" />

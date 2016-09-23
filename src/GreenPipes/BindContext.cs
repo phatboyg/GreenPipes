@@ -13,7 +13,7 @@
 namespace GreenPipes
 {
     /// <summary>
-    /// The binding of a value to the context
+    /// The binding of a value to the context, which is a fancy form of Tuple
     /// </summary>
     /// <typeparam name="TContext"></typeparam>
     /// <typeparam name="TTarget"></typeparam>
