@@ -52,7 +52,9 @@ namespace GreenPipes
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new FilterPipeSpecification<TContext, TFilter>(filter, contextProvider, inputContextProvider);
+            var filterSpecification = new FilterPipeSpecification<TFilter>(filter);
+
+            var pipeBuilderConfigurator = new SplitFilterPipeSpecification<TContext, TFilter>(filterSpecification, contextProvider, inputContextProvider);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

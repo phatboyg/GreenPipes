@@ -11,11 +11,12 @@ namespace GreenPipes.BenchmarkConsole.Throughput
             Add<int>("clients:", "The number of sending message clients", value => Clients = value);
             Add<int>("payload:", "The size of the additional payload for the message", value => PayloadSize = value);
             Add<int>("retry:", "The number of retries to allow", value => RetryCount = value);
+            Add<bool>("yield:", "If the task should yield or return", value => Yield = value);
             Add<int>("fault:", "The number of faults to throw", value => FaultCount = value);
 
             MessageCount = 1000000;
-            ConcurrencyLimit = 16;
-            Clients = 10;
+            ConcurrencyLimit = 0;
+            Clients = 100;
         }
 
         public int PayloadSize { get; set; }
@@ -23,6 +24,7 @@ namespace GreenPipes.BenchmarkConsole.Throughput
         public int Clients { get; set; }
         public int ConcurrencyLimit { get; set; }
         public int RetryCount { get; set; }
+        public bool Yield { get; set; }
         public int FaultCount {get; set; }
     }
 }

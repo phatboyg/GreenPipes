@@ -49,10 +49,6 @@ namespace GreenPipes.Tests
             BasePipeContext,
             PipeContext
         {
-            public TestContext()
-                : base(new PayloadCache())
-            {
-            }
         }
     }
 }

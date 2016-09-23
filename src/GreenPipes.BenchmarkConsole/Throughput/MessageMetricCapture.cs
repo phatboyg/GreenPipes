@@ -1,3 +1,15 @@
+// Copyright 2012-2016 Chris Patterson
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace GreenPipes.BenchmarkConsole.Throughput
 {
     using System;
@@ -40,24 +52,20 @@ namespace GreenPipes.BenchmarkConsole.Throughput
         {
             _consumedMessages.Add(new ConsumedMessage(messageId, _stopwatch.ElapsedTicks));
 
-            long consumed = Interlocked.Increment(ref _consumed);
+            var consumed = Interlocked.Increment(ref _consumed);
             if (consumed == _messageCount)
                 _consumeCompleted.TrySetResult(_stopwatch.Elapsed);
 
             return TaskUtil.Completed;
         }
 
-        public async Task Sent(Guid messageId, Task sendTask)
+        public void Sent(Guid messageId)
         {
-            long sendTimestamp = _stopwatch.ElapsedTicks;
+            var sendTimestamp = _stopwatch.ElapsedTicks;
 
-            await sendTask;
+            _sentMessages.Add(new SentMessage(messageId, sendTimestamp));
 
-            long ackTimestamp = _stopwatch.ElapsedTicks;
-
-            _sentMessages.Add(new SentMessage(messageId, sendTimestamp, ackTimestamp));
-
-            long sent = Interlocked.Increment(ref _sent);
+            var sent = Interlocked.Increment(ref _sent);
             if (sent == _messageCount)
                 _sendCompleted.TrySetResult(_stopwatch.Elapsed);
         }
@@ -65,9 +73,7 @@ namespace GreenPipes.BenchmarkConsole.Throughput
         public MessageMetric[] GetMessageMetrics()
         {
             return _sentMessages.Join(_consumedMessages, x => x.MessageId, x => x.MessageId,
-                (sent, consumed) =>
-                    new MessageMetric(sent.MessageId, sent.AckTimestamp - sent.SendTimestamp,
-                        consumed.Timestamp - sent.SendTimestamp))
+                (sent, consumed) => new MessageMetric(sent.MessageId, Math.Max(0, consumed.Timestamp - sent.SendTimestamp)))
                 .ToArray();
         }
 
@@ -76,13 +82,11 @@ namespace GreenPipes.BenchmarkConsole.Throughput
         {
             public readonly Guid MessageId;
             public readonly long SendTimestamp;
-            public readonly long AckTimestamp;
 
-            public SentMessage(Guid messageId, long sendTimestamp, long ackTimestamp)
+            public SentMessage(Guid messageId, long sendTimestamp)
             {
                 MessageId = messageId;
                 SendTimestamp = sendTimestamp;
-                AckTimestamp = ackTimestamp;
             }
         }
 

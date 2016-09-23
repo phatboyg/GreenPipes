@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Threading;
     using Throughput;
 
 
@@ -58,7 +59,7 @@
 
             var benchmark = new ThroughputBenchmark(settings);
 
-            benchmark.Run();
+            benchmark.Run(CancellationToken.None);
         }
 
         static void ShowHelp(OptionSet p)

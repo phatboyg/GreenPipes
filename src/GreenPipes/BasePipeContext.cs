@@ -1,12 +1,12 @@
-// Copyright 2011-2016 Chris Patterson, Dru Sellers
-// 
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Copyright 2012-2016 Chris Patterson
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
@@ -23,19 +23,18 @@ namespace GreenPipes
     /// </summary>
     public abstract class BasePipeContext
     {
-        readonly CancellationTokenSource _cancellationTokenSource;
         readonly IPayloadCache _payloadCache;
 
         /// <summary>
-        /// Uses the specified payloadCache and cancellationToken for the context
+        /// A new pipe context with an existing payload cache -- includes a new CancellationTokenSource. If 
+        /// cancellation is not supported, use the above constructor with CancellationToken.None to avoid
+        /// creating a token source.
         /// </summary>
-        /// <param name="payloadCache">A payload cache</param>
-        /// <param name="cancellationToken">A cancellation token</param>
-        protected BasePipeContext(IPayloadCache payloadCache, CancellationToken cancellationToken)
+        protected BasePipeContext()
         {
-            CancellationToken = cancellationToken;
+            CancellationToken = CancellationToken.None;
 
-            _payloadCache = payloadCache;
+            _payloadCache = new PayloadCache();
         }
 
         /// <summary>
@@ -46,8 +45,19 @@ namespace GreenPipes
         /// <param name="payloadCache"></param>
         protected BasePipeContext(IPayloadCache payloadCache)
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-            CancellationToken = _cancellationTokenSource.Token;
+            CancellationToken = CancellationToken.None;
+
+            _payloadCache = payloadCache;
+        }
+
+        /// <summary>
+        /// Uses the specified payloadCache and cancellationToken for the context
+        /// </summary>
+        /// <param name="payloadCache">A payload cache</param>
+        /// <param name="cancellationToken">A cancellation token</param>
+        protected BasePipeContext(IPayloadCache payloadCache, CancellationToken cancellationToken)
+        {
+            CancellationToken = cancellationToken;
 
             _payloadCache = payloadCache;
         }
@@ -107,14 +117,6 @@ namespace GreenPipes
                 return context;
 
             return _payloadCache.GetOrAddPayload(payloadFactory);
-        }
-
-        /// <summary>
-        /// Cancel the cancellation token
-        /// </summary>
-        public void Cancel()
-        {
-            _cancellationTokenSource?.Cancel();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,45 +16,15 @@ namespace GreenPipes.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Payloads;
 
 
     [TestFixture]
     public class Using_the_rescue_filter
     {
-        class TestContext :
-            BasePipeContext,
-            PipeContext
-        {
-            public TestContext()
-                : base(new PayloadCache())
-            {
-            }
-
-            public TestContext(TestContext testContext)
-                : base(testContext)
-            {
-            }
-        }
-
-
-        class TestExceptionContext :
-            TestContext
-        {
-            public TestExceptionContext(TestContext context, Exception exception)
-                : base(context)
-            {
-                Exception = exception;
-            }
-
-            public Exception Exception { get; }
-        }
-
-
         [Test]
         public async Task Should_invoke_the_rescue_pipe()
         {
-            int count = 0;
+            var count = 0;
             IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
                 x.UseRescue(Pipe.New<TestExceptionContext>(r =>
@@ -78,7 +48,7 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Should_skip_if_filtered_exception()
         {
-            int count = 0;
+            var count = 0;
             IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
                 x.UseRescue(Pipe.New<TestExceptionContext>(r =>
@@ -95,6 +65,34 @@ namespace GreenPipes.Tests
             var context = new TestContext();
 
             Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
+        }
+
+
+        class TestContext :
+            BasePipeContext,
+            PipeContext
+        {
+            public TestContext()
+            {
+            }
+
+            public TestContext(TestContext testContext)
+                : base(testContext)
+            {
+            }
+        }
+
+
+        class TestExceptionContext :
+            TestContext
+        {
+            public TestExceptionContext(TestContext context, Exception exception)
+                : base(context)
+            {
+                Exception = exception;
+            }
+
+            public Exception Exception { get; }
         }
     }
 }

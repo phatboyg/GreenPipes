@@ -1,27 +1,70 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using GreenPipes.Payloads;
-using NUnit.Framework;
-
+﻿// Copyright 2012-2016 Chris Patterson
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace GreenPipes.Tests
 {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
 
 
     [TestFixture]
     public class Parent_Child_Pipes
     {
         [Test]
+        public async Task Should_compose_pipes()
+        {
+            var count1 = 0;
+            var count2 = 0;
+
+            IPipe<InitialContext> pipe1 = Pipe.New<InitialContext>(cfg =>
+            {
+                cfg.UseExecute(cxt =>
+                {
+                    Interlocked.Increment(ref count1);
+                });
+            });
+
+            IPipe<InitialContext> pipe2 = Pipe.New<InitialContext>(cfg =>
+            {
+                cfg.UseFork(pipe1);
+
+                cfg.UseExecuteAsync(async cxt =>
+                {
+                    Interlocked.Increment(ref count2);
+                });
+            });
+
+            await pipe2.Send(new InitialContext()).ConfigureAwait(false);
+
+            Assert.That(count1, Is.EqualTo(1));
+            Assert.That(count2, Is.EqualTo(1));
+
+
+            Console.WriteLine(pipe2.GetProbeResult().ToJsonString());
+        }
+
+        [Test]
         public async Task ShouldDeliverToBoth()
         {
             var count1 = 0;
             var count2 = 0;
 
-            var pipe2 = Pipe.New<InitialContext>(cfg =>
+            IPipe<InitialContext> pipe2 = Pipe.New<InitialContext>(cfg =>
             {
                 cfg.UseExecuteAsync(async cxt =>
                 {
-                    var pipe1 = Pipe.New<SubContext>(subCfg =>
+                    IPipe<SubContext> pipe1 = Pipe.New<SubContext>(subCfg =>
                     {
                         subCfg.UseExecute(subCxt =>
                         {
@@ -35,7 +78,7 @@ namespace GreenPipes.Tests
                     Interlocked.Increment(ref count2);
                 });
             });
-            
+
 
             await pipe2.Send(new InitialContext()).ConfigureAwait(false);
 
@@ -46,57 +89,18 @@ namespace GreenPipes.Tests
             Console.WriteLine(pipe2.GetProbeResult().ToJsonString());
         }
 
-        [Test]
-        public async Task Should_compose_pipes()
-        {
-            var count1 = 0;
-            var count2 = 0;
-
-            var pipe1 = Pipe.New<InitialContext>(cfg =>
-            {
-                cfg.UseExecute(cxt =>
-                {
-                    Interlocked.Increment(ref count1);
-                });
-            });
-
-            var pipe2 = Pipe.New<InitialContext>(cfg =>
-            {
-                cfg.UseFork(pipe1);
-
-                cfg.UseExecuteAsync(async cxt =>
-                {
-                    Interlocked.Increment(ref count2);
-                });
-            });            
-
-            await pipe2.Send(new InitialContext()).ConfigureAwait(false);
-
-            Assert.That(count1, Is.EqualTo(1));
-            Assert.That(count2, Is.EqualTo(1));
-
-
-            Console.WriteLine(pipe2.GetProbeResult().ToJsonString());
-        }
 
         class InitialContext :
             BasePipeContext,
             PipeContext
         {
-            public InitialContext()
-                : base(new PayloadCache())
-            {
-            }
         }
+
 
         class SubContext :
             BasePipeContext,
             PipeContext
         {
-            public SubContext()
-                : base(new PayloadCache())
-            {
-            }
         }
     }
 }

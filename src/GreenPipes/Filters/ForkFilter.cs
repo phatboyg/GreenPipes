@@ -32,7 +32,7 @@ namespace GreenPipes.Filters
 
         Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
-            return Task.WhenAll(next.Send(context), _pipe.Send(context));
+            return Task.WhenAll(_pipe.Send(context), next.Send(context));
         }
 
         void IProbeSite.Probe(ProbeContext context)

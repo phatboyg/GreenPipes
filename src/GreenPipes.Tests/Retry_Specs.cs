@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,127 +16,18 @@ namespace GreenPipes.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Payloads;
     using Util;
 
 
     [TestFixture]
     public class Using_the_retry_filter
     {
-        class TestContext :
-            BasePipeContext,
-            PipeContext
-        {
-            public TestContext()
-                : base(new PayloadCache())
-            {                
-            }
-        }
-
-
-        [Test]
-        public void Should_retry_the_specified_times_and_fail()
-        {
-            int count = 0;
-            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
-            {
-                x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
-                x.UseExecute(payload =>
-                {
-                    count++;
-                    throw new IntentionalTestException("Kaboom!");
-                });
-            });
-
-            var context = new TestContext();
-
-            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
-
-            Assert.That(count, Is.EqualTo(5));
-        }
-
-        [Test]
-        public void Should_support_overloading_downstream()
-        {
-            int count = 0;
-            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
-            {
-                x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
-                x.UseRetry(r => r.None());
-                x.UseExecute(payload =>
-                {
-                    count++;
-                    throw new IntentionalTestException("Kaboom!");
-                });
-            });
-
-            var context = new TestContext();
-
-            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
-
-            Assert.That(count, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void Should_support_overloading_downstream_either_way()
-        {
-            int count = 0;
-            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
-            {
-                x.UseRetry(r => r.None());
-                x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
-                x.UseExecute(payload =>
-                {
-                    count++;
-                    throw new IntentionalTestException("Kaboom!");
-                });
-            });
-
-            var context = new TestContext();
-
-            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
-
-            Assert.That(count, Is.EqualTo(5));
-        }
-
-        [Test]
-        public async Task Should_be_observable_at_the_inner_level()
-        {
-            var observer = new RetryObserver();
-
-            int count = 0;
-            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
-            {
-                x.UseRetry(r => r.None());
-                x.UseRetry(r =>
-                {
-                    r.Interval(4, TimeSpan.FromMilliseconds(2));
-                    r.ConnectRetryObserver(observer);
-                });
-                x.UseExecute(payload =>
-                {
-                    count++;
-                    throw new IntentionalTestException("Kaboom!");
-                });
-            });
-
-            var context = new TestContext();
-
-            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
-
-            Assert.That(count, Is.EqualTo(5));
-
-            await observer.RetryFault;
-
-            Assert.That(observer.RetryFaultCount, Is.EqualTo(1));
-        }
-
         [Test]
         public async Task Should_be_observable_at_each_retry()
         {
             var observer = new RetryObserver();
 
-            int count = 0;
+            var count = 0;
             IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
                 x.UseRetry(r => r.None());
@@ -164,11 +55,43 @@ namespace GreenPipes.Tests
         }
 
         [Test]
+        public async Task Should_be_observable_at_the_inner_level()
+        {
+            var observer = new RetryObserver();
+
+            var count = 0;
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            {
+                x.UseRetry(r => r.None());
+                x.UseRetry(r =>
+                {
+                    r.Interval(4, TimeSpan.FromMilliseconds(2));
+                    r.ConnectRetryObserver(observer);
+                });
+                x.UseExecute(payload =>
+                {
+                    count++;
+                    throw new IntentionalTestException("Kaboom!");
+                });
+            });
+
+            var context = new TestContext();
+
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
+
+            Assert.That(count, Is.EqualTo(5));
+
+            await observer.RetryFault;
+
+            Assert.That(observer.RetryFaultCount, Is.EqualTo(1));
+        }
+
+        [Test]
         public async Task Should_be_observable_at_the_outer_level()
         {
             var observer = new RetryObserver();
 
-            int count = 0;
+            var count = 0;
             IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
                 x.UseRetry(r =>
@@ -200,7 +123,7 @@ namespace GreenPipes.Tests
         {
             var observer = new RetryObserver();
 
-            int count = 0;
+            var count = 0;
             IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
                 x.UseRetry(r =>
@@ -226,20 +149,100 @@ namespace GreenPipes.Tests
             Assert.That(observer.RetryFaultCount, Is.EqualTo(1));
         }
 
+        [Test]
+        public void Should_retry_the_specified_times_and_fail()
+        {
+            var count = 0;
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            {
+                x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
+                x.UseExecute(payload =>
+                {
+                    count++;
+                    throw new IntentionalTestException("Kaboom!");
+                });
+            });
+
+            var context = new TestContext();
+
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
+
+            Assert.That(count, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void Should_support_overloading_downstream()
+        {
+            var count = 0;
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            {
+                x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
+                x.UseRetry(r => r.None());
+                x.UseExecute(payload =>
+                {
+                    count++;
+                    throw new IntentionalTestException("Kaboom!");
+                });
+            });
+
+            var context = new TestContext();
+
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
+
+            Assert.That(count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Should_support_overloading_downstream_either_way()
+        {
+            var count = 0;
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            {
+                x.UseRetry(r => r.None());
+                x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
+                x.UseExecute(payload =>
+                {
+                    count++;
+                    throw new IntentionalTestException("Kaboom!");
+                });
+            });
+
+            var context = new TestContext();
+
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
+
+            Assert.That(count, Is.EqualTo(5));
+        }
+
+
+        class TestContext :
+            BasePipeContext,
+            PipeContext
+        {
+        }
+
 
         class RetryObserver :
             IRetryObserver
         {
-            readonly TaskCompletionSource<bool> _retryFault;
-            int _retryFaultCount;
             readonly TaskCompletionSource<bool> _postFault;
+            readonly TaskCompletionSource<bool> _retryFault;
             int _postFaultCount;
+            int _retryFaultCount;
 
             public RetryObserver()
             {
                 _retryFault = new TaskCompletionSource<bool>();
                 _postFault = new TaskCompletionSource<bool>();
             }
+
+            public int RetryFaultCount => _retryFaultCount;
+
+            public Task RetryFault => _retryFault.Task;
+
+            public int PostFaultCount => _postFaultCount;
+
+            public Task PostFault => _postFault.Task;
 
             Task IRetryObserver.PostCreate<T>(RetryPolicyContext<T> context)
             {
@@ -268,14 +271,6 @@ namespace GreenPipes.Tests
 
                 return TaskUtil.Completed;
             }
-
-            public int RetryFaultCount => _retryFaultCount;
-
-            public Task RetryFault => _retryFault.Task;
-
-            public int PostFaultCount => _postFaultCount;
-
-            public Task PostFault => _postFault.Task;
         }
     }
 }

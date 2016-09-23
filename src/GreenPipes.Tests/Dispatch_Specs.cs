@@ -49,7 +49,6 @@ namespace GreenPipes.Tests
         PipeContext
     {
         public InputContext(object value)
-            : base(new PayloadCache())
         {
             Value = value;
         }
@@ -78,7 +77,6 @@ namespace GreenPipes.Tests
         where T : class
     {
         public InputContext(T value)
-            : base(new PayloadCache())
         {
             Value = value;
         }

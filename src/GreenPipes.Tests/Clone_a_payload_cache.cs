@@ -1,8 +1,21 @@
-﻿using GreenPipes.Payloads;
-using NUnit.Framework;
-
+﻿// Copyright 2012-2016 Chris Patterson
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace GreenPipes.Tests
 {
+    using NUnit.Framework;
+    using Payloads;
+
+
     [TestFixture]
     public class Clone_a_payload_cache
     {
@@ -36,6 +49,7 @@ namespace GreenPipes.Tests
             public string Name { get; }
         }
 
+
         class Item2
         {
             public Item2(string name)
@@ -46,14 +60,11 @@ namespace GreenPipes.Tests
             public string Name { get; }
         }
 
+
         public class ARandomContext
             : BasePipeContext,
-            PipeContext
+                PipeContext
         {
-            public ARandomContext() : base(new PayloadCache())
-            {
-                
-            }   
         }
     }
 }

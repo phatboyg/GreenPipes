@@ -25,5 +25,7 @@ namespace GreenPipes.BenchmarkConsole.Throughput
         int RetryCount { get; }
 
         int FaultCount { get; }
+
+        bool Yield { get; }
     }
 }

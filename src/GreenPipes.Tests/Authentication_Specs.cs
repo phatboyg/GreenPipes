@@ -117,10 +117,6 @@ namespace GreenPipes.Tests
         BasePipeContext,
         PipeContext
     {
-        public RequestContext() : base(new PayloadCache())
-        {
-        }
-
     }
 
     //Play nice with CFG DSL using an extension method

@@ -1,13 +1,25 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using GreenPipes.Filters;
-using GreenPipes.Payloads;
-using GreenPipes.Pipes;
-using NUnit.Framework;
-
+﻿// Copyright 2012-2016 Chris Patterson
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
 namespace GreenPipes.Tests
 {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Filters;
+    using NUnit.Framework;
+    using Pipes;
+
+
     public class DynamicRouter_Specs
     {
         bool _aWasCalled;
@@ -22,15 +34,14 @@ namespace GreenPipes.Tests
 
             _router = new DynamicRouter<VendorContext>(new VendorConverterFactory());
 
-            var pipeA = Pipe.New<VendorContext<VendorARecord>>(cfg =>
+            IPipe<VendorContext<VendorARecord>> pipeA = Pipe.New<VendorContext<VendorARecord>>(cfg =>
             {
                 cfg.UseExecute(cxt =>
                 {
                     _aWasCalled = true;
-                }); 
-                
+                });
             });
-            var pipeB = Pipe.New<VendorContext<VendorBRecord>>(cfg =>
+            IPipe<VendorContext<VendorBRecord>> pipeB = Pipe.New<VendorContext<VendorBRecord>>(cfg =>
             {
                 cfg.UseExecute(cxt =>
                 {
@@ -63,6 +74,7 @@ namespace GreenPipes.Tests
             Assert.That(_bWasCalled, Is.True);
         }
 
+
         public class VendorConverterFactory : IPipeContextConverterFactory<VendorContext>
         {
             public IPipeContextConverter<VendorContext, TOutput> GetConverter<TOutput>()
@@ -76,6 +88,7 @@ namespace GreenPipes.Tests
                     (IPipeContextConverter<VendorContext, TOutput>)
                         Activator.CreateInstance(typeof(Converter<>).MakeGenericType(innerType));
             }
+
 
             class Converter<TVendor> :
                 IPipeContextConverter<VendorContext, VendorContext<TVendor>>
@@ -100,14 +113,18 @@ namespace GreenPipes.Tests
             string RawData { get; }
         }
 
-        public interface VendorContext<TVendorRecord> : VendorContext where TVendorRecord : VendorRecord
+
+        public interface VendorContext<TVendorRecord> : VendorContext
+            where TVendorRecord : VendorRecord
         {
             TVendorRecord Record { get; }
         }
 
-        public class Vendor : BasePipeContext, VendorContext
+
+        public class Vendor : BasePipeContext,
+            VendorContext
         {
-            public Vendor(string rawData) : base(new PayloadCache())
+            public Vendor(string rawData)
             {
                 RawData = rawData;
             }
@@ -115,10 +132,12 @@ namespace GreenPipes.Tests
             public string RawData { get; set; }
         }
 
-        public class Vendor<TVendorRecord> : BasePipeContext, VendorContext<TVendorRecord>
+
+        public class Vendor<TVendorRecord> : BasePipeContext,
+            VendorContext<TVendorRecord>
             where TVendorRecord : VendorRecord
         {
-            public Vendor(string rawData) : base(new PayloadCache())
+            public Vendor(string rawData)
             {
                 RawData = rawData;
             }
@@ -127,13 +146,16 @@ namespace GreenPipes.Tests
             public TVendorRecord Record { get; set; }
         }
 
+
         public interface VendorRecord
         {
         }
 
+
         public class VendorARecord : VendorRecord
         {
         }
+
 
         public class VendorBRecord : VendorRecord
         {
