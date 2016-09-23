@@ -126,9 +126,8 @@
     <Compile Include="Filters\IPipeContextConverter.cs" />
     <Compile Include="Filters\ITeeFilter.cs" />
     <Compile Include="Filters\KeyFilter.cs" />
-    <Compile Include="Filters\ObservableAdapter.cs" />
     <Compile Include="Filters\OutputPipeFilter.cs" />
-    <Compile Include="Filters\FilterObservable.cs" />
+    <Compile Include="Observers\FilterObservable.cs" />
     <Compile Include="Filters\ContextFilter.cs" />
     <Compile Include="Filters\DelegateFilter.cs" />
     <Compile Include="Filters\DynamicFilter.cs" />
@@ -151,7 +150,8 @@
     <Compile Include="Filters\RescueFilter.cs" />
     <Compile Include="Filters\RetryFilter.cs" />
     <Compile Include="Filters\FactoryTargetFilter.cs" />
-    <Compile Include="Filters\RetryObservable.cs" />
+    <Compile Include="Observers\ObservableAdapter.cs" />
+    <Compile Include="Observers\RetryObservable.cs" />
     <Compile Include="Filters\SplitFilter.cs" />
     <Compile Include="Filters\TeeFilter.cs" />
     <Compile Include="IRetryObserver.cs" />

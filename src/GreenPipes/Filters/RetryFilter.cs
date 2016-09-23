@@ -15,6 +15,7 @@ namespace GreenPipes.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Observers;
 
 
     /// <summary>

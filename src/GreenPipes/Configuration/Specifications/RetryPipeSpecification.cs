@@ -15,6 +15,7 @@ namespace GreenPipes.Specifications
     using System.Collections.Generic;
     using Configurators;
     using Filters;
+    using Observers;
 
 
     public class RetryPipeSpecification<TContext> :

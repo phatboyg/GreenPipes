@@ -18,6 +18,7 @@ namespace GreenPipes.Filters
     using System.Linq;
     using System.Threading.Tasks;
     using Internals.Extensions;
+    using Observers;
     using Pipes;
 
 
