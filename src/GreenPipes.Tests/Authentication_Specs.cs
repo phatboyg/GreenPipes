@@ -69,7 +69,7 @@ namespace GreenPipes.Tests
             Assert.That(rejected, Is.False);
         }
 
-#if !NETCORE
+#if !NETCOREAPP1_0
         [Test]
         public async Task Unauthenticated()
         {
