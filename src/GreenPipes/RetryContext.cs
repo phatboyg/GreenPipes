@@ -23,6 +23,11 @@ namespace GreenPipes
         /// The retry attempt currently being attempted
         /// </summary>
         int RetryAttempt { get; }
+
+        /// <summary>
+        /// The context type of the retry context
+        /// </summary>
+        Type ContextType { get; }
     }
 
 

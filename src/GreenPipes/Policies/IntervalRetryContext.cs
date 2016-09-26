@@ -26,7 +26,7 @@ namespace GreenPipes.Policies
         readonly int _retryCount;
 
         public IntervalRetryContext(IntervalRetryPolicy policy, TContext context, Exception exception, int retryCount)
-            : base(context, retryCount)
+            : base(context, typeof(TContext), retryCount)
         {
             _policy = policy;
             _retryCount = retryCount;

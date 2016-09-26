@@ -23,7 +23,7 @@ namespace GreenPipes.Policies
         where TContext : class, PipeContext
     {
         public NoRetryContext(TContext context, Exception exception)
-            : base(context, 0)
+            : base(context, typeof(TContext), 0)
         {
             Context = context;
             Exception = exception;

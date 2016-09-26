@@ -15,7 +15,9 @@ namespace GreenPipes.Tests
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contracts;
     using NUnit.Framework;
+    using Routers;
     using Util;
 
 
@@ -212,6 +214,58 @@ namespace GreenPipes.Tests
             Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
 
             Assert.That(count, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void Should_support_overloading_downstream_with_dispatch()
+        {
+            var count = 0;
+            IPipe<CommandContext> pipe = Pipe.New<CommandContext>(x =>
+            {
+                x.UseRetry(r => r.None());
+                x.UseDispatch(new CommandContextConverterFactory(), d =>
+                {
+                    d.Pipe<CommandContext<SetConcurrencyLimit>>(p =>
+                    {
+                        p.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
+                        p.UseExecute(payload =>
+                        {
+                            count++;
+                            throw new IntentionalTestException("Kaboom!");
+                        });
+                    });
+                });
+            });
+
+            Assert.That(async () => await pipe.SetConcurrencyLimit(32), Throws.TypeOf<IntentionalTestException>());
+
+            Assert.That(count, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void Should_support_overloading_downstream_with_dispatch_either_way()
+        {
+            var count = 0;
+            IPipe<CommandContext> pipe = Pipe.New<CommandContext>(x =>
+            {
+                x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
+                x.UseDispatch(new CommandContextConverterFactory(), d =>
+                {
+                    d.Pipe<CommandContext<SetConcurrencyLimit>>(p =>
+                    {
+                        p.UseRetry(r => r.None());
+                        p.UseExecute(payload =>
+                        {
+                            count++;
+                            throw new IntentionalTestException("Kaboom!");
+                        });
+                    });
+                });
+            });
+
+            Assert.That(async () => await pipe.SetConcurrencyLimit(32), Throws.TypeOf<IntentionalTestException>());
+
+            Assert.That(count, Is.EqualTo(1));
         }
 
 

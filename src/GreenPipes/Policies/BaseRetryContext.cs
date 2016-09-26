@@ -12,16 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Policies
 {
+    using System;
+
+
     public class BaseRetryContext :
         BasePipeContext,
         RetryContext
     {
-        protected BaseRetryContext(PipeContext context, int retryCount)
+        protected BaseRetryContext(PipeContext context, Type contextType, int retryCount)
             : base(context)
         {
             RetryAttempt = retryCount;
+            ContextType = contextType;
         }
 
         public int RetryAttempt { get; }
+
+        public Type ContextType { get; }
     }
 }

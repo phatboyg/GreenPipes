@@ -46,7 +46,7 @@ namespace GreenPipes.Filters
         [DebuggerStepThrough]
         async Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
-            var policyContext = _retryPolicy.CreatePolicyContext(context);
+            RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context);
 
             await _observers.PostCreate(policyContext).ConfigureAwait(false);
 
@@ -57,11 +57,17 @@ namespace GreenPipes.Filters
             catch (Exception exception)
             {
                 RetryContext<TContext> payloadRetryContext;
-                if (context.TryGetPayload(out payloadRetryContext) && !payloadRetryContext.CanRetry(exception, out payloadRetryContext))
+                if (context.TryGetPayload(out payloadRetryContext))
                 {
-                    await payloadRetryContext.RetryFaulted(exception).ConfigureAwait(false);
-
                     await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
+
+                    throw;
+                }
+
+                RetryContext genericRetryContext;
+                if (context.TryGetPayload(out genericRetryContext))
+                {
+                    await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
 
                     throw;
                 }
@@ -78,6 +84,9 @@ namespace GreenPipes.Filters
                 }
 
                 await _observers.PostFault(retryContext).ConfigureAwait(false);
+
+                if (retryContext.Delay.HasValue)
+                    await Task.Delay(retryContext.Delay.Value).ConfigureAwait(false);
 
                 await Attempt(retryContext, next).ConfigureAwait(false);
             }
@@ -98,11 +107,17 @@ namespace GreenPipes.Filters
             catch (Exception exception)
             {
                 RetryContext<TContext> payloadRetryContext;
-                if (retryContext.Context.TryGetPayload(out payloadRetryContext) && !payloadRetryContext.CanRetry(exception, out payloadRetryContext))
+                if (retryContext.Context.TryGetPayload(out payloadRetryContext))
                 {
-                    await payloadRetryContext.RetryFaulted(exception).ConfigureAwait(false);
-
                     await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
+
+                    throw;
+                }
+
+                RetryContext genericRetryContext;
+                if (retryContext.Context.TryGetPayload(out genericRetryContext))
+                {
+                    await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
 
                     throw;
                 }
