@@ -36,10 +36,36 @@ namespace GreenPipes.Routers
         {
             bool IPipeContextConverter<CommandContext, CommandContext<T>>.TryConvert(CommandContext input, out CommandContext<T> output)
             {
-                output = input as CommandContext<T>;
+                var outputContext = input as CommandContext<T>;
 
-                return output != null;
+                if (outputContext != null)
+                {
+                    output = new Context<T>(outputContext);
+                    return true;
+                }
+
+                output = null;
+                return false;
             }
+        }
+
+
+        class Context<T> :
+            BasePipeContext,
+            CommandContext<T>
+            where T : class
+        {
+            readonly CommandContext<T> _context;
+
+            public Context(CommandContext<T> context)
+                : base(context)
+            {
+                _context = context;
+            }
+
+            public DateTime Timestamp => _context.Timestamp;
+
+            public T Command => _context.Command;
         }
     }
 }

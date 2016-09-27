@@ -59,6 +59,8 @@ namespace GreenPipes.Filters
                 RetryContext<TContext> payloadRetryContext;
                 if (context.TryGetPayload(out payloadRetryContext))
                 {
+                    await policyContext.RetryFaulted(exception).ConfigureAwait(false);
+
                     await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
 
                     throw;
@@ -67,6 +69,8 @@ namespace GreenPipes.Filters
                 RetryContext genericRetryContext;
                 if (context.TryGetPayload(out genericRetryContext))
                 {
+                    await policyContext.RetryFaulted(exception).ConfigureAwait(false);
+
                     await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
 
                     throw;
@@ -109,6 +113,8 @@ namespace GreenPipes.Filters
                 RetryContext<TContext> payloadRetryContext;
                 if (retryContext.Context.TryGetPayload(out payloadRetryContext))
                 {
+                    await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+
                     await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
 
                     throw;
@@ -117,6 +123,8 @@ namespace GreenPipes.Filters
                 RetryContext genericRetryContext;
                 if (retryContext.Context.TryGetPayload(out genericRetryContext))
                 {
+                    await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+
                     await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
 
                     throw;

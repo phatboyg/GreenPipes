@@ -187,6 +187,8 @@
     <Compile Include="KeyAccessor.cs" />
     <Compile Include="Contracts\CommandContext.cs" />
     <Compile Include="Policies\BaseRetryContext.cs" />
+    <Compile Include="Policies\RetryFaultedContextCache.cs" />
+    <Compile Include="RetryFaultedExtensions.cs" />
     <Compile Include="Routers\CommandContextConverterFactory.cs" />
     <Compile Include="FilterContextProvider.cs" />
     <Compile Include="MergeFilterContextProvider.cs" />
