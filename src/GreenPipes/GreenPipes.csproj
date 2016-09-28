@@ -159,6 +159,7 @@
     <Compile Include="IRetryObserverConnector.cs" />
     <Compile Include="ITargetFilter.cs" />
     <Compile Include="ICommandRouter.cs" />
+    <Compile Include="IContextSource.cs" />
     <Compile Include="IExceptionFilter.cs" />
     <Compile Include="IFilterObserver.cs" />
     <Compile Include="IDynamicRouter.cs" />
