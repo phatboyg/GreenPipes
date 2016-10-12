@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -31,7 +31,7 @@ namespace GreenPipes.Internals.Reflection
             | MethodAttributes.VtableLayoutMask;
 
         readonly ConcurrentDictionary<string, ModuleBuilder> _moduleBuilders;
-        readonly string _proxyNamespaceSuffix = "DynamicInternal" + Guid.NewGuid().ToString("N");
+        readonly string _proxyNamespaceSuffix = "GreenPipes.DynamicInternal" + Guid.NewGuid().ToString("N");
         readonly ConcurrentDictionary<Type, Lazy<Type>> _proxyTypes;
 
         public DynamicImplementationBuilder()
@@ -49,18 +49,16 @@ namespace GreenPipes.Internals.Reflection
         Type CreateImplementation(Type interfaceType)
         {
             if (!interfaceType.IsInterface)
-            {
                 throw new ArgumentException("Proxies can only be created for interfaces: " + interfaceType.Name, nameof(interfaceType));
-            }
 
             return GetModuleBuilderForType(interfaceType, moduleBuilder => CreateTypeFromInterface(moduleBuilder, interfaceType));
         }
 
         Type CreateTypeFromInterface(ModuleBuilder builder, Type interfaceType)
         {
-            var typeName = _proxyNamespaceSuffix + "." +
-                (interfaceType.IsNested && interfaceType.DeclaringType != null
-                    ? (interfaceType.DeclaringType.Name + '+' + TypeCache.GetShortName(interfaceType))
+            var typeName = "GreenPipes.DynamicInternal." +
+                (interfaceType.IsNested && (interfaceType.DeclaringType != null)
+                    ? $"{interfaceType.DeclaringType.Name}+{TypeCache.GetShortName(interfaceType)}"
                     : TypeCache.GetShortName(interfaceType));
             try
             {

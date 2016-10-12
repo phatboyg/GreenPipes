@@ -57,6 +57,7 @@
     <Compile Include="CircuitBreaker_Specs.cs" />
     <Compile Include="InterfaceReflectionCache.cs" />
     <Compile Include="Internals\DictionaryToObject_Specs.cs" />
+    <Compile Include="Internals\DynamicBuilder_Specs.cs" />
     <Compile Include="Internals\FastProperty_Specs.cs" />
     <Compile Include="Internals\ObjectToDictionary_Specs.cs" />
     <Compile Include="Internals\TypeExtensionGeneric_Specs.cs" />
