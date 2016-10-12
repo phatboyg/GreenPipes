@@ -35,10 +35,6 @@
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Transactions" />
@@ -127,6 +123,42 @@
     <Compile Include="Filters\ITeeFilter.cs" />
     <Compile Include="Filters\KeyFilter.cs" />
     <Compile Include="Filters\OutputPipeFilter.cs" />
+    <Compile Include="Internals\Extensions\ITypeCache.cs" />
+    <Compile Include="Internals\Mapping\DictionaryConverterCache.cs" />
+    <Compile Include="Internals\Mapping\DictionaryObjectValueProvider.cs" />
+    <Compile Include="Internals\Mapping\DynamicObjectConverter.cs" />
+    <Compile Include="Internals\Mapping\DynamicObjectConverterCache.cs" />
+    <Compile Include="Internals\Mapping\EnumDictionaryMapper.cs" />
+    <Compile Include="Internals\Mapping\EnumObjectMapper.cs" />
+    <Compile Include="Internals\Mapping\IArrayValueProvider.cs" />
+    <Compile Include="Internals\Mapping\IDictionaryConverter.cs" />
+    <Compile Include="Internals\Mapping\IDictionaryConverterCache.cs" />
+    <Compile Include="Internals\Mapping\IDictionaryMapper.cs" />
+    <Compile Include="Internals\Mapping\IObjectConverter.cs" />
+    <Compile Include="Internals\Mapping\IObjectConverterCache.cs" />
+    <Compile Include="Internals\Mapping\IObjectMapper.cs" />
+    <Compile Include="Internals\Mapping\IObjectMapperCache.cs" />
+    <Compile Include="Internals\Mapping\IObjectValueProvider.cs" />
+    <Compile Include="Internals\Mapping\NullableValueDictionaryMapper.cs" />
+    <Compile Include="Internals\Mapping\NullableValueObjectMapper.cs" />
+    <Compile Include="Internals\Mapping\ObjectArrayDictionaryMapper.cs" />
+    <Compile Include="Internals\Mapping\ObjectArrayObjectMapper.cs" />
+    <Compile Include="Internals\Mapping\ObjectArrayValueProvider.cs" />
+    <Compile Include="Internals\Mapping\ObjectConverterExtensions.cs" />
+    <Compile Include="Internals\Mapping\ObjectDictionaryConverter.cs" />
+    <Compile Include="Internals\Mapping\ObjectDictionaryMapper.cs" />
+    <Compile Include="Internals\Mapping\ObjectListDictionaryMapper.cs" />
+    <Compile Include="Internals\Mapping\ObjectListObjectMapper.cs" />
+    <Compile Include="Internals\Mapping\ObjectObjectMapper.cs" />
+    <Compile Include="Internals\Mapping\ValueArrayObjectMapper.cs" />
+    <Compile Include="Internals\Mapping\ValueDictionaryMapper.cs" />
+    <Compile Include="Internals\Mapping\ValueListObjectMapper.cs" />
+    <Compile Include="Internals\Mapping\ValueObjectDictionaryDictionaryMapper.cs" />
+    <Compile Include="Internals\Mapping\ValueObjectDictionaryObjectMapper.cs" />
+    <Compile Include="Internals\Mapping\ValueObjectMapper.cs" />
+    <Compile Include="Internals\Mapping\ValueValueDictionaryDictionaryMapper.cs" />
+    <Compile Include="Internals\Mapping\ValueValueDictionaryObjectMapper.cs" />
+    <Compile Include="Internals\Reflection\IReadWritePropertyCache.cs" />
     <Compile Include="Observers\FilterObservable.cs" />
     <Compile Include="Filters\ContextFilter.cs" />
     <Compile Include="Filters\DelegateFilter.cs" />
@@ -165,7 +197,7 @@
     <Compile Include="Internals\Extensions\ExpressionExtensions.cs" />
     <Compile Include="Internals\Extensions\InterfaceExtensions.cs" />
     <Compile Include="Internals\Extensions\TypeExtensions.cs" />
-    <Compile Include="Internals\Extensions\TypeNameCache.cs" />
+    <Compile Include="Internals\Extensions\TypeCache.cs" />
     <Compile Include="Internals\Reflection\DynamicImplementationBuilder.cs" />
     <Compile Include="Internals\Reflection\IImplementationBuilder.cs" />
     <Compile Include="Internals\Reflection\InterfaceReflectionCache.cs" />
@@ -228,7 +260,6 @@
     <Compile Include="IAsyncDisposable.cs" />
     <Compile Include="IFilter.cs" />
     <Compile Include="Introspection\ScopeProbeContext.cs" />
-    <Compile Include="Introspection\SerializerCache.cs" />
     <Compile Include="IPipe.cs" />
     <Compile Include="IProbeSite.cs" />
     <Compile Include="PayloadFactory.cs" />
@@ -258,9 +289,6 @@
     <Compile Include="RetryPolicyContext.cs" />
     <Compile Include="Util\Connectable.cs" />
     <Compile Include="Util\TaskUtil.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

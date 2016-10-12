@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,7 @@ namespace GreenPipes.Introspection
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
-    using Newtonsoft.Json.Linq;
+    using Internals.Extensions;
 
 
     public class ScopeProbeContext :
@@ -49,7 +49,7 @@ namespace GreenPipes.Introspection
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if (value == null || (value is string && string.IsNullOrEmpty((string)value)))
+            if ((value == null) || (value is string && string.IsNullOrEmpty((string)value)))
                 _variables.Remove(key);
             else
                 _variables[key] = value;
@@ -108,12 +108,10 @@ namespace GreenPipes.Introspection
         void SetVariablesFromDictionary(IEnumerable<KeyValuePair<string, object>> values)
         {
             foreach (KeyValuePair<string, object> value in values)
-            {
-                if (value.Value == null || (value.Value is string && string.IsNullOrEmpty((string)value.Value)))
+                if ((value.Value == null) || (value.Value is string && string.IsNullOrEmpty((string)value.Value)))
                     _variables.Remove(value.Key);
                 else
                     _variables[value.Key] = value.Value;
-            }
         }
 
         static IEnumerable<KeyValuePair<string, object>> GetObjectAsDictionary(object values)
@@ -121,9 +119,7 @@ namespace GreenPipes.Introspection
             if (values == null)
                 return new Dictionary<string, object>();
 
-            var dictionary = JObject.FromObject(values, SerializerCache.Serializer);
-
-            return dictionary.ToObject<IDictionary<string, object>>();
+            return TypeCache.DictionaryConverterCache.GetConverter(values.GetType()).GetDictionary(values);
         }
     }
 }

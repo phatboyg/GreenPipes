@@ -10,22 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes
+namespace GreenPipes.Internals.Extensions
 {
-    using System;
-    using System.Threading;
-    using Introspection;
+    using Reflection;
 
 
-    public static class IntrospectionExtensions
+    public interface ITypeCache<T>
     {
-        public static ProbeResult GetProbeResult(this IProbeSite probeSite, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var builder = new ProbeResultBuilder(Guid.NewGuid(), cancellationToken);
+        string ShortName { get; }
+        IReadOnlyPropertyCache<T> ReadOnlyPropertyCache { get; }
+        IReadWritePropertyCache<T> ReadWritePropertyCache { get; }
 
-            probeSite.Probe(builder);
-
-            return ((IProbeResultBuilder)builder).Build();
-        }
+        T InitializeFromObject(object values);
     }
 }

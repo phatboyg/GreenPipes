@@ -60,8 +60,8 @@ namespace GreenPipes.Internals.Reflection
         {
             var typeName = _proxyNamespaceSuffix + "." +
                 (interfaceType.IsNested && interfaceType.DeclaringType != null
-                    ? (interfaceType.DeclaringType.Name + '+' + TypeNameCache.GetShortName(interfaceType))
-                    : TypeNameCache.GetShortName(interfaceType));
+                    ? (interfaceType.DeclaringType.Name + '+' + TypeCache.GetShortName(interfaceType))
+                    : TypeCache.GetShortName(interfaceType));
             try
             {
                 var typeBuilder = builder.DefineType(typeName,
@@ -91,7 +91,7 @@ namespace GreenPipes.Internals.Reflection
             }
             catch (Exception ex)
             {
-                string message = $"Exception creating proxy ({typeName}) for {TypeNameCache.GetShortName(interfaceType)}";
+                string message = $"Exception creating proxy ({typeName}) for {TypeCache.GetShortName(interfaceType)}";
 
                 throw new InvalidOperationException(message, ex);
             }

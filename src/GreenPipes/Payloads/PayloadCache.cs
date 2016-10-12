@@ -68,7 +68,7 @@ namespace GreenPipes.Payloads
             }
             catch (Exception exception)
             {
-                throw new PayloadFactoryException($"The payload factory faulted: {TypeNameCache<T>.ShortName}", exception);
+                throw new PayloadFactoryException($"The payload factory faulted: {TypeCache<T>.ShortName}", exception);
             }
         }
 

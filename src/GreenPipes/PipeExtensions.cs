@@ -28,7 +28,7 @@ namespace GreenPipes
         {
             TPayload payload;
             if (!context.TryGetPayload(out payload))
-                throw new PayloadNotFoundException($"The payload was not found: {TypeNameCache<TPayload>.ShortName}");
+                throw new PayloadNotFoundException($"The payload was not found: {TypeCache<TPayload>.ShortName}");
 
             return payload;
         }

@@ -37,7 +37,7 @@ namespace GreenPipes.Pipes
             var scope = context.CreateFilterScope("merge");
             scope.Set(new
             {
-                InputType = TypeNameCache<TInput>.ShortName
+                InputType = TypeCache<TInput>.ShortName
             });
 
             _next.Probe(scope);

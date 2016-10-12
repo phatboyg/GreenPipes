@@ -52,7 +52,7 @@ namespace GreenPipes.Filters
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("dispatchPipe");
-            scope.Add("outputType", TypeNameCache<TOutput>.ShortName);
+            scope.Add("outputType", TypeCache<TOutput>.ShortName);
 
             _outputPipe.Probe(scope);
         }

@@ -10,22 +10,29 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes
+namespace GreenPipes.Internals.Mapping
 {
-    using System;
-    using System.Threading;
-    using Introspection;
+    using System.Collections.Generic;
+    using Reflection;
 
 
-    public static class IntrospectionExtensions
+    public class EnumDictionaryMapper<T> :
+        IDictionaryMapper<T>
     {
-        public static ProbeResult GetProbeResult(this IProbeSite probeSite, CancellationToken cancellationToken = default(CancellationToken))
+        readonly ReadOnlyProperty<T> _property;
+
+        public EnumDictionaryMapper(ReadOnlyProperty<T> property)
         {
-            var builder = new ProbeResultBuilder(Guid.NewGuid(), cancellationToken);
+            _property = property;
+        }
 
-            probeSite.Probe(builder);
+        public void WritePropertyToDictionary(IDictionary<string, object> dictionary, T obj)
+        {
+            var value = _property.Get(obj);
+            if (value == null)
+                return;
 
-            return ((IProbeResultBuilder)builder).Build();
+            dictionary.Add(_property.Property.Name, value);
         }
     }
 }

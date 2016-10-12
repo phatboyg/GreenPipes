@@ -31,6 +31,10 @@
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="nunit.framework, Version=3.4.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.4.1\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
@@ -52,6 +56,7 @@
     <Compile Include="IntentionalTestException.cs" />
     <Compile Include="CircuitBreaker_Specs.cs" />
     <Compile Include="InterfaceReflectionCache.cs" />
+    <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="Observer_Specs.cs" />
     <Compile Include="Parent_Child_Pipes.cs" />
     <Compile Include="Profile_Specs.cs" />
@@ -59,6 +64,7 @@
     <Compile Include="RescueContext_Specs.cs" />
     <Compile Include="Rescue_Specs.cs" />
     <Compile Include="Retry_Specs.cs" />
+    <Compile Include="SerializerCache.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GreenPipes\GreenPipes.csproj">

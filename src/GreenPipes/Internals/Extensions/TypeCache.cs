@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,14 +14,16 @@ namespace GreenPipes.Internals.Extensions
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Threading;
-    using Introspection;
-    using Newtonsoft.Json.Linq;
+    using Mapping;
     using Reflection;
 
 
-    public static class TypeNameCache
+    public static class TypeCache
     {
+        internal static readonly IDictionaryConverterCache DictionaryConverterCache = new DictionaryConverterCache();
+        internal static readonly IObjectConverterCache ObjectConverterCache = new DynamicObjectConverterCache(Cached.Builder);
         public static IImplementationBuilder ImplementationBuilder => Cached.Builder;
 
         static CachedType GetOrAdd(Type type)
@@ -57,42 +59,49 @@ namespace GreenPipes.Internals.Extensions
         class CachedType<T> :
             CachedType
         {
-            public string ShortName => TypeNameCache<T>.ShortName;
+            public string ShortName => TypeCache<T>.ShortName;
         }
     }
 
 
-    public interface ITypeNameCache<out T>
+    public class TypeCache<T> :
+        ITypeCache<T>
     {
-        string ShortName { get; }
-
-        T InitializeFromObject(object values);
-    }
-
-
-    public class TypeNameCache<T> :
-        ITypeNameCache<T>
-    {
+        readonly Lazy<IObjectConverter> _converter;
+        readonly Lazy<IDictionaryConverter> _mapper;
+        readonly Lazy<ReadOnlyPropertyCache<T>> _readPropertyCache;
         readonly string _shortName;
+        readonly Lazy<ReadWritePropertyCache<T>> _writePropertyCache;
 
-        TypeNameCache()
+        TypeCache()
         {
             _shortName = typeof(T).GetTypeName();
+            _readPropertyCache = new Lazy<ReadOnlyPropertyCache<T>>(() => new ReadOnlyPropertyCache<T>());
+            _writePropertyCache = new Lazy<ReadWritePropertyCache<T>>(() => new ReadWritePropertyCache<T>());
+
+            _mapper = new Lazy<IDictionaryConverter>(() => TypeCache.DictionaryConverterCache.GetConverter(typeof(T)));
+            _converter = new Lazy<IObjectConverter>(() => TypeCache.ObjectConverterCache.GetConverter(typeof(T)));
         }
+
+        public static IReadOnlyPropertyCache<T> ReadOnlyPropertyCache => Cached.Metadata.Value.ReadOnlyPropertyCache;
+        public static IReadWritePropertyCache<T> ReadWritePropertyCache => Cached.Metadata.Value.ReadWritePropertyCache;
 
         public static string ShortName => Cached.Metadata.Value.ShortName;
 
-        T ITypeNameCache<T>.InitializeFromObject(object values)
+        IReadOnlyPropertyCache<T> ITypeCache<T>.ReadOnlyPropertyCache => _readPropertyCache.Value;
+        IReadWritePropertyCache<T> ITypeCache<T>.ReadWritePropertyCache => _writePropertyCache.Value;
+
+        T ITypeCache<T>.InitializeFromObject(object values)
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var objValues = JObject.FromObject(values, SerializerCache.Serializer);
+            IDictionary<string, object> dictionary = TypeCache.DictionaryConverterCache.GetConverter(values.GetType()).GetDictionary(values);
 
-            return objValues.ToObject<T>(SerializerCache.Serializer);
+            return (T)_converter.Value.GetObject(new DictionaryObjectValueProvider(dictionary));
         }
 
-        string ITypeNameCache<T>.ShortName => _shortName;
+        string ITypeCache<T>.ShortName => _shortName;
 
         public static T InitializeFromObject(object values)
         {
@@ -102,8 +111,8 @@ namespace GreenPipes.Internals.Extensions
 
         static class Cached
         {
-            internal static readonly Lazy<ITypeNameCache<T>> Metadata = new Lazy<ITypeNameCache<T>>(
-                () => new TypeNameCache<T>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<ITypeCache<T>> Metadata = new Lazy<ITypeCache<T>>(() => new TypeCache<T>(),
+                LazyThreadSafetyMode.PublicationOnly);
         }
     }
 }

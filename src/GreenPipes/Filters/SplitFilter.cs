@@ -40,7 +40,7 @@ namespace GreenPipes.Filters
             var scope = context.CreateFilterScope("split");
             scope.Set(new
             {
-                SplitType = TypeNameCache<TSplit>.ShortName
+                SplitType = TypeCache<TSplit>.ShortName
             });
 
             _split.Probe(scope);

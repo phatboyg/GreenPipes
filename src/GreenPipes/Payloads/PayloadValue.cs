@@ -29,7 +29,7 @@ namespace GreenPipes.Payloads
         public PayloadValue(TPayload value)
         {
             if (value == default(TPayload))
-                throw new PayloadNotFoundException($"The payload was not found: {TypeNameCache<TPayload>.ShortName}");
+                throw new PayloadNotFoundException($"The payload was not found: {TypeCache<TPayload>.ShortName}");
 
             _value = value;
         }

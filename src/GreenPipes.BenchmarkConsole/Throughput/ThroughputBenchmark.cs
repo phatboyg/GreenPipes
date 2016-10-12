@@ -65,8 +65,6 @@ namespace GreenPipes.BenchmarkConsole.Throughput
 
             Console.WriteLine("Running Throughput Benchmark");
 
-            Console.WriteLine(pipe.GetProbeResult().ToJsonString());
-
             RunBenchmark(pipe).Wait(cancellationToken);
 
             Console.WriteLine("Message Count: {0}", _settings.MessageCount);

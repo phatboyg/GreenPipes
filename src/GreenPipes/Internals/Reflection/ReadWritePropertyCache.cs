@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,7 +21,7 @@ namespace GreenPipes.Internals.Reflection
 
 
     public class ReadWritePropertyCache<T> :
-        IEnumerable<ReadWriteProperty<T>>
+        IReadWritePropertyCache<T>
     {
         readonly IDictionary<string, ReadWriteProperty<T>> _properties;
 
@@ -59,6 +59,11 @@ namespace GreenPipes.Internals.Reflection
             }
         }
 
+        public bool TryGetProperty(string propertyName, out ReadWriteProperty<T> property)
+        {
+            return _properties.TryGetValue(propertyName, out property);
+        }
+
         static IDictionary<string, ReadWriteProperty<T>> CreatePropertyCache(bool includeNonPublic)
         {
             return new Dictionary<string, ReadWriteProperty<T>>(typeof(T).GetAllProperties()
@@ -76,11 +81,6 @@ namespace GreenPipes.Internals.Reflection
         public object Get(Expression<Func<T, object>> propertyExpression, T instance)
         {
             return _properties[propertyExpression.GetMemberName()].Get(instance);
-        }
-
-        public bool TryGetProperty(string propertyName, out ReadWriteProperty<T> property)
-        {
-            return _properties.TryGetValue(propertyName, out property);
         }
     }
 }

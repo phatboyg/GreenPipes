@@ -47,7 +47,7 @@ namespace GreenPipes.Filters
 
             var keyPipe = pipe as IPipe<TContext>;
             if (keyPipe == null)
-                throw new ArgumentException($"The pipe must match the input type: {TypeNameCache<TContext>.ShortName}", nameof(pipe));
+                throw new ArgumentException($"The pipe must match the input type: {TypeCache<TContext>.ShortName}", nameof(pipe));
 
             var added = _pipes.TryAdd(key, keyPipe);
             if (!added)

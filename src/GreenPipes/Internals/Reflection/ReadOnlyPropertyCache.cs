@@ -20,8 +20,15 @@ namespace GreenPipes.Internals.Reflection
     using Extensions;
 
 
-    public class ReadOnlyPropertyCache<T> :
+    public interface IReadOnlyPropertyCache<T> :
         IEnumerable<ReadOnlyProperty<T>>
+    {
+        bool TryGetValue(string key, out ReadOnlyProperty<T> value);
+    }
+
+
+    public class ReadOnlyPropertyCache<T> :
+        IReadOnlyPropertyCache<T>
     {
         readonly IDictionary<string, ReadOnlyProperty<T>> _properties;
 

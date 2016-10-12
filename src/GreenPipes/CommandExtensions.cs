@@ -28,7 +28,7 @@ namespace GreenPipes
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var command = TypeNameCache<T>.InitializeFromObject(values);
+            var command = TypeCache<T>.InitializeFromObject(values);
 
             var context = new Command<T>(command);
 
