@@ -56,6 +56,13 @@
     <Compile Include="IntentionalTestException.cs" />
     <Compile Include="CircuitBreaker_Specs.cs" />
     <Compile Include="InterfaceReflectionCache.cs" />
+    <Compile Include="Internals\DictionaryToObject_Specs.cs" />
+    <Compile Include="Internals\FastProperty_Specs.cs" />
+    <Compile Include="Internals\ObjectToDictionary_Specs.cs" />
+    <Compile Include="Internals\TypeExtensionGeneric_Specs.cs" />
+    <Compile Include="Internals\TypeExtensionMoreGeneric_Specs.cs" />
+    <Compile Include="Internals\TypeExtension_Specs.cs" />
+    <Compile Include="Internals\TypeProperty_Specs.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
     <Compile Include="Observer_Specs.cs" />
     <Compile Include="Parent_Child_Pipes.cs" />
