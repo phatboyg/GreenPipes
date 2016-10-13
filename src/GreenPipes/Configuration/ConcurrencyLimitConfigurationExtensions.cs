@@ -26,7 +26,7 @@ namespace GreenPipes
         /// <param name="configurator"></param>
         /// <param name="concurrencyLimit">The concurrency limit for the subsequent filters in the pipeline</param>
         /// <param name="router">A control pipe to support runtime adjustment</param>
-        public static void UseConcurrencyLimit<T>(this IPipeConfigurator<T> configurator, int concurrencyLimit, ICommandRouter router = null)
+        public static void UseConcurrencyLimit<T>(this IPipeConfigurator<T> configurator, int concurrencyLimit, IPipeRouter router = null)
             where T : class, PipeContext
         {
             if (configurator == null)

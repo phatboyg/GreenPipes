@@ -26,7 +26,7 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Should_be_called_post_send()
         {
-            ICommandRouter router = new CommandRouter();
+            IPipeRouter router = new PipeRouter();
 
             router.ConnectPipe(Pipe.Empty<CommandContext<SetConcurrencyLimit>>());
 
@@ -48,7 +48,7 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Should_be_called_pre_send()
         {
-            ICommandRouter router = new CommandRouter();
+            IPipeRouter router = new PipeRouter();
 
             router.ConnectPipe(Pipe.Empty<CommandContext<SetConcurrencyLimit>>());
 
@@ -70,7 +70,7 @@ namespace GreenPipes.Tests
         [Test]
         public void Should_be_called_when_send_faulted()
         {
-            ICommandRouter router = new CommandRouter();
+            IPipeRouter router = new PipeRouter();
 
             router.ConnectPipe(Pipe.New<CommandContext<SetConcurrencyLimit>>(cfg =>
             {

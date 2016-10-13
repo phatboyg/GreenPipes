@@ -16,6 +16,8 @@ namespace GreenPipes.Filters.CircuitBreaker
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading;
+    using System.Threading.Tasks;
+    using Util;
 
 
     /// <summary>
@@ -41,17 +43,19 @@ namespace GreenPipes.Filters.CircuitBreaker
             _elapsed = Stopwatch.StartNew();
         }
 
-        void ICircuitBreakerBehavior.PreSend()
+        Task ICircuitBreakerBehavior.PreSend()
         {
             throw _exception;
         }
 
-        void ICircuitBreakerBehavior.PostSend()
+        Task ICircuitBreakerBehavior.PostSend()
         {
+            return TaskUtil.Completed;
         }
 
-        void ICircuitBreakerBehavior.SendFault(Exception exception)
+        Task ICircuitBreakerBehavior.SendFault(Exception exception)
         {
+            return TaskUtil.Completed;
         }
 
         void IProbeSite.Probe(ProbeContext context)

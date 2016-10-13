@@ -223,7 +223,7 @@ namespace GreenPipes.Tests
             IPipe<CommandContext> pipe = Pipe.New<CommandContext>(x =>
             {
                 x.UseRetry(r => r.None());
-                x.UseDispatch(new CommandContextConverterFactory(), d =>
+                x.UseDispatch(new PipeContextConverterFactory(), d =>
                 {
                     d.Pipe<CommandContext<SetConcurrencyLimit>>(p =>
                     {
@@ -249,7 +249,7 @@ namespace GreenPipes.Tests
             IPipe<CommandContext> pipe = Pipe.New<CommandContext>(x =>
             {
                 x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
-                x.UseDispatch(new CommandContextConverterFactory(), d =>
+                x.UseDispatch(new PipeContextConverterFactory(), d =>
                 {
                     d.Pipe<CommandContext<SetConcurrencyLimit>>(p =>
                     {

@@ -14,6 +14,8 @@ namespace GreenPipes.Filters.CircuitBreaker
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
+    using Util;
 
 
     /// <summary>
@@ -36,23 +38,27 @@ namespace GreenPipes.Filters.CircuitBreaker
 
         bool IsActive => _attemptCount > _breaker.ActiveThreshold;
 
-        void ICircuitBreakerBehavior.PreSend()
+        Task ICircuitBreakerBehavior.PreSend()
         {
             Interlocked.Increment(ref _attemptCount);
+
+            return TaskUtil.Completed;
         }
 
-        void ICircuitBreakerBehavior.PostSend()
+        Task ICircuitBreakerBehavior.PostSend()
         {
             Interlocked.Increment(ref _successCount);
+
+            return TaskUtil.Completed;
         }
 
-        void ICircuitBreakerBehavior.SendFault(Exception exception)
+        async Task ICircuitBreakerBehavior.SendFault(Exception exception)
         {
             int failureCount = Interlocked.Increment(ref _failureCount);
 
             if (IsActive && TripThresholdExceeded(failureCount))
             {
-                _breaker.Open(exception, this);
+                await _breaker.Open(exception, this).ConfigureAwait(false);
                 _timer.Dispose();
             }
         }

@@ -20,7 +20,7 @@ namespace GreenPipes
 
     public static class ProfileConfigurationExtensions
     {
-        public static void UseProfile<T>(this IPipeConfigurator<T> configurator, ReportProfileData reportProfileData)
+        public static void UseProfile<T>(this IPipeConfigurator<T> configurator, ReportProfileData<T> reportProfileData)
             where T : class, PipeContext
         {
             if (configurator == null)
@@ -33,7 +33,7 @@ namespace GreenPipes
             configurator.AddPipeSpecification(specification);
         }
 
-        public static void UseProfile<T>(this IPipeConfigurator<T> configurator, long trivialThreshold, ReportProfileData reportProfileData)
+        public static void UseProfile<T>(this IPipeConfigurator<T> configurator, long trivialThreshold, ReportProfileData<T> reportProfileData)
             where T : class, PipeContext
         {
             if (configurator == null)
@@ -57,7 +57,8 @@ namespace GreenPipes
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
 
-        static void ConsoleProfileWriter(ProfileData data)
+        static void ConsoleProfileWriter<T>(ProfileData<T> data)
+            where T : class, PipeContext
         {
             Console.Out.WriteLine($"{data.Id,-6} {data.Timestamp:u} {data.Elapsed:g}");
         }

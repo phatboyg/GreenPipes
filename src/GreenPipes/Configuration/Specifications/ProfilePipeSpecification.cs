@@ -21,10 +21,10 @@ namespace GreenPipes.Specifications
         IPipeSpecification<T>
         where T : class, PipeContext
     {
-        readonly ReportProfileData _reportProfileData;
+        readonly ReportProfileData<T> _reportProfileData;
         readonly long _trivialThreshold;
 
-        public ProfilePipeSpecification(ReportProfileData reportProfileData, long trivialThreshold)
+        public ProfilePipeSpecification(ReportProfileData<T> reportProfileData, long trivialThreshold)
         {
             _reportProfileData = reportProfileData;
             _trivialThreshold = trivialThreshold;

@@ -61,6 +61,7 @@
     <Compile Include="Configuration\Configurators\RetryPolicyFactory.cs" />
     <Compile Include="Configuration\DispatchConfigurationExtensions.cs" />
     <Compile Include="Configuration\ForkConfigurationExtensions.cs" />
+    <Compile Include="Configuration\InlineFilterConfigurationExtensions.cs" />
     <Compile Include="Configuration\InterceptConfigurationExtensions.cs" />
     <Compile Include="Configuration\ISpecification.cs" />
     <Compile Include="Configuration\Configurators\ICircuitBreakerConfigurator.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Configuration\RetryConfigurationExtensions.cs" />
     <Compile Include="Configuration\Specifications\AsyncDelegatePipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\BindPipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\InlineFilterPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\SplitFilterPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\CircuitBreakerPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\ConcurrencyLimitPipeSpecification.cs" />
@@ -104,7 +106,10 @@
     <Compile Include="Configuration\Validation\ConfigurationValidationResult.cs" />
     <Compile Include="Configuration\Validation\PipeConfigurationResult.cs" />
     <Compile Include="ConnectHandle.cs" />
-    <Compile Include="Contracts\oiuwer.cs" />
+    <Compile Include="Contracts\CircuitBreakerClosed.cs" />
+    <Compile Include="Contracts\CircuitBreakerOpened.cs" />
+    <Compile Include="Contracts\EventContext.cs" />
+    <Compile Include="Contracts\ProfileData.cs" />
     <Compile Include="Contracts\SetRateLimit.cs" />
     <Compile Include="Exceptions\DuplicateKeyPipeConfigurationException.cs" />
     <Compile Include="Exceptions\PayloadException.cs" />
@@ -113,9 +118,11 @@
     <Compile Include="Exceptions\PipeConfigurationException.cs" />
     <Compile Include="Filters\AsyncDelegateFilter.cs" />
     <Compile Include="Filters\BindFilter.cs" />
+    <Compile Include="Filters\CircuitBreaker\CircuitBreakerEventExtensions.cs" />
     <Compile Include="Filters\ConcurrencyLimitFilter.cs" />
     <Compile Include="Contracts\SetConcurrencyLimit.cs" />
     <Compile Include="Filters\IDynamicFilter.cs" />
+    <Compile Include="Filters\InlineFilter.cs" />
     <Compile Include="Filters\IOutputPipeFilter.cs" />
     <Compile Include="Filters\InterceptFilter.cs" />
     <Compile Include="Filters\IPipeContextConverterFactory.cs" />
@@ -123,6 +130,7 @@
     <Compile Include="Filters\ITeeFilter.cs" />
     <Compile Include="Filters\KeyFilter.cs" />
     <Compile Include="Filters\OutputPipeFilter.cs" />
+    <Compile Include="InlineFilterMethod.cs" />
     <Compile Include="Internals\Extensions\ITypeCache.cs" />
     <Compile Include="Internals\Mapping\DictionaryConverterCache.cs" />
     <Compile Include="Internals\Mapping\DictionaryObjectValueProvider.cs" />
@@ -190,7 +198,7 @@
     <Compile Include="IRetryObserver.cs" />
     <Compile Include="IRetryObserverConnector.cs" />
     <Compile Include="ITargetFilter.cs" />
-    <Compile Include="ICommandRouter.cs" />
+    <Compile Include="IPipeRouter.cs" />
     <Compile Include="IExceptionFilter.cs" />
     <Compile Include="IFilterObserver.cs" />
     <Compile Include="IDynamicRouter.cs" />
@@ -221,11 +229,11 @@
     <Compile Include="Policies\BaseRetryContext.cs" />
     <Compile Include="Policies\RetryFaultedContextCache.cs" />
     <Compile Include="RetryFaultedExtensions.cs" />
-    <Compile Include="Routers\CommandContextConverterFactory.cs" />
+    <Compile Include="Routers\PipeContextConverterFactory.cs" />
     <Compile Include="FilterContextProvider.cs" />
     <Compile Include="MergeFilterContextProvider.cs" />
     <Compile Include="Payloads\PipeContextPayloadAdapter.cs" />
-    <Compile Include="Pipes\CommandRouter.cs" />
+    <Compile Include="Pipes\PipeRouter.cs" />
     <Compile Include="Pipes\DynamicRouter.cs" />
     <Compile Include="Pipes\MergePipe.cs" />
     <Compile Include="Policies\ExceptionFilters\AllExceptionFilter.cs" />

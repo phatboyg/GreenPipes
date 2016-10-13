@@ -21,11 +21,11 @@ namespace GreenPipes.Specifications
         IPipeSpecification<T>
         where T : class, PipeContext
     {
-        readonly ICommandRouter _router;
+        readonly IPipeRouter _router;
         readonly TimeSpan _interval;
         readonly int _rateLimit;
 
-        public RateLimitPipeSpecification(int rateLimit, TimeSpan interval, ICommandRouter router = null)
+        public RateLimitPipeSpecification(int rateLimit, TimeSpan interval, IPipeRouter router = null)
         {
             _rateLimit = rateLimit;
             _interval = interval;

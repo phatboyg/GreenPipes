@@ -65,6 +65,7 @@
     <Compile Include="Internals\TypeExtension_Specs.cs" />
     <Compile Include="Internals\TypeProperty_Specs.cs" />
     <Compile Include="IntrospectionExtensions.cs" />
+    <Compile Include="LayeredRetry_Specs.cs" />
     <Compile Include="Observer_Specs.cs" />
     <Compile Include="Parent_Child_Pipes.cs" />
     <Compile Include="Profile_Specs.cs" />

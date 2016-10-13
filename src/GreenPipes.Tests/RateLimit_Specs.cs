@@ -55,7 +55,7 @@ namespace GreenPipes.Tests
         [Test, Explicit]
         public async Task Should_allow_dynamic_reconfiguration_up()
         {
-            var router = new CommandRouter();
+            var router = new PipeRouter();
             int count = 0;
             IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {
@@ -86,7 +86,7 @@ namespace GreenPipes.Tests
         [Test, Explicit]
         public async Task Should_allow_dynamic_reconfiguration_down()
         {
-            var router = new CommandRouter();
+            var router = new PipeRouter();
             int count = 0;
             IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {

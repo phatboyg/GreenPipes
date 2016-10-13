@@ -15,5 +15,6 @@ namespace GreenPipes.Filters.Profile
     using Contracts;
 
 
-    public delegate void ReportProfileData(ProfileData data);
+    public delegate void ReportProfileData<in T>(ProfileData<T> data) 
+        where T : PipeContext;
 }

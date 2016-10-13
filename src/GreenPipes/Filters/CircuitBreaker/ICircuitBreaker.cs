@@ -14,6 +14,7 @@ namespace GreenPipes.Filters.CircuitBreaker
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
 
     /// <summary>
@@ -43,7 +44,7 @@ namespace GreenPipes.Filters.CircuitBreaker
         /// <param name="exception">The exception to return when the circuit breaker is accessed</param>
         /// <param name="behavior"></param>
         /// <param name="timeoutEnumerator">A previously created enumerator for a timeout period</param>
-        void Open(Exception exception, ICircuitBreakerBehavior behavior, IEnumerator<TimeSpan> timeoutEnumerator = null);
+        Task Open(Exception exception, ICircuitBreakerBehavior behavior, IEnumerator<TimeSpan> timeoutEnumerator = null);
 
         /// <summary>
         /// Partially open the circuit breaker, allowing the eventual return to a closed
@@ -52,12 +53,12 @@ namespace GreenPipes.Filters.CircuitBreaker
         /// <param name="exception"></param>
         /// <param name="timeoutEnumerator"></param>
         /// <param name="behavior"></param>
-        void ClosePartially(Exception exception, IEnumerator<TimeSpan> timeoutEnumerator, ICircuitBreakerBehavior behavior);
+        Task ClosePartially(Exception exception, IEnumerator<TimeSpan> timeoutEnumerator, ICircuitBreakerBehavior behavior);
 
         /// <summary>
         /// Close the circuit breaker, allowing normal execution
         /// </summary>
         /// <param name="behavior"></param>
-        void Close(ICircuitBreakerBehavior behavior);
+        Task Close(ICircuitBreakerBehavior behavior);
     }
 }

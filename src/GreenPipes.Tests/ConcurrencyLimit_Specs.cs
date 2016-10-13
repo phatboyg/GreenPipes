@@ -63,7 +63,7 @@ namespace GreenPipes.Tests
             var currentCount = 0;
             var maxCount = 0;
 
-            ICommandRouter dynamicRouter = new CommandRouter();
+            IPipeRouter dynamicRouter = new PipeRouter();
 
             IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {

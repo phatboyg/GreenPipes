@@ -27,9 +27,9 @@ namespace GreenPipes.Specifications
     {
         readonly int _concurrencyLimit;
 
-        readonly ICommandRouter _router;
+        readonly IPipeRouter _router;
 
-        public ConcurrencyLimitPipeSpecification(int concurrencyLimit, ICommandRouter router = null)
+        public ConcurrencyLimitPipeSpecification(int concurrencyLimit, IPipeRouter router = null)
         {
             _concurrencyLimit = concurrencyLimit;
 

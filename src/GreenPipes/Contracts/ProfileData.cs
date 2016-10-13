@@ -10,13 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes
+namespace GreenPipes.Contracts
 {
-    using Contracts;
+    using System;
 
 
-    public interface ICommandRouter :
-        IDynamicRouter<CommandContext>
+    /// <summary>
+    /// Profiler data emitted for each occurrence
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface ProfileData<out T> :
+        ProfileData
+        where T : PipeContext
     {
+        /// <summary>
+        /// The context for the profiled send
+        /// </summary>
+        T Context { get; }
+    }
+
+
+    /// <summary>
+    /// Profiler data emitted for each occurrence
+    /// </summary>
+    public interface ProfileData
+    {
+        long Id { get; }
+        DateTime Timestamp { get; }
+        TimeSpan Elapsed { get; }
     }
 }

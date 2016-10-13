@@ -44,7 +44,12 @@ namespace GreenPipes.Configurators
         /// Sets a specific reset interval for the circuit to attempt to close after being tripped.
         /// By default, this is an incrementing scale up to one minute.
         /// </summary>
-        /// <param name="interval"></param>
-        void ResetInterval(TimeSpan interval);
+        /// <value></value>
+        TimeSpan ResetInterval { set; }
+
+        /// <summary>
+        /// Configure a router for sending events from the circuit breaker
+        /// </summary>
+        IPipeRouter Router { set; }
     }
 }

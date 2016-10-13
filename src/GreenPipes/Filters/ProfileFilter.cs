@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,11 +24,11 @@ namespace GreenPipes.Filters
         IFilter<TContext>
         where TContext : class, PipeContext
     {
-        readonly ReportProfileData _reportProfileData;
+        readonly ReportProfileData<TContext> _reportProfileData;
         readonly long _trivialThreshold;
         long _nextTimingId;
 
-        public ProfileFilter(ReportProfileData reportProfileData, long trivialThreshold)
+        public ProfileFilter(ReportProfileData<TContext> reportProfileData, long trivialThreshold)
         {
             _reportProfileData = reportProfileData;
             _trivialThreshold = trivialThreshold;
@@ -45,11 +45,11 @@ namespace GreenPipes.Filters
         {
             var timingId = Interlocked.Increment(ref _nextTimingId);
 
-            var instance = new DataRecorder(timingId);
+            var instance = new DataRecorder(timingId, context);
 
             await next.Send(context).ConfigureAwait(false);
 
-            instance.Complete(_trivialThreshold, _reportProfileData);
+            instance.Complete(_reportProfileData, _trivialThreshold);
         }
 
 
@@ -58,39 +58,42 @@ namespace GreenPipes.Filters
             readonly DateTime _startTime;
             readonly long _stopwatchTicks;
             readonly long _timingId;
+            readonly TContext _context;
 
-            internal DataRecorder(long timingId)
+            internal DataRecorder(long timingId, TContext context)
             {
                 _timingId = timingId;
+                _context = context;
                 _startTime = DateTime.UtcNow;
                 _stopwatchTicks = Stopwatch.GetTimestamp();
             }
 
-            public void Complete(long trivialThreshold, ReportProfileData reportProfileData)
+            public void Complete(ReportProfileData<TContext> reportProfileData, long trivialThreshold)
             {
                 var completeTicks = Stopwatch.GetTimestamp() - _stopwatchTicks;
 
                 var milliseconds = completeTicks * 1000 / Stopwatch.Frequency;
                 if (milliseconds > trivialThreshold)
-                {
-                    reportProfileData(new Report(_timingId, _startTime, TimeSpan.FromMilliseconds(milliseconds)));
-                }
+                    reportProfileData(new Report(_timingId, _context, _startTime, TimeSpan.FromMilliseconds(milliseconds)));
             }
 
 
             struct Report :
-                ProfileData
+                ProfileData<TContext>
             {
-                public Report(long id, DateTime timestamp, TimeSpan elapsed)
+                public Report(long id, TContext context, DateTime timestamp, TimeSpan elapsed)
                 {
                     Id = id;
                     Timestamp = timestamp;
                     Elapsed = elapsed;
+                    Context = context;
                 }
 
                 public long Id { get; }
                 public DateTime Timestamp { get; }
                 public TimeSpan Elapsed { get; }
+
+                public TContext Context { get; }
             }
         }
     }

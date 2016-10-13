@@ -27,7 +27,7 @@ namespace GreenPipes.Tests
             var count = 0;
             IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
-                x.UseCircuitBreaker(v => v.ResetInterval(TimeSpan.FromSeconds(60)));
+                x.UseCircuitBreaker(v => v.ResetInterval = TimeSpan.FromSeconds(60));
                 x.UseExecute(payload =>
                 {
                     Interlocked.Increment(ref count);

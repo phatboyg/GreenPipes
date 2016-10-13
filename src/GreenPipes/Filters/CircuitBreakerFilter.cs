@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,6 +18,7 @@ namespace GreenPipes.Filters
     using System.Threading;
     using System.Threading.Tasks;
     using CircuitBreaker;
+    using Util;
 
 
     public class CircuitBreakerFilter<TContext> :
@@ -39,22 +40,35 @@ namespace GreenPipes.Filters
 
         public TimeSpan OpenDuration => _settings.TrackingPeriod;
 
-        void ICircuitBreaker.Open(Exception exception, ICircuitBreakerBehavior behavior, IEnumerator<TimeSpan> timeoutEnumerator)
+        Task ICircuitBreaker.Open(Exception exception, ICircuitBreakerBehavior behavior, IEnumerator<TimeSpan> timeoutEnumerator)
         {
             if (timeoutEnumerator == null)
                 timeoutEnumerator = _settings.ResetTimeout.GetEnumerator();
 
-            Interlocked.CompareExchange(ref _behavior, new OpenBehavior(this, exception, timeoutEnumerator), behavior);
+            var openBehavior = new OpenBehavior(this, exception, timeoutEnumerator);
+
+            Interlocked.CompareExchange(ref _behavior, openBehavior, behavior);
+            if (_behavior == openBehavior)
+                return _settings.Router?.PublishCircuitBreakerOpened() ?? TaskUtil.Completed;
+
+            return TaskUtil.Completed;
         }
 
-        void ICircuitBreaker.Close(ICircuitBreakerBehavior behavior)
+        Task ICircuitBreaker.Close(ICircuitBreakerBehavior behavior)
         {
-            Interlocked.CompareExchange(ref _behavior, new ClosedBehavior(this), behavior);
+            var closedBehavior = new ClosedBehavior(this);
+            Interlocked.CompareExchange(ref _behavior, closedBehavior, behavior);
+            if (_behavior == closedBehavior)
+                return _settings.Router?.PublishCircuitBreakerClosed() ?? TaskUtil.Completed;
+
+            return TaskUtil.Completed;
         }
 
-        void ICircuitBreaker.ClosePartially(Exception exception, IEnumerator<TimeSpan> timeoutEnumerator, ICircuitBreakerBehavior behavior)
+        Task ICircuitBreaker.ClosePartially(Exception exception, IEnumerator<TimeSpan> timeoutEnumerator, ICircuitBreakerBehavior behavior)
         {
             Interlocked.CompareExchange(ref _behavior, new HalfOpenBehavior(this, exception, timeoutEnumerator), behavior);
+
+            return TaskUtil.Completed;
         }
 
         public int TripThreshold => _settings.TripThreshold;
@@ -65,18 +79,18 @@ namespace GreenPipes.Filters
         {
             try
             {
-                _behavior.PreSend();
+                await _behavior.PreSend().ConfigureAwait(false);
 
                 await next.Send(context).ConfigureAwait(false);
 
-                _behavior.PostSend();
+                await _behavior.PostSend().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 if (!_exceptionFilter.Match(ex))
                     throw;
 
-                _behavior.SendFault(ex);
+                await _behavior.SendFault(ex).ConfigureAwait(false);
 
                 throw;
             }

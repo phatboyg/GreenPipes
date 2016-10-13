@@ -54,4 +54,42 @@ namespace GreenPipes
             T CommandContext<T>.Command => _command;
         }
     }
+
+
+    public static class EventExtensions
+    {
+        public static Task PublishEvent<T>(this IPipe<EventContext> pipe, object values)
+            where T : class
+        {
+            if (pipe == null)
+                throw new ArgumentNullException(nameof(pipe));
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            var command = TypeCache<T>.InitializeFromObject(values);
+
+            var context = new Event<T>(command);
+
+            return pipe.Send(context);
+        }
+
+
+        class Event<T> :
+            BasePipeContext,
+            EventContext<T>
+            where T : class
+        {
+            readonly T _event;
+
+            public Event(T @event)
+            {
+                _event = @event;
+                Timestamp = DateTime.UtcNow;
+            }
+
+            public DateTime Timestamp { get; }
+
+            T EventContext<T>.Event => _event;
+        }
+    }
 }

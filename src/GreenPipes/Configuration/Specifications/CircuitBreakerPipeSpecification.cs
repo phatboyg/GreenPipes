@@ -48,9 +48,14 @@ namespace GreenPipes.Specifications
             set { _settings.ActiveThreshold = value; }
         }
 
-        public void ResetInterval(TimeSpan interval)
+        public TimeSpan ResetInterval
         {
-            _settings.ResetTimeout = IntervalTimeout(interval);
+            set { _settings.ResetTimeout = IntervalTimeout(value); }
+        }
+
+        public IPipeRouter Router
+        {
+            set { _settings.Router = value; }
         }
 
         public void Apply(IPipeBuilder<T> builder)
@@ -109,6 +114,7 @@ namespace GreenPipes.Specifications
             public IEnumerable<TimeSpan> ResetTimeout { get; set; }
             public int TripThreshold { get; set; }
             public int ActiveThreshold { get; set; }
+            public IPipeRouter Router { get; set; }
         }
     }
 }
