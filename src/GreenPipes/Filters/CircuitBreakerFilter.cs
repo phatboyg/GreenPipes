@@ -49,7 +49,7 @@ namespace GreenPipes.Filters
 
             Interlocked.CompareExchange(ref _behavior, openBehavior, behavior);
             if (_behavior == openBehavior)
-                return _settings.Router?.PublishCircuitBreakerOpened() ?? TaskUtil.Completed;
+                return _settings.Router?.PublishCircuitBreakerOpened(exception) ?? TaskUtil.Completed;
 
             return TaskUtil.Completed;
         }

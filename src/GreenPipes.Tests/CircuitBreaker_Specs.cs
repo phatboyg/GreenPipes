@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,8 +15,10 @@ namespace GreenPipes.Tests
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contracts;
     using NUnit.Framework;
-    using Payloads;
+    using Pipes;
+
 
     [TestFixture]
     public class Using_a_circuit_breaker
@@ -24,10 +26,16 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Should_allow_the_first_call()
         {
+            var router = new PipeRouter();
+
             var count = 0;
             IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
-                x.UseCircuitBreaker(v => v.ResetInterval = TimeSpan.FromSeconds(60));
+                x.UseCircuitBreaker(v =>
+                {
+                    v.ResetInterval = TimeSpan.FromSeconds(60);
+                    v.Router = router;
+                });
                 x.UseExecute(payload =>
                 {
                     Interlocked.Increment(ref count);
@@ -36,12 +44,18 @@ namespace GreenPipes.Tests
                 });
             });
 
+            TaskCompletionSource<CircuitBreakerOpened> opened = new TaskCompletionSource<CircuitBreakerOpened>();
+            var observeCircuitBreaker = Pipe.Execute<EventContext<CircuitBreakerOpened>>(x => opened.TrySetResult(x.Event));
+            router.ConnectPipe(observeCircuitBreaker);
+
             var context = new TestContext();
 
             for (var i = 0; i < 100; i++)
                 Assert.That(async () => await pipe.Send(context).ConfigureAwait(false), Throws.TypeOf<IntentionalTestException>());
 
             Assert.That(count, Is.EqualTo(6));
+
+            await opened.Task;
         }
 
 

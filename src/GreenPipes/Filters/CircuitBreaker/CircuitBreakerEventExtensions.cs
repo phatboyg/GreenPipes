@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Filters.CircuitBreaker
 {
+    using System;
     using System.Threading.Tasks;
     using Contracts;
 
@@ -22,10 +23,11 @@ namespace GreenPipes.Filters.CircuitBreaker
         /// Set the concurrency limit of the filter
         /// </summary>
         /// <param name="pipe"></param>
+        /// <param name="exception"></param>
         /// <returns></returns>
-        public static Task PublishCircuitBreakerOpened(this IPipe<EventContext> pipe)
+        public static Task PublishCircuitBreakerOpened(this IPipe<EventContext> pipe, Exception exception)
         {
-            return pipe.PublishEvent<CircuitBreakerOpened>(new object());
+            return pipe.PublishEvent<CircuitBreakerOpened>(new { Exception = exception});
         }
 
         /// <summary>

@@ -73,7 +73,7 @@ namespace GreenPipes.Internals.Mapping
                 return (IDictionaryMapper<T>)Activator.CreateInstance(converterType, property, elementConverter);
             }
 
-            if (valueType.IsValueType || (valueType == typeof(string)))
+            if (valueType.IsValueType || (valueType == typeof(string)) || typeof(Exception).IsAssignableFrom(valueType))
                 return new ValueDictionaryMapper<T>(property);
 
             if (valueType.HasInterface(typeof(IEnumerable<>)))
@@ -116,6 +116,7 @@ namespace GreenPipes.Internals.Mapping
                     return (IDictionaryMapper<T>)Activator.CreateInstance(converterType, property, elementConverter);
                 }
             }
+
             return new ObjectDictionaryMapper<T>(property, _cache.GetConverter(valueType));
         }
     }
