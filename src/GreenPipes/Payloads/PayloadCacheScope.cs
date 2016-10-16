@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace GreenPipes.Payloads
 {
     using System;
-    using System.Threading;
 
 
     public class PayloadCacheScope :
@@ -26,21 +25,15 @@ namespace GreenPipes.Payloads
         {
             _parentCache = new PipeContextPayloadAdapter(context);
 
-            CancellationToken = context.CancellationToken;
-
             _payloadCache = new PayloadCache();
         }
 
-        public PayloadCacheScope(IPayloadCache parent, CancellationToken cancellationToken)
+        public PayloadCacheScope(IPayloadCache parent)
         {
             _parentCache = parent;
 
-            CancellationToken = cancellationToken;
-
             _payloadCache = new PayloadCache();
         }
-
-        public CancellationToken CancellationToken { get; }
 
         public bool HasPayloadType(Type payloadType)
         {
@@ -68,7 +61,7 @@ namespace GreenPipes.Payloads
 
         public IPayloadCache CreateScope()
         {
-            return new PayloadCacheScope(this, CancellationToken);
+            return new PayloadCacheScope(this);
         }
     }
 }

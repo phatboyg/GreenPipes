@@ -21,6 +21,34 @@ namespace GreenPipes.Tests
     [TestFixture]
     public class Using_the_rescue_filter
     {
+        class TestContext :
+            BasePipeContext,
+            PipeContext
+        {
+            public TestContext()
+            {
+            }
+
+            public TestContext(TestContext testContext)
+                : base(testContext)
+            {
+            }
+        }
+
+
+        class TestExceptionContext :
+            TestContext
+        {
+            public TestExceptionContext(TestContext context, Exception exception)
+                : base(context)
+            {
+                Exception = exception;
+            }
+
+            public Exception Exception { get; }
+        }
+
+
         [Test]
         public async Task Should_invoke_the_rescue_pipe()
         {
@@ -65,34 +93,6 @@ namespace GreenPipes.Tests
             var context = new TestContext();
 
             Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
-        }
-
-
-        class TestContext :
-            BasePipeContext,
-            PipeContext
-        {
-            public TestContext()
-            {
-            }
-
-            public TestContext(TestContext testContext)
-                : base(testContext)
-            {
-            }
-        }
-
-
-        class TestExceptionContext :
-            TestContext
-        {
-            public TestExceptionContext(TestContext context, Exception exception)
-                : base(context)
-            {
-                Exception = exception;
-            }
-
-            public Exception Exception { get; }
         }
     }
 }

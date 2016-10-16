@@ -109,7 +109,7 @@ namespace GreenPipes.Tests.Internals.Mapping
         IDictionary<string, object> _dictionary;
         Values _values;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             _dictionary = new Dictionary<string, object>

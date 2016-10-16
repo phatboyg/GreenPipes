@@ -28,7 +28,7 @@ namespace GreenPipes.Payloads.Collections
 
         internal static class Shared
         {
-            public static EmptyPayloadCollection Empty = new EmptyPayloadCollection();
+            public static readonly EmptyPayloadCollection Empty = new EmptyPayloadCollection();
         }
     }
 }

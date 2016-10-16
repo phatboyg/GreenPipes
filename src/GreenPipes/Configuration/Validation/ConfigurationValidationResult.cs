@@ -41,10 +41,10 @@ namespace GreenPipes.Validation
 			Message = message;
 		}
 
-		public ValidationResultDisposition Disposition { get; private set; }
-		public string Key { get; private set; }
-		public string Value { get; set; }
-		public string Message { get; private set; }
+		public ValidationResultDisposition Disposition { get; }
+		public string Key { get; }
+		public string Value { get; }
+		public string Message { get; }
 
 		public override string ToString()
 		{

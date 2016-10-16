@@ -44,7 +44,6 @@ namespace GreenPipes
     /// Supports connecting a pipe using a key, which is a method of dispatching to different pipes
     /// based on context.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     /// <typeparam name="TKey"></typeparam>
     public interface IKeyPipeConnector<in TKey>
     {

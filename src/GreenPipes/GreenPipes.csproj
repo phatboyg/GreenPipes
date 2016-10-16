@@ -110,6 +110,7 @@
     <Compile Include="Contracts\EventContext.cs" />
     <Compile Include="Contracts\ProfileData.cs" />
     <Compile Include="Contracts\SetRateLimit.cs" />
+    <Compile Include="EventExtensions.cs" />
     <Compile Include="Exceptions\DuplicateKeyPipeConfigurationException.cs" />
     <Compile Include="Exceptions\PayloadException.cs" />
     <Compile Include="Exceptions\PayloadFactoryException.cs" />

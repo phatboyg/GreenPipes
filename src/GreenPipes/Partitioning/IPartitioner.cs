@@ -30,7 +30,6 @@ namespace GreenPipes.Partitioning
         /// <summary>
         /// Sends the context through the partitioner
         /// </summary>
-        /// <typeparam name="TContext">The context type</typeparam>
         /// <param name="context">The context</param>
         /// <param name="next">The next pipe</param>
         /// <returns></returns>

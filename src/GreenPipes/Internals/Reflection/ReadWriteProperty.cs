@@ -53,7 +53,7 @@ namespace GreenPipes.Internals.Reflection
 
             MethodCallExpression call = Expression.Call(instanceCast, property.SetMethod, valueCast);
 
-            return Expression.Lambda<Action<object, object>>(call, new[] {instance, value}).Compile();
+            return Expression.Lambda<Action<object, object>>(call, instance, value).Compile();
         }
     }
 
@@ -103,7 +103,7 @@ namespace GreenPipes.Internals.Reflection
                 valueCast = Expression.TypeAs(value, property.PropertyType);
             MethodCallExpression call = Expression.Call(instance, property.SetMethod, valueCast);
 
-            return Expression.Lambda<Action<T, object>>(call, new[] {instance, value}).Compile();
+            return Expression.Lambda<Action<T, object>>(call, instance, value).Compile();
         }
     }
 
@@ -139,7 +139,7 @@ namespace GreenPipes.Internals.Reflection
             ParameterExpression instance = Expression.Parameter(typeof(T), "instance");
             ParameterExpression value = Expression.Parameter(typeof(TProperty), "value");
             MethodCallExpression call = Expression.Call(instance, property.SetMethod, value);
-            return Expression.Lambda<Action<T, TProperty>>(call, new[] {instance, value}).Compile();
+            return Expression.Lambda<Action<T, TProperty>>(call, instance, value).Compile();
         }
     }
 }

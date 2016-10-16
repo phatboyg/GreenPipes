@@ -125,7 +125,7 @@ namespace GreenPipes.Filters
                 PipeFilters = new List<IFilter<TOutput>>();
             }
 
-            public IList<IFilter<TOutput>> PipeFilters { get; }
+            protected IList<IFilter<TOutput>> PipeFilters { get; }
 
             public IFilter<TInput> Filter => _filter.Value;
 

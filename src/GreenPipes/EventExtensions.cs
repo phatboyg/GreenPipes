@@ -18,9 +18,9 @@ namespace GreenPipes
     using Internals.Extensions;
 
 
-    public static class CommandExtensions
+    public static class EventExtensions
     {
-        public static Task SendCommand<T>(this IPipe<CommandContext> pipe, object values)
+        public static Task PublishEvent<T>(this IPipe<EventContext> pipe, object values)
             where T : class
         {
             if (pipe == null)
@@ -30,28 +30,28 @@ namespace GreenPipes
 
             var command = TypeCache<T>.InitializeFromObject(values);
 
-            var context = new Command<T>(command);
+            var context = new Event<T>(command);
 
             return pipe.Send(context);
         }
 
 
-        class Command<T> :
+        class Event<T> :
             BasePipeContext,
-            CommandContext<T>
+            EventContext<T>
             where T : class
         {
-            readonly T _command;
+            readonly T _event;
 
-            public Command(T command)
+            public Event(T @event)
             {
-                _command = command;
+                _event = @event;
                 Timestamp = DateTime.UtcNow;
             }
 
             public DateTime Timestamp { get; }
 
-            T CommandContext<T>.Command => _command;
+            T EventContext<T>.Event => _event;
         }
     }
 }
