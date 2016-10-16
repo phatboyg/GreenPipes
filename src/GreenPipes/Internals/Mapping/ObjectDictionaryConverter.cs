@@ -64,7 +64,7 @@ namespace GreenPipes.Internals.Mapping
             if (valueType.IsArray)
             {
                 var elementType = valueType.GetElementType();
-                if (elementType.IsValueType || (elementType == typeof(string)))
+                if (ValueObject.IsValueObjectType(elementType))
                     return new ValueDictionaryMapper<T>(property);
 
                 var elementConverter = _cache.GetConverter(elementType);
@@ -73,7 +73,7 @@ namespace GreenPipes.Internals.Mapping
                 return (IDictionaryMapper<T>)Activator.CreateInstance(converterType, property, elementConverter);
             }
 
-            if (valueType.IsValueType || (valueType == typeof(string)) || typeof(Exception).IsAssignableFrom(valueType))
+            if (ValueObject.IsValueObjectType(valueType))
                 return new ValueDictionaryMapper<T>(property);
 
             if (valueType.HasInterface(typeof(IEnumerable<>)))
@@ -84,24 +84,19 @@ namespace GreenPipes.Internals.Mapping
                 {
                     Type[] arguments = valueType.GetClosingArguments(typeof(IDictionary<,>)).ToArray();
                     var keyType = arguments[0];
-                    if (keyType.IsValueType || (keyType == typeof(string)))
+                    if (ValueObject.IsValueObjectType(keyType))
                     {
                         elementType = arguments[1];
-                        if (elementType.IsValueType || (elementType == typeof(string)))
+                        if (ValueObject.IsValueObjectType(elementType))
                         {
-                            var converterType =
-                                typeof(ValueValueDictionaryDictionaryMapper<,,>).MakeGenericType(typeof(T),
-                                    keyType, elementType);
+                            var converterType = typeof(ValueValueDictionaryDictionaryMapper<,,>).MakeGenericType(typeof(T), keyType, elementType);
                             return (IDictionaryMapper<T>)Activator.CreateInstance(converterType, property);
                         }
                         else
                         {
-                            var converterType =
-                                typeof(ValueObjectDictionaryDictionaryMapper<,,>).MakeGenericType(typeof(T),
-                                    keyType, elementType);
+                            var converterType = typeof(ValueObjectDictionaryDictionaryMapper<,,>).MakeGenericType(typeof(T), keyType, elementType);
                             var elementConverter = _cache.GetConverter(elementType);
-                            return
-                                (IDictionaryMapper<T>)Activator.CreateInstance(converterType, property, elementConverter);
+                            return (IDictionaryMapper<T>)Activator.CreateInstance(converterType, property, elementConverter);
                         }
                     }
 

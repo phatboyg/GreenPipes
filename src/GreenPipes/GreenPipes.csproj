@@ -161,6 +161,7 @@
     <Compile Include="Internals\Mapping\ValueArrayObjectMapper.cs" />
     <Compile Include="Internals\Mapping\ValueDictionaryMapper.cs" />
     <Compile Include="Internals\Mapping\ValueListObjectMapper.cs" />
+    <Compile Include="Internals\Mapping\ValueObject.cs" />
     <Compile Include="Internals\Mapping\ValueObjectDictionaryDictionaryMapper.cs" />
     <Compile Include="Internals\Mapping\ValueObjectDictionaryObjectMapper.cs" />
     <Compile Include="Internals\Mapping\ValueObjectMapper.cs" />

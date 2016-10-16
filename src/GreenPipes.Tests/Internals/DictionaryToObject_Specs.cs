@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Tests.Internals.Mapping
 {
+    using System;
     using System.Collections.Generic;
     using GreenPipes.Internals.Mapping;
     using GreenPipes.Internals.Reflection;
@@ -21,6 +22,117 @@ namespace GreenPipes.Tests.Internals.Mapping
     [TestFixture]
     public class Converting_a_dictionary_to_an_object
     {
+        IDictionary<string, object> _dictionary;
+        Values _values;
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            _dictionary = new Dictionary<string, object>
+            {
+                {"IntValue", 27},
+                {"StringValue", "Hello"},
+                {"LongValue", (long?)123},
+                {"ValueType", ValueType.Integer},
+                {"ValueTypeAsInt", 2},
+                {"Address", new Uri("loopback://localhost")},
+                {"Exception", new IntentionalTestException()},
+                {"ValueTypeAsString", "String"},
+                {
+                    "SubValue", new Dictionary<string, object>
+                    {
+                        {"A", "A"},
+                        {"B", "B"}
+                    }
+                },
+                {"StringValues", new object[] {"A", "B", "C"}},
+                {
+                    "SubValues", new object[]
+                    {
+                        new Dictionary<string, object>
+                        {
+                            {"A", "A"},
+                            {"B", "B"},
+                            {"Address", new Uri("loopback://localhost/1")}
+                        },
+                        new Dictionary<string, object>
+                        {
+                            {"A", "1"},
+                            {"B", "2"},
+                            {"Address", new Uri("loopback://localhost/2")}
+                        }
+                    }
+                },
+                {
+                    "ListOfSubValues", new object[]
+                    {
+                        new Dictionary<string, object>
+                        {
+                            {"A", "A"},
+                            {"B", "B"},
+                            {"Address", new Uri("loopback://localhost/1")},
+                            {"Exception", new IntentionalTestException()}
+                        },
+                        new Dictionary<string, object>
+                        {
+                            {"A", "1"},
+                            {"B", "2"},
+                            {"Address", new Uri("loopback://localhost/2")},
+                            {"Exception", new IntentionalTestException()}
+                        }
+                    }
+                },
+                {
+                    "BagOfDicts", new object[]
+                    {
+                        new object[] {"First", "One"},
+                        new object[] {"Second", "Two"},
+                    }
+                }
+            };
+
+
+            IObjectConverterCache converterCache = new DynamicObjectConverterCache(new DynamicImplementationBuilder());
+
+            _values = (Values)converterCache.GetConverter(typeof(Values)).GetObject(_dictionary);
+        }
+
+
+        public interface Values
+        {
+            int IntValue { get; }
+            string StringValue { get; }
+            long? LongValue { get; }
+            ValueType ValueType { get; }
+            ValueType ValueTypeAsInt { get; }
+            ValueType ValueTypeAsString { get; }
+            SubValue SubValue { get; }
+            string[] StringValues { get; }
+            SubValue[] SubValues { get; }
+            IList<SubValue> ListOfSubValues { get; }
+            IDictionary<string, string> BagOfDicts { get; }
+            Exception Exception { get; }
+            Uri Address { get; }
+        }
+
+
+        public interface SubValue
+        {
+            string A { get; }
+            string B { get; }
+            Uri Address { get; }
+            Exception Exception { get; }
+        }
+
+
+        public enum ValueType
+        {
+            Default,
+            String,
+            Integer
+        }
+
+
         [Test]
         public void Should_include_a_string()
         {
@@ -79,6 +191,8 @@ namespace GreenPipes.Tests.Internals.Mapping
 
             Assert.AreEqual("A", _values.ListOfSubValues[0].A);
             Assert.AreEqual("B", _values.ListOfSubValues[0].B);
+            Assert.AreEqual(new IntentionalTestException().Message, _values.ListOfSubValues[0].Exception.Message);
+            Assert.AreEqual("loopback://localhost/1", _values.ListOfSubValues[0].Address.ToString());
 
             Assert.AreEqual("1", _values.ListOfSubValues[1].A);
             Assert.AreEqual("2", _values.ListOfSubValues[1].B);
@@ -104,104 +218,6 @@ namespace GreenPipes.Tests.Internals.Mapping
 
             Assert.AreEqual("1", _values.SubValues[1].A);
             Assert.AreEqual("2", _values.SubValues[1].B);
-        }
-
-        IDictionary<string, object> _dictionary;
-        Values _values;
-
-        [OneTimeSetUp]
-        public void Setup()
-        {
-            _dictionary = new Dictionary<string, object>
-            {
-                {"IntValue", 27},
-                {"StringValue", "Hello"},
-                {"LongValue", (long?)123},
-                {"ValueType", ValueType.Integer},
-                {"ValueTypeAsInt", 2},
-                {"ValueTypeAsString", "String"},
-                {
-                    "SubValue", new Dictionary<string, object>
-                    {
-                        {"A", "A"},
-                        {"B", "B"}
-                    }
-                },
-                {"StringValues", new object[] {"A", "B", "C"}},
-                {
-                    "SubValues", new object[]
-                    {
-                        new Dictionary<string, object>
-                        {
-                            {"A", "A"},
-                            {"B", "B"}
-                        },
-                        new Dictionary<string, object>
-                        {
-                            {"A", "1"},
-                            {"B", "2"}
-                        }
-                    }
-                },
-                {
-                    "ListOfSubValues", new object[]
-                    {
-                        new Dictionary<string, object>
-                        {
-                            {"A", "A"},
-                            {"B", "B"}
-                        },
-                        new Dictionary<string, object>
-                        {
-                            {"A", "1"},
-                            {"B", "2"}
-                        }
-                    }
-                },
-                {
-                    "BagOfDicts", new object[]
-                    {
-                        new object[] {"First", "One"},
-                        new object[] {"Second", "Two"},
-                    }
-                }
-            };
-
-
-            IObjectConverterCache converterCache = new DynamicObjectConverterCache(new DynamicImplementationBuilder());
-
-            _values = (Values)converterCache.GetConverter(typeof(Values)).GetObject(_dictionary);
-        }
-
-
-        public interface Values
-        {
-            int IntValue { get; }
-            string StringValue { get; }
-            long? LongValue { get; }
-            ValueType ValueType { get; }
-            ValueType ValueTypeAsInt { get; }
-            ValueType ValueTypeAsString { get; }
-            SubValue SubValue { get; }
-            string[] StringValues { get; }
-            SubValue[] SubValues { get; }
-            IList<SubValue> ListOfSubValues { get; }
-            IDictionary<string, string> BagOfDicts { get; }
-        }
-
-
-        public interface SubValue
-        {
-            string A { get; }
-            string B { get; }
-        }
-
-
-        public enum ValueType
-        {
-            Default,
-            String,
-            Integer
         }
     }
 }

@@ -50,9 +50,7 @@ namespace GreenPipes.Internals.Mapping
             var underlyingType = Nullable.GetUnderlyingType(valueType);
             if (underlyingType != null)
             {
-                var converterType =
-                    typeof(NullableValueObjectMapper<,>).MakeGenericType(typeof(TImplementation),
-                        underlyingType);
+                var converterType = typeof(NullableValueObjectMapper<,>).MakeGenericType(typeof(TImplementation), underlyingType);
 
                 return (IObjectMapper<TImplementation>)Activator.CreateInstance(converterType, property);
             }
@@ -63,22 +61,19 @@ namespace GreenPipes.Internals.Mapping
             if (valueType.IsArray)
             {
                 var elementType = valueType.GetElementType();
-                if (elementType.IsValueType || (elementType == typeof(string)))
+                if (ValueObject.IsValueObjectType(elementType))
                 {
-                    var valueConverterType = typeof(ValueArrayObjectMapper<,>).MakeGenericType(
-                        typeof(TImplementation), elementType);
+                    var valueConverterType = typeof(ValueArrayObjectMapper<,>).MakeGenericType(typeof(TImplementation), elementType);
                     return (IObjectMapper<TImplementation>)Activator.CreateInstance(valueConverterType, property);
                 }
 
                 var elementConverter = _cache.GetConverter(elementType);
 
-                var converterType = typeof(ObjectArrayObjectMapper<,>).MakeGenericType(typeof(TImplementation),
-                    elementType);
-                return
-                    (IObjectMapper<TImplementation>)Activator.CreateInstance(converterType, property, elementConverter);
+                var converterType = typeof(ObjectArrayObjectMapper<,>).MakeGenericType(typeof(TImplementation), elementType);
+                return (IObjectMapper<TImplementation>)Activator.CreateInstance(converterType, property, elementConverter);
             }
 
-            if (valueType.IsValueType || (valueType == typeof(string)))
+            if (ValueObject.IsValueObjectType(valueType))
                 return new ValueObjectMapper<TImplementation>(property);
 
             if (valueType.ClosesType(typeof(IEnumerable<>)))
@@ -91,27 +86,20 @@ namespace GreenPipes.Internals.Mapping
                     var elementType = genericArguments[1];
 
 
-                    if (keyType.IsValueType || (keyType == typeof(string)))
-                        if (elementType.IsValueType || (elementType == typeof(string)))
+                    if (ValueObject.IsValueObjectType(keyType))
+                        if (ValueObject.IsValueObjectType(elementType))
                         {
-                            var valueConverterType =
-                                typeof(ValueValueDictionaryObjectMapper<,,>).MakeGenericType(typeof(TImplementation),
-                                    keyType, elementType);
+                            var valueConverterType = typeof(ValueValueDictionaryObjectMapper<,,>).MakeGenericType(typeof(TImplementation), keyType, elementType);
                             return (IObjectMapper<TImplementation>)Activator.CreateInstance(valueConverterType, property);
                         }
                         else
                         {
                             var elementConverter = _cache.GetConverter(elementType);
-                            var valueConverterType =
-                                typeof(ValueObjectDictionaryObjectMapper<,,>).MakeGenericType(typeof(TImplementation),
-                                    keyType, elementType);
-                            return
-                                (IObjectMapper<TImplementation>)
-                                    Activator.CreateInstance(valueConverterType, property, elementConverter);
+                            var valueConverterType = typeof(ValueObjectDictionaryObjectMapper<,,>).MakeGenericType(typeof(TImplementation), keyType, elementType);
+                            return (IObjectMapper<TImplementation>)Activator.CreateInstance(valueConverterType, property, elementConverter);
                         }
 
-                    throw new InvalidOperationException("A dictionary with a reference type key is not supported: "
-                        + property.Property.Name);
+                    throw new InvalidOperationException("A dictionary with a reference type key is not supported: " + property.Property.Name);
                 }
 
 
@@ -120,22 +108,18 @@ namespace GreenPipes.Internals.Mapping
                     Type[] genericArguments = valueType.GetClosingArguments(typeof(IEnumerable<>)).ToArray();
                     var elementType = genericArguments[0];
 
-                    if (elementType.IsValueType || (elementType == typeof(string)))
+                    if (ValueObject.IsValueObjectType(elementType))
                     {
-                        var valueConverterType =
-                            typeof(ValueListObjectMapper<,>).MakeGenericType(typeof(TImplementation),
-                                elementType);
+                        var valueConverterType = typeof(ValueListObjectMapper<,>).MakeGenericType(typeof(TImplementation), elementType);
 
                         return (IObjectMapper<TImplementation>)Activator.CreateInstance(valueConverterType, property);
                     }
 
                     var elementConverter = _cache.GetConverter(elementType);
 
-                    var converterType = typeof(ObjectListObjectMapper<,>).MakeGenericType(typeof(TImplementation),
-                        elementType);
+                    var converterType = typeof(ObjectListObjectMapper<,>).MakeGenericType(typeof(TImplementation), elementType);
 
-                    return (IObjectMapper<TImplementation>)Activator.CreateInstance(converterType, property,
-                        elementConverter);
+                    return (IObjectMapper<TImplementation>)Activator.CreateInstance(converterType, property, elementConverter);
                 }
             }
 
