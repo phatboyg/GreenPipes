@@ -30,9 +30,9 @@ namespace GreenPipes.Configurators
             _specifications = new List<IPipeSpecification<TContext>>();
         }
 
-        IEnumerable<ValidationResult> ISpecification.Validate()
+        IEnumerable<ValidationResult> ISpecification.Validate(ValidationContext context)
         {
-            return _specifications.SelectMany(x => x.Validate());
+            return _specifications.SelectMany(x => x.Validate(context));
         }
 
         void IPipeConfigurator<TContext>.AddPipeSpecification(IPipeSpecification<TContext> specification)
@@ -57,7 +57,14 @@ namespace GreenPipes.Configurators
 
         void ValidatePipeConfiguration()
         {
-            IPipeConfigurationResult result = new PipeConfigurationResult(_specifications.SelectMany(x => x.Validate()));
+            var context = new PipeValidationContext();
+
+            IPipeConfigurationResult result = new PipeConfigurationResult(_specifications.SelectMany(x =>
+            {
+                context.Current = x;
+
+                return x.Validate(context);
+            }));
             if (result.ContainsFailure)
                 throw new PipeConfigurationException(result.GetMessage("The pipe configuration was invalid"));
         }

@@ -58,12 +58,12 @@ namespace GreenPipes.Specifications
             builder.AddFilter(bindFilter);
         }
 
-        IEnumerable<ValidationResult> ISpecification.Validate()
+        IEnumerable<ValidationResult> ISpecification.Validate(ValidationContext context)
         {
             if (_filterFactory == null)
                 yield return this.Failure("FilterFactory", "must not be null");
 
-            foreach (var result in _pipeConfigurator.Validate())
+            foreach (var result in _pipeConfigurator.Validate(context))
             {
                 yield return result;
             }

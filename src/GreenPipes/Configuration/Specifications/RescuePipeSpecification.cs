@@ -44,12 +44,12 @@ namespace GreenPipes.Specifications
             builder.AddFilter(new RescueFilter<TContext, TRescue>(rescuePipe, Filter, _rescueContextFactory));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             if (_rescueContextFactory == null)
                 yield return this.Failure("RescueContextFactory", "must not be null");
 
-            foreach (var result in _pipeConfigurator.Validate())
+            foreach (var result in _pipeConfigurator.Validate(context))
                 yield return result;
         }
 

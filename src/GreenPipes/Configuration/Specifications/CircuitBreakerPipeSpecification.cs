@@ -63,7 +63,7 @@ namespace GreenPipes.Specifications
             builder.AddFilter(new CircuitBreakerFilter<T>(_settings, Filter));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             if (_settings.ActiveThreshold < 1)
                 yield return this.Failure(nameof(_settings.ActiveThreshold), "must be >= 1");

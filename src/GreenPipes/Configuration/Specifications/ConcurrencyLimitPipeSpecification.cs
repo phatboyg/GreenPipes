@@ -45,7 +45,7 @@ namespace GreenPipes.Specifications
             _router?.ConnectPipe(filter);
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             if (_concurrencyLimit < 1)
                 yield return this.Failure("ConcurrencyLimit", "must be >= 1");

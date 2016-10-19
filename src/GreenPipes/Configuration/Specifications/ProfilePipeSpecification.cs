@@ -35,7 +35,7 @@ namespace GreenPipes.Specifications
             builder.AddFilter(new ProfileFilter<T>(_reportProfileData, _trivialThreshold));
         }
 
-        IEnumerable<ValidationResult> ISpecification.Validate()
+        IEnumerable<ValidationResult> ISpecification.Validate(ValidationContext context)
         {
             if (_reportProfileData == null)
                 yield return this.Failure("ReportProfileData", "must not be null");

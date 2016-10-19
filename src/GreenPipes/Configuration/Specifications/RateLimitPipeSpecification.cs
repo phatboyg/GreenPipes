@@ -41,7 +41,7 @@ namespace GreenPipes.Specifications
             _router?.ConnectPipe(filter);
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             if (_rateLimit < 1)
                 yield return this.Failure("RateLimit", "must be >= 1");

@@ -150,7 +150,7 @@ namespace GreenPipes.Tests
             builder.AddFilter(new SampleAuthenticationFilter<T>(_authPipe, _unauthPipe, _allowedRoles));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             if (_allowedRoles == null || !_allowedRoles.Any())
                 yield return this.Failure("SampleAuthenticationFilter", "You need to supply roles");

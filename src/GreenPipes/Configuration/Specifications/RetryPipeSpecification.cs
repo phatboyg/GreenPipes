@@ -39,7 +39,7 @@ namespace GreenPipes.Specifications
             builder.AddFilter(new RetryFilter<TContext>(retryPolicy, _observers));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             if (_policyFactory == null)
                 yield return this.Failure("RetryPolicy", "must not be null");

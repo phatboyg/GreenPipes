@@ -53,7 +53,7 @@ namespace GreenPipes.Specifications
             builder.AddFilter(dispatchFilter);
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             if (_pipeContextConverterFactory == null)
                 yield return this.Failure("PipeContextProviderFactory", "must not be null");

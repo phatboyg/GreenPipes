@@ -46,7 +46,7 @@ namespace GreenPipes.Specifications
             builder.AddFilter(new PartitionFilter<T>(_keyProvider, partitioner));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             if (_keyProvider == null)
                 yield return this.Failure("KeyProvider", "must not be null");

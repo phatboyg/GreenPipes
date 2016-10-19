@@ -45,7 +45,7 @@ namespace GreenPipes.Specifications
             _specification.Apply(splitBuilder);
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             if (_specification == null)
                 yield return this.Failure("Specification", "must not be null");

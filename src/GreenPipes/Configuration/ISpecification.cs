@@ -26,8 +26,9 @@ namespace GreenPipes
         /// <summary>
         /// Validate the specification, ensuring that a successful build will occur.
         /// </summary>
+        /// <param name="context">The validation context used to store metadata about required and provided payloads</param>
         /// <returns></returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        IEnumerable<ValidationResult> Validate();
+        IEnumerable<ValidationResult> Validate(ValidationContext context);
     }
 }

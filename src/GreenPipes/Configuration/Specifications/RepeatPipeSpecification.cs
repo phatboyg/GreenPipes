@@ -33,7 +33,7 @@ namespace GreenPipes.Specifications
             builder.AddFilter(new RepeatFilter<T>(_cancellationToken));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             yield break;
         }

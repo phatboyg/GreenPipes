@@ -35,7 +35,7 @@ namespace GreenPipes.Specifications
             builder.AddFilter(_filter);
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             if (_filter == null)
                 yield return this.Failure("Filter", "must not be null");

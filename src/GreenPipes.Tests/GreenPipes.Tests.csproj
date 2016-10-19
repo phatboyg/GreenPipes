@@ -78,6 +78,7 @@
     <Compile Include="Rescue_Specs.cs" />
     <Compile Include="Retry_Specs.cs" />
     <Compile Include="SerializerCache.cs" />
+    <Compile Include="ValidationDependency_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GreenPipes\GreenPipes.csproj">

@@ -63,6 +63,10 @@
     <Compile Include="Configuration\Configurators\IRetryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RequestConfigurator.cs" />
     <Compile Include="Configuration\Configurators\ResultConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\PayloadProvider.cs" />
+    <Compile Include="Configuration\Configurators\PipePayloadProvider.cs" />
+    <Compile Include="Configuration\Configurators\PipeValidationContext.cs" />
+    <Compile Include="Configuration\Configurators\PipeValidationScope.cs" />
     <Compile Include="Configuration\Configurators\RetryPolicyFactory.cs" />
     <Compile Include="Configuration\DispatchConfigurationExtensions.cs" />
     <Compile Include="Configuration\ForkConfigurationExtensions.cs" />
@@ -81,6 +85,8 @@
     <Compile Include="Configuration\IPipeSpecification.cs" />
     <Compile Include="Configuration\LogConfigurationExtensions.cs" />
     <Compile Include="Configuration\PartitionerConfigurationExtensions.cs" />
+    <Compile Include="Configuration\PartitionerPipeConfigurationExtensions.cs" />
+    <Compile Include="Configuration\PayloadProviderInfo.cs" />
     <Compile Include="Configuration\ProfileConfigurationExtensions.cs" />
     <Compile Include="Configuration\RateLimitConfigurationExtensions.cs" />
     <Compile Include="Configuration\RepeatPipeConfigurationExtensions.cs" />
@@ -108,6 +114,7 @@
     <Compile Include="Configuration\Specifications\RepeatPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\RescuePipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\RetryPipeSpecification.cs" />
+    <Compile Include="Configuration\ValidationContext.cs" />
     <Compile Include="Configuration\ValidationResult.cs" />
     <Compile Include="Configuration\ValidationResultDisposition.cs" />
     <Compile Include="Configuration\ValidationResultExtensions.cs" />

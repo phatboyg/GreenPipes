@@ -36,7 +36,7 @@ namespace GreenPipes.Specifications
             builder.AddFilter(new LogFilter<T>(_writer, _formatter));
         }
 
-        IEnumerable<ValidationResult> ISpecification.Validate()
+        IEnumerable<ValidationResult> ISpecification.Validate(ValidationContext context)
         {
             if (_writer == null)
                 yield return this.Failure("TextWriter", "must not be null");

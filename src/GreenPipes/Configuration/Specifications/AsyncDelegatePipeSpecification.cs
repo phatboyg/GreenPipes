@@ -34,7 +34,7 @@ namespace GreenPipes.Specifications
             builder.AddFilter(new AsyncDelegateFilter<T>(_callback));
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
             if (_callback == null)
                 yield return this.Failure("Callback", "must not be null");
