@@ -33,9 +33,9 @@ namespace GreenPipes.Partitioning
             _limit = new SemaphoreSlim(1);
         }
 
-        public async Task DisposeAsync()
+        public async Task DisposeAsync(CancellationToken cancellationToken)
         {
-            await WaitForRunningTasks(CancellationToken.None).ConfigureAwait(false);
+            await WaitForRunningTasks(cancellationToken).ConfigureAwait(false);
 
             _limit?.Dispose();
         }

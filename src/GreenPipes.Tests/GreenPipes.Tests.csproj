@@ -68,6 +68,7 @@
     <Compile Include="LayeredRetry_Specs.cs" />
     <Compile Include="Observer_Specs.cs" />
     <Compile Include="Parent_Child_Pipes.cs" />
+    <Compile Include="PartitionByKey_Specs.cs" />
     <Compile Include="Profile_Specs.cs" />
     <Compile Include="RateLimit_Specs.cs" />
     <Compile Include="RescueContext_Specs.cs" />

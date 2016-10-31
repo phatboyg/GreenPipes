@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,12 +14,12 @@ namespace GreenPipes.Partitioning
 {
     using System;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
 
     public class Partitioner :
-        IPartitioner,
-        IAsyncDisposable
+        IPartitioner
     {
         readonly IHashGenerator _hashGenerator;
         readonly string _id;
@@ -37,9 +37,9 @@ namespace GreenPipes.Partitioning
                 .ToArray();
         }
 
-        public Task DisposeAsync()
+        public Task DisposeAsync(CancellationToken cancellationToken)
         {
-            return Task.WhenAll(_partitions.Select(x => x.DisposeAsync()));
+            return Task.WhenAll(_partitions.Select(x => x.DisposeAsync(cancellationToken)));
         }
 
         IPartitioner<T> IPartitioner.GetPartitioner<T>(PartitionKeyProvider<T> keyProvider)
@@ -54,9 +54,7 @@ namespace GreenPipes.Partitioning
             scope.Add("partitionCount", _partitionCount);
 
             for (var i = 0; i < _partitions.Length; i++)
-            {
                 _partitions[i].Probe(scope);
-            }
         }
 
         Task Send<T>(byte[] key, T context, IPipe<T> next) where T : class, PipeContext
@@ -94,6 +92,11 @@ namespace GreenPipes.Partitioning
             public void Probe(ProbeContext context)
             {
                 _partitioner.Probe(context);
+            }
+
+            public Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
+            {
+                return _partitioner.DisposeAsync(cancellationToken);
             }
         }
     }
