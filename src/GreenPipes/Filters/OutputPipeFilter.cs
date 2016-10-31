@@ -76,7 +76,6 @@ namespace GreenPipes.Filters
                 }
                 catch (Exception ex)
                 {
-                    // we can't await in a catch block, so we have to wait explicitly on this one
                     if (_observers.Count > 0)
                     {
                         await _observers.SendFault(pipeContext, ex).ConfigureAwait(false);
