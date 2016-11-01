@@ -106,6 +106,7 @@ namespace GreenPipes.Tests
         }
 
 
+
         public interface RequestContext<out TRequest> :
             RequestContext
         {
@@ -115,6 +116,7 @@ namespace GreenPipes.Tests
             TRequest Request { get; }
 
             bool TrySetResponse<TResponse>(TResponse response);
+
             bool TrySetResponse<TResponse>(Task<TResponse> response);
         }
 
