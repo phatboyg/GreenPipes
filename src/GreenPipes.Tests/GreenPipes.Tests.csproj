@@ -71,6 +71,7 @@
     <Compile Include="PartitionByKey_Specs.cs" />
     <Compile Include="Profile_Specs.cs" />
     <Compile Include="RateLimit_Specs.cs" />
+    <Compile Include="Request_Specs.cs" />
     <Compile Include="RescueContext_Specs.cs" />
     <Compile Include="Rescue_Specs.cs" />
     <Compile Include="Response_Specs.cs" />

@@ -10,7 +10,7 @@ namespace GreenPipes.Tests
 {
     public class Authentication_Specs
     {
-        IPipe<RequestContext> _thePipe;
+        IPipe<RequestContextImpl> _thePipe;
         bool protectedBusinessAction;
         bool cleanUp;
         bool rejected;
@@ -22,7 +22,7 @@ namespace GreenPipes.Tests
             cleanUp = false;
             rejected = false;
 
-            var authPipe = Pipe.New<RequestContext>(cfg =>
+            var authPipe = Pipe.New<RequestContextImpl>(cfg =>
             {
                 cfg.UseExecute(cxt =>
                 {
@@ -30,7 +30,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            var unauthPipe = Pipe.New<RequestContext>(cfg =>
+            var unauthPipe = Pipe.New<RequestContextImpl>(cfg =>
             {
                 cfg.UseExecute(cxt =>
                 {
@@ -38,7 +38,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            _thePipe = Pipe.New<RequestContext>(cfg =>
+            _thePipe = Pipe.New<RequestContextImpl>(cfg =>
             {
                 cfg.UseAuthFilter(authPipe, unauthPipe, "bob");
                 cfg.UseExecute(cxt =>
@@ -59,7 +59,7 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Authenticated()
         {
-            var request = new RequestContext();
+            var request = new RequestContextImpl();
             request.GetOrAddPayload(() => new GenericPrincipal(new GenericIdentity("Gizmo"), new []{"bob"} ));
 
             await _thePipe.Send(request).ConfigureAwait(false);
@@ -72,7 +72,7 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Unauthenticated()
         {
-            var request = new RequestContext();
+            var request = new RequestContextImpl();
             request.GetOrAddPayload(() => System.Threading.Thread.CurrentPrincipal);
 
             await _thePipe.Send(request).ConfigureAwait(false);
@@ -87,7 +87,7 @@ namespace GreenPipes.Tests
         {
             bool protectedBusinessAction = false;
 
-            var authPipe = Pipe.New<RequestContext>(cfg =>
+            var authPipe = Pipe.New<RequestContextImpl>(cfg =>
             {
                 cfg.UseExecute(cxt =>
                 {
@@ -95,14 +95,14 @@ namespace GreenPipes.Tests
                 });
             });
 
-            var unauthPipe = Pipe.New<RequestContext>(cfg =>
+            var unauthPipe = Pipe.New<RequestContextImpl>(cfg =>
             {
 
             });
 
             Assert.That(() =>
             {
-                Pipe.New<RequestContext>(cfg =>
+                Pipe.New<RequestContextImpl>(cfg =>
                 {
                     cfg.UseAuthFilter(authPipe, unauthPipe);
                 });
@@ -113,7 +113,7 @@ namespace GreenPipes.Tests
 
     //A random context
     //Notice: No mention of IPrincipal any where
-    public class RequestContext :
+    public class RequestContextImpl :
         BasePipeContext,
         PipeContext
     {
