@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Routers
+namespace GreenPipes.Contexts
 {
     using System;
     using System.Linq;
@@ -18,31 +18,31 @@ namespace GreenPipes.Routers
     using Internals.Extensions;
 
 
-    public class ResultConverterFactory :
-        IPipeContextConverterFactory<ResultContext>
+    public class RequestConverterFactory :
+        IPipeContextConverterFactory<PipeContext>
     {
-        IPipeContextConverter<ResultContext, TOutput> IPipeContextConverterFactory<ResultContext>.GetConverter<TOutput>()
+        IPipeContextConverter<PipeContext, TOutput> IPipeContextConverterFactory<PipeContext>.GetConverter<TOutput>()
         {
-            if (typeof(TOutput).HasInterface<ResultContext>())
+            if (typeof(TOutput).HasInterface<RequestContext>())
             {
-                Type[] innerType = typeof(TOutput).GetClosingArguments(typeof(ResultContext<,>)).ToArray();
+                var innerType = typeof(TOutput).GetClosingArguments(typeof(RequestContext<>)).Single();
 
-                return (IPipeContextConverter<ResultContext, TOutput>)Activator.CreateInstance(typeof(ResultContextConverter<,>).MakeGenericType(innerType));
+                return (IPipeContextConverter<PipeContext, TOutput>)Activator.CreateInstance(typeof(RequestContextConverter<>).MakeGenericType(innerType));
             }
 
             throw new ArgumentException($"The output type is not supported: {TypeCache<TOutput>.ShortName}", nameof(TOutput));
         }
 
 
-        class ResultContextConverter<TRequest, TResult> :
-            IPipeContextConverter<ResultContext, ResultContext<TRequest, TResult>>
+        class RequestContextConverter<TRequest> :
+            IPipeContextConverter<PipeContext, RequestContext<TRequest>>
             where TRequest : class
-            where TResult : class
         {
-            bool IPipeContextConverter<ResultContext, ResultContext<TRequest, TResult>>.TryConvert(ResultContext input,
-                out ResultContext<TRequest, TResult> output)
+            bool IPipeContextConverter<PipeContext, RequestContext<TRequest>>.TryConvert(PipeContext input,
+                out RequestContext<TRequest> output)
             {
-                var outputContext = input as ResultContext<TRequest, TResult>;
+                var outputContext = input as RequestContext<TRequest>;
+
                 if (outputContext != null)
                 {
                     output = outputContext;

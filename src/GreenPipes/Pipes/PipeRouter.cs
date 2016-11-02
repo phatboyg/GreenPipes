@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Pipes
 {
-    using Routers;
+    using Contexts;
 
 
     public class PipeRouter :

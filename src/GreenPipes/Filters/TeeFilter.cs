@@ -47,7 +47,7 @@ namespace GreenPipes.Filters
         [DebuggerNonUserCode]
         public async Task Send(TContext context, IPipe<TContext> next)
         {
-            await _connections.ForEachAsync(async pipe => await pipe.Send(context).ConfigureAwait(false)).ConfigureAwait(false);
+            await _connections.ForEachAsync(pipe => pipe.Send(context)).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
         }

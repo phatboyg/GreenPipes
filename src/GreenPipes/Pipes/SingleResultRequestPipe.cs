@@ -14,8 +14,8 @@ namespace GreenPipes.Pipes
 {
     using System;
     using System.Threading.Tasks;
+    using Contexts;
     using Internals.Extensions;
-    using PipeContexts;
 
 
     /// <summary>
@@ -37,14 +37,14 @@ namespace GreenPipes.Pipes
             _requestPipe = requestPipe;
         }
 
-        public async Task<ResultContext<TResult>> Send(TRequest request)
+        public Task<ResultContext<TResult>> Send(TRequest request)
         {
             var context = new SingleResultRequestContext<TRequest, TResult>(request, _resultPipe);
             try
             {
-                await _requestPipe.Send(context).ConfigureAwait(false);
+                SendRequest(context);
 
-                return await context.Result.ConfigureAwait(false);
+                return context.Result;
             }
             catch (TaskCanceledException)
             {
@@ -68,6 +68,13 @@ namespace GreenPipes.Pipes
 
             _requestPipe.Probe(scope.CreateScope("requestPipe"));
             _resultPipe.Probe(scope.CreateScope("resultPipe"));
+        }
+
+        void SendRequest(RequestContext context)
+        {
+            _requestPipe.Send(context)
+                .ContinueWith(task => context.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled)
+                .ContinueWith(task => context.TrySetException(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
         }
     }
 }

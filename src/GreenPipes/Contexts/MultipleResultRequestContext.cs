@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Pipes.PipeContexts
+namespace GreenPipes.Contexts
 {
     using System;
     using System.Threading.Tasks;
@@ -21,38 +21,54 @@ namespace GreenPipes.Pipes.PipeContexts
         RequestContext<TRequest>
         where TRequest : class
     {
-        readonly TaskCompletionSource<ResultContext> _response;
         readonly IPipe<ResultContext> _resultPipe;
+        readonly TaskCompletionSource<ResultContext> _resultTask;
+        ResultContext _resultContext;
 
         public MultipleResultRequestContext(TRequest request, IPipe<ResultContext> resultPipe)
         {
             _resultPipe = resultPipe;
             Request = request;
 
-            _response = new TaskCompletionSource<ResultContext>();
+            _resultTask = new TaskCompletionSource<ResultContext>();
         }
 
-        public Task<ResultContext> Result => _response.Task;
+        public Task<ResultContext> Result => _resultTask.Task;
 
         public TRequest Request { get; }
 
-        async Task<bool> RequestContext<TRequest>.TrySetResult<T>(T result)
+        async Task<bool> RequestContext.TrySetResult<T>(T result)
         {
             var resultContext = new PipeResultContext<TRequest, T>(Request, result);
 
             await _resultPipe.Send(resultContext).ConfigureAwait(false);
 
-            return _response.TrySetResult(resultContext);
+            var resultWasSet = _resultTask.TrySetResult(resultContext);
+            if (resultWasSet)
+                _resultContext = resultContext;
+
+            return resultWasSet;
         }
 
         public bool TrySetException(Exception exception)
         {
-            return _response.TrySetException(exception);
+            return _resultTask.TrySetException(exception);
         }
 
         public bool TrySetCanceled()
         {
-            return _response.TrySetCanceled();
+            return _resultTask.TrySetCanceled();
+        }
+
+        public bool HasResult => _resultContext != null;
+
+        bool RequestContext.TryGetResult<T>(out T result)
+        {
+            if ((_resultContext != null) && _resultContext.TryGetResult(out result))
+                return true;
+
+            result = default(T);
+            return false;
         }
     }
 }
