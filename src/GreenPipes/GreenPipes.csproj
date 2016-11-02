@@ -238,9 +238,9 @@
     <Compile Include="KeyAccessor.cs" />
     <Compile Include="Contracts\CommandContext.cs" />
     <Compile Include="Pipes\MultipleResultRequestPipe.cs" />
-    <Compile Include="Pipes\PipeContexts\MultipleResultRequestContext.cs" />
-    <Compile Include="Pipes\PipeContexts\SingleResultRequestContext.cs" />
-    <Compile Include="Pipes\PipeContexts\PipeResultContext.cs" />
+    <Compile Include="Contexts\MultipleResultRequestContext.cs" />
+    <Compile Include="Contexts\SingleResultRequestContext.cs" />
+    <Compile Include="Contexts\PipeResultContext.cs" />
     <Compile Include="Pipes\SingleResultRequestPipe.cs" />
     <Compile Include="Policies\BaseRetryContext.cs" />
     <Compile Include="Policies\RetryFaultedContextCache.cs" />
@@ -248,7 +248,7 @@
     <Compile Include="ResultContext.cs" />
     <Compile Include="ResultExtensions.cs" />
     <Compile Include="RetryFaultedExtensions.cs" />
-    <Compile Include="Routers\PipeContextConverterFactory.cs" />
+    <Compile Include="Contexts\PipeContextConverterFactory.cs" />
     <Compile Include="FilterContextProvider.cs" />
     <Compile Include="MergeFilterContextProvider.cs" />
     <Compile Include="Payloads\PipeContextPayloadAdapter.cs" />
@@ -314,8 +314,8 @@
     <Compile Include="RateLimitExtensions.cs" />
     <Compile Include="RetryContext.cs" />
     <Compile Include="RetryPolicyContext.cs" />
-    <Compile Include="Routers\RequestContextConverterFactory.cs" />
-    <Compile Include="Routers\ResultConverterFactory.cs" />
+    <Compile Include="Contexts\RequestContextConverterFactory.cs" />
+    <Compile Include="Contexts\ResultConverterFactory.cs" />
     <Compile Include="Util\Connectable.cs" />
     <Compile Include="Util\TaskUtil.cs" />
   </ItemGroup>

@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Pipes.PipeContexts
+namespace GreenPipes.Contexts
 {
     using System;
     using System.Threading.Tasks;
@@ -23,38 +23,54 @@ namespace GreenPipes.Pipes.PipeContexts
         where TRequest : class
         where TResult : class
     {
-        readonly TaskCompletionSource<ResultContext<TResult>> _response;
         readonly IPipe<ResultContext<TRequest, TResult>> _resultPipe;
+        readonly TaskCompletionSource<ResultContext<TResult>> _resultTask;
+        ResultContext<TResult> _resultContext;
 
         public SingleResultRequestContext(TRequest request, IPipe<ResultContext<TRequest, TResult>> resultPipe)
         {
             _resultPipe = resultPipe;
             Request = request;
 
-            _response = new TaskCompletionSource<ResultContext<TResult>>();
+            _resultTask = new TaskCompletionSource<ResultContext<TResult>>();
         }
 
-        public Task<ResultContext<TResult>> Result => _response.Task;
+        public Task<ResultContext<TResult>> Result => _resultTask.Task;
 
         public TRequest Request { get; }
 
-        Task<bool> RequestContext<TRequest>.TrySetResult<T>(T result)
+        Task<bool> RequestContext.TrySetResult<T>(T result)
         {
-            var self = this as SingleResultRequestContext<TRequest, T>;
-            if (self != null)
-                return self.SetResult(result);
+            if (typeof(TResult).IsAssignableFrom(typeof(T)))
+            {
+                if (result == null)
+                    return SetResult(null);
+
+                return SetResult(result as TResult);
+            }
 
             return TaskUtil.False;
         }
 
         public bool TrySetException(Exception exception)
         {
-            return _response.TrySetException(exception);
+            return _resultTask.TrySetException(exception);
         }
 
         public bool TrySetCanceled()
         {
-            return _response.TrySetCanceled();
+            return _resultTask.TrySetCanceled();
+        }
+
+        public bool HasResult => _resultContext != null;
+
+        bool RequestContext.TryGetResult<T>(out T result)
+        {
+            if ((_resultContext != null) && _resultContext.TryGetResult(out result))
+                return true;
+
+            result = default(T);
+            return false;
         }
 
         async Task<bool> SetResult(TResult result)
@@ -63,7 +79,11 @@ namespace GreenPipes.Pipes.PipeContexts
 
             await _resultPipe.Send(resultContext).ConfigureAwait(false);
 
-            return _response.TrySetResult(resultContext);
+            var resultWasSet = _resultTask.TrySetResult(resultContext);
+            if (resultWasSet)
+                _resultContext = resultContext;
+
+            return resultWasSet;
         }
     }
 }

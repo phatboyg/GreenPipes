@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Routers
+namespace GreenPipes.Contexts
 {
     using System;
     using System.Linq;
@@ -52,32 +52,13 @@ namespace GreenPipes.Routers
 
                 if (outputContext != null)
                 {
-                    output = new Command<T>(outputContext);
+                    output = outputContext;
                     return true;
                 }
 
                 output = null;
                 return false;
             }
-        }
-
-
-        class Command<T> :
-            BasePipeContext,
-            CommandContext<T>
-            where T : class
-        {
-            readonly CommandContext<T> _context;
-
-            public Command(CommandContext<T> context)
-                : base(context)
-            {
-                _context = context;
-            }
-
-            public DateTime Timestamp => _context.Timestamp;
-
-            T CommandContext<T>.Command => _context.Command;
         }
 
 
@@ -91,32 +72,13 @@ namespace GreenPipes.Routers
 
                 if (outputContext != null)
                 {
-                    output = new Event<T>(outputContext);
+                    output = outputContext;
                     return true;
                 }
 
                 output = null;
                 return false;
             }
-        }
-
-
-        class Event<T> :
-            BasePipeContext,
-            EventContext<T>
-            where T : class
-        {
-            readonly EventContext<T> _context;
-
-            public Event(EventContext<T> context)
-                : base(context)
-            {
-                _context = context;
-            }
-
-            public DateTime Timestamp => _context.Timestamp;
-
-            T EventContext<T>.Event => _context.Event;
         }
     }
 }

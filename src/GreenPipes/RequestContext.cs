@@ -19,21 +19,19 @@ namespace GreenPipes
     public interface RequestContext :
         PipeContext
     {
-    }
-
-
-    /// <summary>
-    /// The context of a request sent to a pipe
-    /// </summary>
-    /// <typeparam name="TRequest"></typeparam>
-    public interface RequestContext<out TRequest> :
-        RequestContext
-        where TRequest : class
-    {
         /// <summary>
-        /// The request type that was sent to the pipe
+        /// True if the request has been completed and a result specified
         /// </summary>
-        TRequest Request { get; }
+        bool HasResult { get; }
+
+        /// <summary>
+        /// Attempts to retrieve the result from the request that was set
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        bool TryGetResult<T>(out T result)
+            where T : class;
 
         /// <summary>
         /// Attempt to specify a result for the request
@@ -56,5 +54,20 @@ namespace GreenPipes
         /// </summary>
         /// <returns></returns>
         bool TrySetCanceled();
+    }
+
+
+    /// <summary>
+    /// The context of a request sent to a pipe
+    /// </summary>
+    /// <typeparam name="TRequest"></typeparam>
+    public interface RequestContext<out TRequest> :
+        RequestContext
+        where TRequest : class
+    {
+        /// <summary>
+        /// The request type that was sent to the pipe
+        /// </summary>
+        TRequest Request { get; }
     }
 }
