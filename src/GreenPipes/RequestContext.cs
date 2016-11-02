@@ -28,6 +28,7 @@ namespace GreenPipes
     /// <typeparam name="TRequest"></typeparam>
     public interface RequestContext<out TRequest> :
         RequestContext
+        where TRequest : class
     {
         /// <summary>
         /// The request type that was sent to the pipe
@@ -37,10 +38,11 @@ namespace GreenPipes
         /// <summary>
         /// Attempt to specify a result for the request
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="result"></param>
+        /// <typeparam name="T">The result type</typeparam>
+        /// <param name="result">The result</param>
         /// <returns>True if the response was accepted, false if a response was already accepted</returns>
-        Task<bool> TrySetResult<T>(T result);
+        Task<bool> TrySetResult<T>(T result)
+            where T : class;
 
         /// <summary>
         /// Specify that the request faulted and will have an exception

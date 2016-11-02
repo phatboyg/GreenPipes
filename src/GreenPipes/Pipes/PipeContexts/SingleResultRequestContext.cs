@@ -17,14 +17,16 @@ namespace GreenPipes.Pipes.PipeContexts
     using Util;
 
 
-    public class SingeResultRequestContext<TRequest, TResult> :
+    public class SingleResultRequestContext<TRequest, TResult> :
         BasePipeContext,
         RequestContext<TRequest>
+        where TRequest : class
+        where TResult : class
     {
         readonly TaskCompletionSource<ResultContext<TResult>> _response;
         readonly IPipe<ResultContext<TRequest, TResult>> _resultPipe;
 
-        public SingeResultRequestContext(TRequest request, IPipe<ResultContext<TRequest, TResult>> resultPipe)
+        public SingleResultRequestContext(TRequest request, IPipe<ResultContext<TRequest, TResult>> resultPipe)
         {
             _resultPipe = resultPipe;
             Request = request;
@@ -32,13 +34,13 @@ namespace GreenPipes.Pipes.PipeContexts
             _response = new TaskCompletionSource<ResultContext<TResult>>();
         }
 
-        public Task<ResultContext<TResult>> Response => _response.Task;
+        public Task<ResultContext<TResult>> Result => _response.Task;
 
         public TRequest Request { get; }
 
         Task<bool> RequestContext<TRequest>.TrySetResult<T>(T result)
         {
-            var self = this as SingeResultRequestContext<TRequest, T>;
+            var self = this as SingleResultRequestContext<TRequest, T>;
             if (self != null)
                 return self.SetResult(result);
 

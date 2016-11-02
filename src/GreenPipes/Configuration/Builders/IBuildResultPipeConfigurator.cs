@@ -12,25 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Builders
 {
-    public interface IBuildRequestPipeConfigurator<TRequest> :
-        IPipeConfigurator<RequestContext<TRequest>>,
+    public interface IBuildResultPipeConfigurator<TRequest, TResult> :
+        IPipeConfigurator<ResultContext<TRequest, TResult>>,
         ISpecification
+        where TRequest : class
+        where TResult : class
     {
         /// <summary>
         /// Builds the pipe, applying any initial specifications to the front of the pipe
         /// </summary>
         /// <returns></returns>
-        IRequestPipe<TRequest> Build();
-    }
-
-    public interface IBuildResultPipeConfigurator<TRequest, TResponse> :
-        IPipeConfigurator<ResultContext<TRequest, TResponse>>,
-        ISpecification
-    {
-        /// <summary>
-        /// Builds the pipe, applying any initial specifications to the front of the pipe
-        /// </summary>
-        /// <returns></returns>
-        IRequestPipe<TRequest, TResponse> Build();
+        IRequestPipe<TRequest, TResult> Build();
     }
 }

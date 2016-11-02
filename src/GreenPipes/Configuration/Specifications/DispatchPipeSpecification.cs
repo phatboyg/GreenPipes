@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace GreenPipes.Specifications
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Configurators;
     using Filters;
 
@@ -23,34 +24,31 @@ namespace GreenPipes.Specifications
         IDispatchConfigurator<TInput>
         where TInput : class, PipeContext
     {
-        readonly IList<Action<IPipeConnector>> _connectActions;
         readonly IPipeContextConverterFactory<TInput> _pipeContextConverterFactory;
+        readonly IList<IPipeConnectorSpecification> _specifications;
 
         public DispatchPipeSpecification(IPipeContextConverterFactory<TInput> pipeContextConverterFactory)
         {
             _pipeContextConverterFactory = pipeContextConverterFactory;
 
-            _connectActions = new List<Action<IPipeConnector>>();
+            _specifications = new List<IPipeConnectorSpecification>();
         }
 
         void IDispatchConfigurator<TInput>.Pipe<T>(Action<IPipeConfigurator<T>> configurePipe)
         {
-            _connectActions.Add(connector =>
-            {
-                IPipe<T> pipe = Pipe.New(configurePipe);
+            var specification = new ConfiguratorPipeConnectorSpecification<T>();
 
-                connector.ConnectPipe(pipe);
-            });
+            configurePipe?.Invoke(specification);
+
+            _specifications.Add(specification);
         }
 
         public void Apply(IPipeBuilder<TInput> builder)
         {
             var dispatchFilter = new DynamicFilter<TInput>(_pipeContextConverterFactory);
 
-            foreach (Action<IPipeConnector> action in _connectActions)
-            {
-                action(dispatchFilter);
-            }
+            foreach (var specification in _specifications)
+                specification.Connect(dispatchFilter);
 
             builder.AddFilter(dispatchFilter);
         }
@@ -59,6 +57,9 @@ namespace GreenPipes.Specifications
         {
             if (_pipeContextConverterFactory == null)
                 yield return this.Failure("PipeContextProviderFactory", "must not be null");
+
+            foreach (var result in _specifications.SelectMany(x => x.Validate()))
+                yield return result.WithParentKey("Dispatch");
         }
     }
 }

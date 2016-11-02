@@ -10,19 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Specifications
+namespace GreenPipes.Configurators
 {
     using System.Collections.Generic;
     using Builders;
-    using Configurators;
     using Pipes;
 
 
+    /// <summary>
+    /// This will become a specification, since the goal is to have everything rally around
+    /// the dispatch pipe
+    /// </summary>
+    /// <typeparam name="TRequest"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
     public class ResultConfigurator<TRequest, TResult> :
         IResultConfigurator<TRequest, TResult>,
         IBuildResultPipeConfigurator<TRequest, TResult>,
         IBuildPipeConfigurator<ResultContext<TRequest, TResult>>
-
+        where TRequest : class
+        where TResult : class
     {
         readonly IPipe<RequestContext> _pipe;
         readonly IBuildPipeConfigurator<ResultContext<TRequest, TResult>> _pipeConfigurator;
@@ -42,7 +48,7 @@ namespace GreenPipes.Specifications
         {
             IPipe<ResultContext<TRequest, TResult>> responsePipe = _pipeConfigurator.Build();
 
-            return new RequestPipe<TRequest, TResult>(_pipe, responsePipe);
+            return new SingleResultRequestPipe<TRequest, TResult>(_pipe, responsePipe);
         }
 
         public IEnumerable<ValidationResult> Validate()

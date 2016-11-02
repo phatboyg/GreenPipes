@@ -12,18 +12,40 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Pipes.PipeContexts
 {
-    public class PipeResultContext<TRequest, TResponse> :
+    using System;
+    using Internals.Extensions;
+
+
+    public class PipeResultContext<TRequest, TResult> :
         BasePipeContext,
-        ResultContext<TRequest, TResponse>
+        ResultContext<TRequest, TResult>
+        where TRequest : class
+        where TResult : class
     {
-        public PipeResultContext(TRequest request, TResponse response)
+        public PipeResultContext(TRequest request, TResult result)
         {
             Request = request;
-            Result = response;
+            Result = result;
         }
 
-        public TResponse Result { get; }
+        public TResult Result { get; }
 
         public TRequest Request { get; }
+
+        T ResultContext.GetResult<T>()
+        {
+            var result = Result as T;
+            if (result == null)
+                throw new ArgumentException("The result is not assignable to the specified type: " + TypeCache<T>.ShortName);
+
+            return result;
+        }
+
+        bool ResultContext.TryGetResult<T>(out T result)
+        {
+            result = Result as T;
+
+            return result != default(T);
+        }
     }
 }
