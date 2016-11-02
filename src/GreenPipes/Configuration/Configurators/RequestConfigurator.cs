@@ -13,8 +13,11 @@
 namespace GreenPipes.Configurators
 {
     using System;
+    using System.Collections.Generic;
     using Builders;
-    using Specifications;
+    using Pipes;
+    using Routers;
+    using Validation;
 
 
     /// <summary>
@@ -31,23 +34,112 @@ namespace GreenPipes.Configurators
             _pipe = pipe;
         }
 
-        IBuildRequestPipeConfigurator<T> IRequestConfigurator.Request<T>(Action<IRequestConfigurator<T>> configureRequest)
+        public IRequestPipe<TRequest> Request<TRequest>(params Func<IRequestConfigurator<TRequest>, IRequestPipe<TRequest>>[] configure)
+            where TRequest : class
         {
-            var specification = new RequestPipeConfigurator<T>(_pipe);
+            var specification = new RequestConfigurator<TRequest>(_pipe);
 
-            configureRequest?.Invoke(specification);
+            foreach (Func<IRequestConfigurator<TRequest>, IRequestPipe<TRequest>> callback in configure)
+                callback(specification);
 
-            throw new NotImplementedException();
+            return specification.Build();
         }
 
-        public IBuildResultPipeConfigurator<TRequest, TResponse> Request<TRequest, TResponse>(
-            Func<IResultConfigurator<TRequest, TResponse>, IBuildResultPipeConfigurator<TRequest, TResponse>> configureRequest = null)
+        public IRequestPipe<TRequest, TResult> Request<TRequest, TResult>(Action<IResultConfigurator<TRequest, TResult>> configureRequest = null)
+            where TRequest : class
+            where TResult : class
         {
-            var specification = new ResultConfigurator<TRequest, TResponse>(_pipe);
+            var configurator = new ResultConfigurator<TRequest, TResult>(_pipe);
 
-            configureRequest?.Invoke(specification);
+            configureRequest?.Invoke(configurator);
 
-            return specification;
+            return configurator.Build();
+        }
+    }
+
+
+    public class RequestConfigurator<TRequest> :
+        IRequestConfigurator<TRequest>
+        where TRequest : class
+    {
+        readonly IPipe<RequestContext> _pipe;
+        readonly IBuildPipeConfigurator<ResultContext> _resultPipeConfigurator;
+        readonly DynamicRouter<ResultContext> _router;
+
+        public RequestConfigurator(IPipe<RequestContext> pipe)
+        {
+            _pipe = pipe;
+            _resultPipeConfigurator = new PipeConfigurator<ResultContext>();
+            _router = new DynamicRouter<ResultContext>(new ResultConverterFactory());
+        }
+
+        IRequestPipe<TRequest> IRequestConfigurator<TRequest>.Result<TResult>(Action<IRequestConfigurator<TRequest, TResult>> configure)
+        {
+            var requestConfigurator = new RequestConfigurator<TRequest, TResult>(_pipe);
+
+            configure?.Invoke(requestConfigurator);
+
+            IPipeConfigurationResult result = new PipeConfigurationResult(requestConfigurator.Validate());
+            if (result.ContainsFailure)
+                throw new PipeConfigurationException(result.GetMessage("The result configuration was invalid"));
+
+            requestConfigurator.Connect(_router);
+
+            return requestConfigurator.Build(_resultPipeConfigurator.Build());
+        }
+
+        void IPipeConfigurator<ResultContext>.AddPipeSpecification(IPipeSpecification<ResultContext> specification)
+        {
+            _resultPipeConfigurator.AddPipeSpecification(specification);
+        }
+
+        public IRequestPipe<TRequest> Build()
+        {
+            return new MultipleResultRequestPipe<TRequest>(_pipe, _resultPipeConfigurator.Build());
+        }
+    }
+
+
+    /// <summary>
+    /// This will become a specification, since the goal is to have everything rally around
+    /// the dispatch pipe
+    /// </summary>
+    /// <typeparam name="TRequest"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    public class RequestConfigurator<TRequest, TResult> :
+        IBuildRequestPipeConfigurator<TRequest, TResult>
+        where TRequest : class
+        where TResult : class
+    {
+        readonly IPipe<RequestContext> _pipe;
+        readonly IBuildPipeConfigurator<ResultContext<TRequest, TResult>> _pipeConfigurator;
+
+        public RequestConfigurator(IPipe<RequestContext> pipe)
+        {
+            _pipe = pipe;
+            _pipeConfigurator = new PipeConfigurator<ResultContext<TRequest, TResult>>();
+        }
+
+        public IRequestPipe<TRequest> Build(IPipe<ResultContext> resultPipe)
+        {
+            return new MultipleResultRequestPipe<TRequest>(_pipe, resultPipe);
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return _pipeConfigurator.Validate();
+        }
+
+        public void Connect(IPipeConnector connector)
+        {
+            IPipe<ResultContext<TRequest, TResult>> responsePipe = _pipeConfigurator.Build();
+
+            connector.ConnectPipe(responsePipe);
+        }
+
+        public void AddPipeSpecification(IPipeSpecification<ResultContext<TRequest, TResult>> specification)
+        {
+            _pipeConfigurator.AddPipeSpecification(specification);
         }
     }
 }

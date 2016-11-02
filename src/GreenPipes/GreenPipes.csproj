@@ -48,6 +48,7 @@
     <Compile Include="ConcurrencyLimitExtensions.cs" />
     <Compile Include="Configuration\BindConfigurationExtensions.cs" />
     <Compile Include="Configuration\Builders\IBuildPipeConfigurator.cs" />
+    <Compile Include="Configuration\Builders\IBuildRequestPipeConfigurator.cs" />
     <Compile Include="Configuration\Builders\IBuildResultPipeConfigurator.cs" />
     <Compile Include="Configuration\Builders\PipeBuilder.cs" />
     <Compile Include="Configuration\CircuitBreakerConfigurationExtensions.cs" />
@@ -61,9 +62,11 @@
     <Compile Include="Configuration\Configurators\IRescueConfigurator.cs" />
     <Compile Include="Configuration\Configurators\IRetryConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RequestConfigurator.cs" />
+    <Compile Include="Configuration\Configurators\ResultConfigurator.cs" />
     <Compile Include="Configuration\Configurators\RetryPolicyFactory.cs" />
     <Compile Include="Configuration\DispatchConfigurationExtensions.cs" />
     <Compile Include="Configuration\ForkConfigurationExtensions.cs" />
+    <Compile Include="Configuration\IPipeConnectorSpecification.cs" />
     <Compile Include="Configuration\InlineFilterConfigurationExtensions.cs" />
     <Compile Include="Configuration\InterceptConfigurationExtensions.cs" />
     <Compile Include="Configuration\ISpecification.cs" />
@@ -86,9 +89,8 @@
     <Compile Include="Configuration\RetryConfigurationExtensions.cs" />
     <Compile Include="Configuration\Specifications\AsyncDelegatePipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\BindPipeSpecification.cs" />
+    <Compile Include="Configuration\Specifications\ConfiguratorPipeConnectorSpecification.cs" />
     <Compile Include="Configuration\Specifications\InlineFilterPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\RequestPipeConfigurator.cs" />
-    <Compile Include="Configuration\Specifications\ResultConfigurator.cs" />
     <Compile Include="Configuration\Specifications\SplitFilterPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\CircuitBreakerPipeSpecification.cs" />
     <Compile Include="Configuration\Specifications\ConcurrencyLimitPipeSpecification.cs" />
@@ -235,14 +237,16 @@
     <Compile Include="ITargetFactory.cs" />
     <Compile Include="KeyAccessor.cs" />
     <Compile Include="Contracts\CommandContext.cs" />
-    <Compile Include="Pipes\PipeContexts\SingeResultRequestContext.cs" />
-    <Compile Include="Pipes\SingleResponseRequestContext.cs" />
+    <Compile Include="Pipes\MultipleResultRequestPipe.cs" />
+    <Compile Include="Pipes\PipeContexts\MultipleResultRequestContext.cs" />
+    <Compile Include="Pipes\PipeContexts\SingleResultRequestContext.cs" />
     <Compile Include="Pipes\PipeContexts\PipeResultContext.cs" />
-    <Compile Include="Pipes\RequestPipe.cs" />
+    <Compile Include="Pipes\SingleResultRequestPipe.cs" />
     <Compile Include="Policies\BaseRetryContext.cs" />
     <Compile Include="Policies\RetryFaultedContextCache.cs" />
     <Compile Include="RequestContext.cs" />
     <Compile Include="ResultContext.cs" />
+    <Compile Include="ResultExtensions.cs" />
     <Compile Include="RetryFaultedExtensions.cs" />
     <Compile Include="Routers\PipeContextConverterFactory.cs" />
     <Compile Include="FilterContextProvider.cs" />
@@ -311,7 +315,7 @@
     <Compile Include="RetryContext.cs" />
     <Compile Include="RetryPolicyContext.cs" />
     <Compile Include="Routers\RequestContextConverterFactory.cs" />
-    <Compile Include="Routers\ResponseConverterFactory.cs" />
+    <Compile Include="Routers\ResultConverterFactory.cs" />
     <Compile Include="Util\Connectable.cs" />
     <Compile Include="Util\TaskUtil.cs" />
   </ItemGroup>

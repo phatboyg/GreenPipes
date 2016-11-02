@@ -13,7 +13,6 @@
 namespace GreenPipes.Configurators
 {
     using System;
-    using Builders;
 
 
     /// <summary>
@@ -21,17 +20,19 @@ namespace GreenPipes.Configurators
     /// </summary>
     public interface IRequestConfigurator
     {
-        IBuildRequestPipeConfigurator<TRequest> Request<TRequest>(Action<IRequestConfigurator<TRequest>> configureRequest);
+        IRequestPipe<TRequest> Request<TRequest>(params Func<IRequestConfigurator<TRequest>, IRequestPipe<TRequest>>[] configure)
+            where TRequest : class;
 
         /// <summary>
         /// Create a pipe that handles a request with a single response
         /// </summary>
         /// <typeparam name="TRequest"></typeparam>
-        /// <typeparam name="TResponse"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
         /// <param name="configureRequest"></param>
         /// <returns></returns>
-        IBuildResultPipeConfigurator<TRequest, TResponse> Request<TRequest, TResponse>(
-            Func<IResultConfigurator<TRequest, TResponse>, IBuildResultPipeConfigurator<TRequest, TResponse>> configureRequest = null);
+        IRequestPipe<TRequest, TResult> Request<TRequest, TResult>(Action<IResultConfigurator<TRequest, TResult>> configureRequest = null)
+            where TRequest : class
+            where TResult : class;
     }
 
 
@@ -39,7 +40,9 @@ namespace GreenPipes.Configurators
     /// Configure a request, specifying the responses and their pipes
     /// </summary>
     /// <typeparam name="TRequest"></typeparam>
-    public interface IRequestConfigurator<TRequest>
+    public interface IRequestConfigurator<TRequest> :
+        IPipeConfigurator<ResultContext>
+        where TRequest : class
     {
         /// <summary>
         /// Declares a result for the request which can be set by a service
@@ -47,6 +50,20 @@ namespace GreenPipes.Configurators
         /// <typeparam name="TResult">The result type</typeparam>
         /// <param name="configure">Configure the result pipe</param>
         /// <returns></returns>
-        IRequestPipe<TRequest, TResult> Result<TResult>(Action<IResultConfigurator<TRequest, TResult>> configure = null);
+        IRequestPipe<TRequest> Result<TResult>(Action<IRequestConfigurator<TRequest, TResult>> configure = null)
+            where TResult : class;
+    }
+
+
+    /// <summary>
+    /// Configure a response pipe, which handles a response from a request pipe
+    /// </summary>
+    /// <typeparam name="TRequest"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    public interface IRequestConfigurator<TRequest, TResult> :
+        IPipeConfigurator<ResultContext<TRequest, TResult>>
+        where TRequest : class
+        where TResult : class
+    {
     }
 }

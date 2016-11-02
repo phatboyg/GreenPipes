@@ -18,28 +18,37 @@ namespace GreenPipes.Pipes
     using PipeContexts;
 
 
-    public class RequestPipe<TRequest, TResult> :
-        IRequestPipe<TRequest, TResult>
+    /// <summary>
+    /// A pipe for a single request with multiple result types
+    /// </summary>
+    /// <typeparam name="TRequest"></typeparam>
+    public class MultipleResultRequestPipe<TRequest> :
+        IRequestPipe<TRequest>
+        where TRequest : class
     {
         readonly IPipe<RequestContext> _requestPipe;
-        readonly IPipe<ResultContext<TRequest, TResult>> _resultPipe;
+        readonly IPipe<ResultContext> _resultPipe;
 
-        public RequestPipe(IPipe<RequestContext> requestPipe, IPipe<ResultContext<TRequest, TResult>> resultPipe)
+        public MultipleResultRequestPipe(IPipe<RequestContext> requestPipe, IPipe<ResultContext> resultPipe)
         {
             _resultPipe = resultPipe;
             _requestPipe = requestPipe;
         }
 
-        public async Task<TResult> Send(TRequest request)
+        public async Task<ResultContext> Send(TRequest request)
         {
-            var context = new SingeResultRequestContext<TRequest, TResult>(request, _resultPipe);
+            var context = new MultipleResultRequestContext<TRequest>(request, _resultPipe);
             try
             {
                 await _requestPipe.Send(context).ConfigureAwait(false);
 
-                ResultContext<TResult> resultContext = await context.Response.ConfigureAwait(false);
+                return await context.Result.ConfigureAwait(false);
+            }
+            catch (TaskCanceledException)
+            {
+                context.TrySetCanceled();
 
-                return resultContext.Result;
+                throw;
             }
             catch (Exception ex)
             {
@@ -53,7 +62,6 @@ namespace GreenPipes.Pipes
         {
             var scope = context.CreateScope("request");
             scope.Add("requestType", TypeCache<TRequest>.ShortName);
-            scope.Add("resultType", TypeCache<TResult>.ShortName);
 
             _requestPipe.Probe(scope.CreateScope("requestPipe"));
             _resultPipe.Probe(scope.CreateScope("resultPipe"));

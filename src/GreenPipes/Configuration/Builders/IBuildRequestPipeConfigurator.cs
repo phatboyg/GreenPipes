@@ -10,17 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Configurators
+namespace GreenPipes.Builders
 {
-    /// <summary>
-    /// Configure a response pipe, which handles a response from a request pipe
-    /// </summary>
-    /// <typeparam name="TRequest"></typeparam>
-    /// <typeparam name="TResult"></typeparam>
-    public interface IResultConfigurator<TRequest, TResult> :
-        IPipeConfigurator<ResultContext<TRequest, TResult>>
+    using Configurators;
+
+
+    public interface IBuildRequestPipeConfigurator<TRequest, TResult> :
+        IRequestConfigurator<TRequest, TResult>,
+        IPipeConnectorSpecification
         where TRequest : class
         where TResult : class
     {
+        /// <summary>
+        /// Builds the pipe, applying any initial specifications to the front of the pipe
+        /// </summary>
+        /// <returns></returns>
+        IRequestPipe<TRequest> Build(IPipe<ResultContext> resultPipe);
     }
 }

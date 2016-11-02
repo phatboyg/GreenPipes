@@ -27,7 +27,7 @@ namespace GreenPipes.Tests
 
             IRequestPipe<PurchaseTicket, TicketReceipt> requestPipe = pipe.CreateRequestPipe<PurchaseTicket, TicketReceipt>();
 
-            var receipt = await requestPipe.Send(new PurchaseTicket() {EventName = "The Big Party", Quantity = 2});
+            var receipt = await requestPipe.Send(new PurchaseTicket() {EventName = "The Big Party", Quantity = 2}).Result();
 
             Assert.That(receipt.OrderNumber, Is.EqualTo("42"));
         }
@@ -42,10 +42,42 @@ namespace GreenPipes.Tests
                 x.UseExecute(context => context.Result.AuthorizationCode = "8675309");
             });
 
-            var receipt = await requestPipe.Send(new PurchaseTicket() {EventName = "The Big Party", Quantity = 2});
+            var receipt = await requestPipe.Send(new PurchaseTicket() {EventName = "The Big Party", Quantity = 2}).Result();
 
             Assert.That(receipt.OrderNumber, Is.EqualTo("42"));
             Assert.That(receipt.AuthorizationCode, Is.EqualTo("8675309"));
+        }
+
+        [Test]
+        public async Task Should_support_multiple_result_types()
+        {
+            IPipe<RequestContext> pipe = CreateHandlerPipe();
+
+            IRequestPipe<PurchaseTicket> requestPipe = pipe.CreateRequestPipe<PurchaseTicket>(
+                x => x.Result<TicketReceipt>(),
+                x => x.Result<EventSoldOut>());
+
+            ResultContext resultContext = await requestPipe.Send(new PurchaseTicket() {EventName = "Golden State Warriors", Quantity = 4});
+
+            TicketReceipt receipt;
+            Assert.That(resultContext.TryGetResult(out receipt), Is.False);
+
+            EventSoldOut soldOut;
+            Assert.That(resultContext.TryGetResult(out soldOut), Is.True);
+
+            Assert.That(soldOut.EventName, Is.EqualTo("Golden State Warriors"));
+        }
+
+        [Test]
+        public async Task Should_support_the_same_thing_a_different_way()
+        {
+            IPipe<RequestContext> pipe = CreateHandlerPipe();
+
+            IRequestPipe<PurchaseTicket, TicketReceipt> requestPipe = pipe.CreateRequestPipe<PurchaseTicket, TicketReceipt>();
+
+            var receipt = await requestPipe.Send(new PurchaseTicket() {EventName = "The Big Party", Quantity = 2}).Result();
+
+            Assert.That(receipt.OrderNumber, Is.EqualTo("42"));
         }
 
         static IPipe<RequestContext> CreateHandlerPipe()
@@ -56,12 +88,18 @@ namespace GreenPipes.Tests
                 {
                     d.Handle<PurchaseTicket>(h =>
                     {
-                        h.UseExecute(context => context.TrySetResult(new TicketReceipt
+                        h.UseExecuteAsync(context =>
                         {
-                            EventName = context.Request.EventName,
-                            Quantity = context.Request.Quantity,
-                            OrderNumber = "42"
-                        }));
+                            if (context.Request.EventName == "Golden State Warriors")
+                                return context.TrySetResult(new EventSoldOut {EventName = context.Request.EventName});
+
+                            return context.TrySetResult(new TicketReceipt
+                            {
+                                EventName = context.Request.EventName,
+                                Quantity = context.Request.Quantity,
+                                OrderNumber = "42"
+                            });
+                        });
                     });
                 });
             });
@@ -82,6 +120,12 @@ namespace GreenPipes.Tests
             public int Quantity { get; set; }
             public string OrderNumber { get; set; }
             public string AuthorizationCode { get; set; }
+        }
+
+
+        class EventSoldOut
+        {
+            public string EventName { get; set; }
         }
     }
 }
