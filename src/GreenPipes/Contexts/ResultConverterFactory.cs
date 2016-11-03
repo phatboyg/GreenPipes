@@ -42,15 +42,9 @@ namespace GreenPipes.Contexts
             bool IPipeContextConverter<ResultContext, ResultContext<TRequest, TResult>>.TryConvert(ResultContext input,
                 out ResultContext<TRequest, TResult> output)
             {
-                var outputContext = input as ResultContext<TRequest, TResult>;
-                if (outputContext != null)
-                {
-                    output = outputContext;
-                    return true;
-                }
+                output = input as ResultContext<TRequest, TResult>;
 
-                output = null;
-                return false;
+                return output != null;
             }
         }
     }

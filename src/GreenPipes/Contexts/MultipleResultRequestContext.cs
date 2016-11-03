@@ -22,32 +22,36 @@ namespace GreenPipes.Contexts
         where TRequest : class
     {
         readonly IPipe<ResultContext> _resultPipe;
-        readonly TaskCompletionSource<ResultContext> _resultTask;
-        ResultContext _resultContext;
+        readonly TaskCompletionSource<Task<ResultContext>> _resultTask;
 
         public MultipleResultRequestContext(TRequest request, IPipe<ResultContext> resultPipe)
         {
             _resultPipe = resultPipe;
             Request = request;
 
-            _resultTask = new TaskCompletionSource<ResultContext>();
+            _resultTask = new TaskCompletionSource<Task<ResultContext>>();
         }
 
-        public Task<ResultContext> Result => _resultTask.Task;
+        public Task<ResultContext> Result => _resultTask.Task.Unwrap();
 
         public TRequest Request { get; }
 
-        async Task<bool> RequestContext.TrySetResult<T>(T result)
+        bool RequestContext.TrySetResult<T>(T result)
         {
             var resultContext = new PipeResultContext<TRequest, T>(Request, result);
 
-            await _resultPipe.Send(resultContext).ConfigureAwait(false);
+            var sendTask = _resultPipe.Send(resultContext);
 
-            var resultWasSet = _resultTask.TrySetResult(resultContext);
-            if (resultWasSet)
-                _resultContext = resultContext;
+            return _resultTask.TrySetResult(sendTask.ContinueWith(task =>
+            {
+                if (task.IsCanceled)
+                    throw new OperationCanceledException();
 
-            return resultWasSet;
+                if (task.IsFaulted)
+                    throw task.Exception?.InnerException ?? new ArgumentException("The result faulted and could not be set");
+
+                return (ResultContext)resultContext;
+            }, TaskContinuationOptions.ExecuteSynchronously));
         }
 
         public bool TrySetException(Exception exception)
@@ -60,11 +64,11 @@ namespace GreenPipes.Contexts
             return _resultTask.TrySetCanceled();
         }
 
-        public bool HasResult => _resultContext != null;
+        public bool HasResult => _resultTask.Task.IsCompleted;
 
         bool RequestContext.TryGetResult<T>(out T result)
         {
-            if ((_resultContext != null) && _resultContext.TryGetResult(out result))
+            if (HasResult && _resultTask.Task.Result.Result.TryGetResult(out result))
                 return true;
 
             result = default(T);
