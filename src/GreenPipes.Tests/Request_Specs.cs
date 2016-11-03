@@ -88,12 +88,14 @@ namespace GreenPipes.Tests
                 {
                     d.Handle<PurchaseTicket>(h =>
                     {
-                        h.UseExecuteAsync(context =>
+                        h.UseExecute(context =>
                         {
                             if (context.Request.EventName == "Golden State Warriors")
-                                return context.TrySetResult(new EventSoldOut {EventName = context.Request.EventName});
+                            {
+                               context.TrySetResult(new EventSoldOut {EventName = context.Request.EventName});
+                            }
 
-                            return context.TrySetResult(new TicketReceipt
+                            context.TrySetResult(new TicketReceipt
                             {
                                 EventName = context.Request.EventName,
                                 Quantity = context.Request.Quantity,

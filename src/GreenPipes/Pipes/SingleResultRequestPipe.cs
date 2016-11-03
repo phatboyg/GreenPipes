@@ -72,9 +72,9 @@ namespace GreenPipes.Pipes
 
         void SendRequest(RequestContext context)
         {
-            _requestPipe.Send(context)
-                .ContinueWith(task => context.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled)
-                .ContinueWith(task => context.TrySetException(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
+            var send = _requestPipe.Send(context);
+            send.ContinueWith(task => context.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
+            send.ContinueWith(task => context.TrySetException(task.Exception), TaskContinuationOptions.OnlyOnFaulted);
         }
     }
 }

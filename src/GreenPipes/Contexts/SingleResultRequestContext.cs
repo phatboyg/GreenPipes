@@ -14,7 +14,6 @@ namespace GreenPipes.Contexts
 {
     using System;
     using System.Threading.Tasks;
-    using Util;
 
 
     public class SingleResultRequestContext<TRequest, TResult> :
@@ -24,22 +23,21 @@ namespace GreenPipes.Contexts
         where TResult : class
     {
         readonly IPipe<ResultContext<TRequest, TResult>> _resultPipe;
-        readonly TaskCompletionSource<ResultContext<TResult>> _resultTask;
-        ResultContext<TResult> _resultContext;
+        readonly TaskCompletionSource<Task<ResultContext<TResult>>> _resultTask;
 
         public SingleResultRequestContext(TRequest request, IPipe<ResultContext<TRequest, TResult>> resultPipe)
         {
             _resultPipe = resultPipe;
             Request = request;
 
-            _resultTask = new TaskCompletionSource<ResultContext<TResult>>();
+            _resultTask = new TaskCompletionSource<Task<ResultContext<TResult>>>();
         }
 
-        public Task<ResultContext<TResult>> Result => _resultTask.Task;
+        public Task<ResultContext<TResult>> Result => _resultTask.Task.Unwrap();
 
         public TRequest Request { get; }
 
-        Task<bool> RequestContext.TrySetResult<T>(T result)
+        bool RequestContext.TrySetResult<T>(T result)
         {
             if (typeof(TResult).IsAssignableFrom(typeof(T)))
             {
@@ -49,7 +47,7 @@ namespace GreenPipes.Contexts
                 return SetResult(result as TResult);
             }
 
-            return TaskUtil.False;
+            return false;
         }
 
         public bool TrySetException(Exception exception)
@@ -62,28 +60,33 @@ namespace GreenPipes.Contexts
             return _resultTask.TrySetCanceled();
         }
 
-        public bool HasResult => _resultContext != null;
+        public bool HasResult => _resultTask.Task.IsCompleted;
 
         bool RequestContext.TryGetResult<T>(out T result)
         {
-            if ((_resultContext != null) && _resultContext.TryGetResult(out result))
+            if (HasResult && _resultTask.Task.Result.Result.TryGetResult(out result))
                 return true;
 
             result = default(T);
             return false;
         }
 
-        async Task<bool> SetResult(TResult result)
+        bool SetResult(TResult result)
         {
             var resultContext = new PipeResultContext<TRequest, TResult>(Request, result);
 
-            await _resultPipe.Send(resultContext).ConfigureAwait(false);
+            var sendTask = _resultPipe.Send(resultContext);
 
-            var resultWasSet = _resultTask.TrySetResult(resultContext);
-            if (resultWasSet)
-                _resultContext = resultContext;
+            return _resultTask.TrySetResult(sendTask.ContinueWith(task =>
+            {
+                if (task.IsCanceled)
+                    throw new OperationCanceledException();
 
-            return resultWasSet;
+                if (task.IsFaulted)
+                    throw task.Exception?.InnerException ?? new ArgumentException("The result faulted and could not be set");
+
+                return (ResultContext<TResult>)resultContext;
+            }, TaskContinuationOptions.ExecuteSynchronously));
         }
     }
 }

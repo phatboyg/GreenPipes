@@ -14,7 +14,6 @@ namespace GreenPipes.Tests
 {
     using System;
     using System.Diagnostics;
-    using System.Linq;
     using System.Runtime.Caching;
     using System.Threading.Tasks;
     using Contexts;
@@ -42,13 +41,15 @@ namespace GreenPipes.Tests
             };
 
             var timer = Stopwatch.StartNew();
-            await Task.WhenAll(Enumerable.Range(0, 100).Select(index => requestPipe.Send(checks[index % checks.Length]).Result()));
+            for (var i = 0; i < 100; i++)
+                await requestPipe.Send(checks[i % checks.Length]).Result();
+
             timer.Stop();
 
             Console.WriteLine("Total time: {0}ms", timer.ElapsedMilliseconds);
             Console.WriteLine("Total calls: {0}", _totalCalls);
 
-            Assert.That(timer.Elapsed, Is.LessThan(TimeSpan.FromMilliseconds(500)));
+            Assert.That(timer.Elapsed, Is.LessThan(TimeSpan.FromMilliseconds(1000)));
         }
 
         [Test]
@@ -102,6 +103,8 @@ namespace GreenPipes.Tests
                     // The check filter is going to call the API to get the actual inventory amount.
                     d.Handle<CheckInventory>(h =>
                     {
+                        h.UseRateLimit(10);
+                        h.UseConcurrencyLimit(2);
                         h.UseProfile(50, profile =>
                         {
                             _totalCalls++;
@@ -163,19 +166,16 @@ namespace GreenPipes.Tests
         {
             public async Task Send(RequestContext<CheckInventory> context, IPipe<RequestContext<CheckInventory>> next)
             {
-                if (context.HasResult)
-                    Console.WriteLine("We have a result already!");
-
                 if (!context.HasResult)
                 {
                     await Task.Delay(250).ConfigureAwait(false);
 
-                    await context.TrySetResult(new CheckInventoryResult
+                    context.TrySetResult(new CheckInventoryResult
                     {
                         ItemNumber = context.Request.ItemNumber,
                         QuantityOnHand = context.Request.ItemNumber.GetHashCode() % 100,
                         Timestamp = DateTime.Now,
-                    }).ConfigureAwait(false);
+                    });
                 }
 
                 await next.Send(context).ConfigureAwait(false);
@@ -224,16 +224,16 @@ namespace GreenPipes.Tests
                 _cache = cache;
             }
 
-            public async Task Send(RequestContext<CheckInventory> context, IPipe<RequestContext<CheckInventory>> next)
+            public Task Send(RequestContext<CheckInventory> context, IPipe<RequestContext<CheckInventory>> next)
             {
                 if (!string.IsNullOrWhiteSpace(context.Request.ItemNumber))
                 {
                     CheckInventoryResult result;
                     if (_cache.TryGet(context.Request.ItemNumber, out result))
-                        await context.TrySetResult(result).ConfigureAwait(false);
+                        context.TrySetResult(result);
                 }
 
-                await next.Send(context).ConfigureAwait(false);
+                return next.Send(context);
             }
 
             public void Probe(ProbeContext context)

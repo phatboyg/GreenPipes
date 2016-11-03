@@ -48,16 +48,9 @@ namespace GreenPipes.Contexts
         {
             bool IPipeContextConverter<PipeContext, CommandContext<T>>.TryConvert(PipeContext input, out CommandContext<T> output)
             {
-                var outputContext = input as CommandContext<T>;
+                output = input as CommandContext<T>;
 
-                if (outputContext != null)
-                {
-                    output = outputContext;
-                    return true;
-                }
-
-                output = null;
-                return false;
+                return output != null;
             }
         }
 
@@ -68,16 +61,9 @@ namespace GreenPipes.Contexts
         {
             bool IPipeContextConverter<PipeContext, EventContext<T>>.TryConvert(PipeContext input, out EventContext<T> output)
             {
-                var outputContext = input as EventContext<T>;
+                output = input as EventContext<T>;
 
-                if (outputContext != null)
-                {
-                    output = outputContext;
-                    return true;
-                }
-
-                output = null;
-                return false;
+                return output != null;
             }
         }
     }
