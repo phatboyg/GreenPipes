@@ -32,11 +32,9 @@ namespace GreenPipes.Contexts
             _resultTask = new TaskCompletionSource<Task<ResultContext>>();
         }
 
-        public Task<ResultContext> Result => _resultTask.Task.Unwrap();
-
         public TRequest Request { get; }
 
-        bool RequestContext.TrySetResult<T>(T result)
+        public bool TrySetResult<T>(T result) where T : class
         {
             var resultContext = new PipeResultContext<TRequest, T>(Request, result);
 
@@ -64,15 +62,15 @@ namespace GreenPipes.Contexts
             return _resultTask.TrySetCanceled();
         }
 
-        public bool HasResult => _resultTask.Task.IsCompleted;
+        public bool IsCompleted => _resultTask.Task.IsCompleted;
 
-        bool RequestContext.TryGetResult<T>(out T result)
+        public Task<ResultContext> Result => GetResult();
+
+        async Task<ResultContext> GetResult()
         {
-            if (HasResult && _resultTask.Task.Result.Result.TryGetResult(out result))
-                return true;
+            Task<ResultContext> resultTask = await _resultTask.Task.ConfigureAwait(false);
 
-            result = default(T);
-            return false;
+            return await resultTask.ConfigureAwait(false);
         }
     }
 }

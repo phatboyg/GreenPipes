@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,15 +15,18 @@ namespace GreenPipes.Filters.Log
     using System;
 
 
-    public struct LogContext
+    public struct LogContext<T>
+        where T : class, PipeContext
     {
         public readonly TimeSpan Duration;
         public readonly DateTime StartTime;
+        public readonly T Context;
 
-        public LogContext(DateTime startTime, TimeSpan duration)
+        public LogContext(T context, DateTime startTime, TimeSpan duration)
         {
             StartTime = startTime;
             Duration = duration;
+            Context = context;
         }
     }
 }

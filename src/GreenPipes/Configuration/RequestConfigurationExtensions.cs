@@ -55,7 +55,7 @@ namespace GreenPipes
 
             var requestConfigurator = new RequestConfigurator(requestPipe);
 
-            return requestConfigurator.Request<TRequest, TResult>(configure);
+            return requestConfigurator.Request(configure);
         }
 
         /// <summary>

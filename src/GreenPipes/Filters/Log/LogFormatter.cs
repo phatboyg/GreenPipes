@@ -15,6 +15,6 @@ namespace GreenPipes.Filters.Log
     using System.Threading.Tasks;
 
 
-    public delegate Task<string> LogFormatter<in TContext>(TContext context, LogContext logContext)
+    public delegate Task<string> LogFormatter<TContext>(LogContext<TContext> context)
         where TContext : class, PipeContext;
 }
