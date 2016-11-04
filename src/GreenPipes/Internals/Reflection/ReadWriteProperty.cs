@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -39,19 +39,19 @@ namespace GreenPipes.Internals.Reflection
             if (property.DeclaringType == null)
                 throw new ArgumentException("DeclaringType is null", nameof(property));
 
-            ParameterExpression instance = Expression.Parameter(typeof(object), "instance");
-            ParameterExpression value = Expression.Parameter(typeof(object), "value");
+            var instance = Expression.Parameter(typeof(object), "instance");
+            var value = Expression.Parameter(typeof(object), "value");
 
             // value as T is slightly faster than (T)value, so if it's not a value type, use that
-            UnaryExpression instanceCast = property.DeclaringType.GetTypeInfo().IsValueType
+            var instanceCast = property.DeclaringType.GetTypeInfo().IsValueType
                 ? Expression.Convert(instance, property.DeclaringType)
                 : Expression.TypeAs(instance, property.DeclaringType);
 
-            UnaryExpression valueCast = property.PropertyType.GetTypeInfo().IsValueType
+            var valueCast = property.PropertyType.GetTypeInfo().IsValueType
                 ? Expression.Convert(value, property.PropertyType)
                 : Expression.TypeAs(value, property.PropertyType);
 
-            MethodCallExpression call = Expression.Call(instanceCast, property.SetMethod, valueCast);
+            var call = Expression.Call(instanceCast, property.SetMethod, valueCast);
 
             return Expression.Lambda<Action<object, object>>(call, instance, value).Compile();
         }
@@ -87,21 +87,17 @@ namespace GreenPipes.Internals.Reflection
         static Action<T, object> GetSetMethod(PropertyInfo property)
         {
             if (!property.CanWrite)
-            {
                 return (x, i) =>
                 {
                     throw new InvalidOperationException("No setter available on " + property.Name);
                 };
-            }
 
-            ParameterExpression instance = Expression.Parameter(typeof(T), "instance");
-            ParameterExpression value = Expression.Parameter(typeof(object), "value");
-            UnaryExpression valueCast;
-            if (property.PropertyType.GetTypeInfo().IsValueType)
-                valueCast = Expression.Convert(value, property.PropertyType);
-            else
-                valueCast = Expression.TypeAs(value, property.PropertyType);
-            MethodCallExpression call = Expression.Call(instance, property.SetMethod, valueCast);
+            var instance = Expression.Parameter(typeof(T), "instance");
+            var value = Expression.Parameter(typeof(object), "value");
+            var valueCast = property.PropertyType.GetTypeInfo().IsValueType
+                ? Expression.Convert(value, property.PropertyType)
+                : Expression.TypeAs(value, property.PropertyType);
+            var call = Expression.Call(instance, property.SetMethod, valueCast);
 
             return Expression.Lambda<Action<T, object>>(call, instance, value).Compile();
         }
@@ -136,9 +132,9 @@ namespace GreenPipes.Internals.Reflection
 
         static Action<T, TProperty> GetSetMethod(PropertyInfo property)
         {
-            ParameterExpression instance = Expression.Parameter(typeof(T), "instance");
-            ParameterExpression value = Expression.Parameter(typeof(TProperty), "value");
-            MethodCallExpression call = Expression.Call(instance, property.SetMethod, value);
+            var instance = Expression.Parameter(typeof(T), "instance");
+            var value = Expression.Parameter(typeof(TProperty), "value");
+            var call = Expression.Call(instance, property.SetMethod, value);
             return Expression.Lambda<Action<T, TProperty>>(call, instance, value).Compile();
         }
     }

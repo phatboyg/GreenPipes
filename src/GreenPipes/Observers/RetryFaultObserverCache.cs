@@ -25,8 +25,7 @@ namespace GreenPipes.Observers
 
         IRetryFaultObserver this[Type type] => _types.GetOrAdd(type, CreateTypeConverter).Value;
 
-        public static Task RetryFault(IRetryObserver observer, RetryContext context, Type contextType,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static Task RetryFault(IRetryObserver observer, RetryContext context, Type contextType)
         {
             return Cached.Converters.Value[contextType].RetryFault(observer, context);
         }

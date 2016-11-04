@@ -166,7 +166,7 @@ namespace GreenPipes.Tests
         {
             public async Task Send(RequestContext<CheckInventory> context, IPipe<RequestContext<CheckInventory>> next)
             {
-                if (!context.HasResult)
+                if (!context.IsCompleted)
                 {
                     await Task.Delay(250).ConfigureAwait(false);
 
