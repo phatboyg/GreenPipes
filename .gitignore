@@ -42,4 +42,5 @@ AppPackages/
 _book
 /node_modules
 .vs/
+.vscode/
 *.lock.json

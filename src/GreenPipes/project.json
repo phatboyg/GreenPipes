@@ -17,10 +17,12 @@
         "System.Threading.Timer": "4.0.1",
         "System.Collections.Concurrent": "4.0.12",
         "System.Reflection.Emit": "4.0.1",
+        "System.Reflection.Extensions": "4.0.1",
         "System.Console": "4.0.0",
         "System.Diagnostics.FileVersionInfo": "4.0.0",
         "System.Diagnostics.Process": "4.1.0",
         "System.Runtime.InteropServices.RuntimeInformation": "4.0.0",
+        "System.ComponentModel.TypeConverter": "4.1.0",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0"
       },
       "buildOptions": {

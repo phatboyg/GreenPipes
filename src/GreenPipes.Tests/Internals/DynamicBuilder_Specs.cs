@@ -17,7 +17,7 @@ namespace GreenPipes.Tests.Internals
     using GreenPipes.Internals.Mapping;
     using GreenPipes.Internals.Reflection;
     using NUnit.Framework;
-
+    using System.Reflection;
 
     [TestFixture]
     public class DynamicBuilder_Specs
@@ -44,7 +44,7 @@ namespace GreenPipes.Tests.Internals
             Console.WriteLine($"Object 1: {obj1.GetType().Name} :: {obj1.GetType().FullName}");
             Console.WriteLine($"Object 2: {obj2.GetType().Name} :: {obj2.GetType().FullName}");
 
-            Console.WriteLine($"Object 1 Assembly: {obj1.GetType().Assembly.FullName}");
+            Console.WriteLine($"Object 1 Assembly: {obj1.GetType().GetTypeInfo().Assembly.FullName}");
         }
 
 

@@ -15,8 +15,9 @@ namespace GreenPipes.Tests
     using System;
     using System.Runtime.Serialization;
 
-
+#if !NETCOREAPP1_0
     [Serializable]
+#endif
     public class IntentionalTestException :
         Exception
     {
