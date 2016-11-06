@@ -62,15 +62,6 @@ namespace GreenPipes.Contexts
 
         public bool IsCompleted => _resultTask.Task.IsCompleted;
 
-        Task<ResultContext> RequestContext.Result => GetResult();
-
-        async Task<ResultContext> GetResult()
-        {
-            Task<ResultContext<TResult>> resultTask = await _resultTask.Task.ConfigureAwait(false);
-
-            return await resultTask.ConfigureAwait(false);
-        }
-
         async Task<ResultContext<TResult>> GetResultContext()
         {
             Task<ResultContext<TResult>> resultTask = await _resultTask.Task.ConfigureAwait(false);

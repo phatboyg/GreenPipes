@@ -13,7 +13,6 @@
 namespace GreenPipes
 {
     using System;
-    using System.Threading.Tasks;
 
 
     public interface RequestContext :
@@ -23,11 +22,6 @@ namespace GreenPipes
         /// True if the request has been completed and a result specified
         /// </summary>
         bool IsCompleted { get; }
-
-        /// <summary>
-        /// Allows the result to be awaited, and then interrogated
-        /// </summary>
-        Task<ResultContext> Result { get; }
 
         /// <summary>
         /// Attempt to specify a result for the request
