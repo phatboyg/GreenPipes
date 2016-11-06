@@ -54,7 +54,7 @@ Target "Clean" (fun _ ->
 )
 
 Target "RestorePackages" (fun _ -> 
-     "./src/GreenPipes.sln"
+     "./src/GreenPipes.NetCore.sln"
      |> RestoreMSSolutionPackages (fun p ->
          { p with
              OutputPath = packagesPath
@@ -65,7 +65,7 @@ Target "Build" (fun _ ->
 
   CreateCSharpAssemblyInfo @".\src\SolutionVersion.cs"
     [ Attribute.Title "GreenPipes"
-      Attribute.Description "GreenPipes, a pipes and filters framework for the Task Parallel Library"
+      Attribute.Description "GreenPipes, a pipes and filters library for the Task Parallel Library"
       Attribute.Product "GreenPipes"
       Attribute.Version assemblyVersion
       Attribute.FileVersion FileVersion
@@ -104,7 +104,7 @@ type packageInfo = {
 Target "Package" (fun _ ->
 
   let nugs = [| { Project = "GreenPipes"
-                  Summary = "GreenPipes, a pipes and filters framework for the Task Parallel Library"
+                  Summary = "GreenPipes, a pipes and filters library for the Task Parallel Library"
                   PackageFile = @".\src\GreenPipes\packages.config"
                   Files = [ (@"..\src\GreenPipes\bin\Release\GreenPipes.*", Some @"lib\net452", None);
                             (@"..\src\GreenPipes\**\*.cs", Some "src", None) ] }
@@ -120,7 +120,7 @@ Target "Package" (fun _ ->
       let setParams defaults = {
         defaults with 
           Authors = ["Chris Patterson"]
-          Description = "GreenPipes, a pipes and filters framework for the Task Parallel Library"
+          Description = "GreenPipes, a pipes and filters library for the Task Parallel Library"
           OutputPath = buildArtifactPath
           Project = nug.Project
           Dependencies = (getDeps nug)
