@@ -89,7 +89,7 @@ Target "Build" (fun _ ->
             ]
   }
 
-  build setParams @".\src\GreenPipes.sln"
+  build setParams @".\src\GreenPipes.NetCore.sln"
       |> DoNothing
 )
 
@@ -105,7 +105,8 @@ Target "Package" (fun _ ->
   let nugs = [| { Project = "GreenPipes"
                   Summary = "GreenPipes, a pipes and filters library for the Task Parallel Library"
                   PackageFile = @".\src\GreenPipes\packages.config"
-                  Files = [ (@"..\src\GreenPipes\bin\Release\GreenPipes.*", Some @"lib\net452", None);
+                  Files = [ (@"..\src\GreenPipes\bin\Release\net452\GreenPipes.*", Some @"lib\net452", None);
+                            (@"..\src\GreenPipes\bin\Release\netstandard1.5\GreenPipes.*", Some @"lib\netstandard15", None);
                             (@"..\src\GreenPipes\**\*.cs", Some "src", None) ] }
              |]
 
