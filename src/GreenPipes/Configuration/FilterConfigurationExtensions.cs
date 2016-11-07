@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace GreenPipes
 {
     using System;
+    using System.Collections.Generic;
     using Specifications;
 
 
@@ -33,6 +34,50 @@ namespace GreenPipes
             var pipeBuilderConfigurator = new FilterPipeSpecification<T>(filter);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
+        }
+
+        /// <summary>
+        /// Adds filters to the pipe
+        /// </summary>
+        /// <typeparam name="T">The context type</typeparam>
+        /// <param name="configurator">The pipe configurator</param>
+        /// <param name="filters">The filters to add</param>
+        public static void UseFilters<T>(this IPipeConfigurator<T> configurator, IEnumerable<IFilter<T>> filters)
+            where T : class, PipeContext
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (filters == null)
+                throw new ArgumentNullException(nameof(filters));
+
+            foreach (IFilter<T> filter in filters)
+            {
+                var pipeBuilderConfigurator = new FilterPipeSpecification<T>(filter);
+
+                configurator.AddPipeSpecification(pipeBuilderConfigurator);
+            }
+        }
+
+        /// <summary>
+        /// Adds filters to the pipe
+        /// </summary>
+        /// <typeparam name="T">The context type</typeparam>
+        /// <param name="configurator">The pipe configurator</param>
+        /// <param name="filters">The filters to add</param>
+        public static void UseFilters<T>(this IPipeConfigurator<T> configurator, params IFilter<T>[] filters)
+            where T : class, PipeContext
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (filters == null)
+                throw new ArgumentNullException(nameof(filters));
+
+            foreach (IFilter<T> filter in filters)
+            {
+                var pipeBuilderConfigurator = new FilterPipeSpecification<T>(filter);
+
+                configurator.AddPipeSpecification(pipeBuilderConfigurator);
+            }
         }
 
         /// <summary>
