@@ -12,12 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Tests
 {
-    using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Contracts;
-    using Filters;
     using NUnit.Framework;
     using Pipes;
 
@@ -126,31 +124,6 @@ namespace GreenPipes.Tests
             await Task.WhenAll(tasks);
 
             Assert.That(maxCount, Is.EqualTo(1));
-        }
-
-
-        class CommandContextConverterFactory :
-            IPipeContextConverterFactory<CommandContext>
-        {
-            IPipeContextConverter<CommandContext, TOutput> IPipeContextConverterFactory<CommandContext>.GetConverter<TOutput>()
-            {
-                var innerType = typeof(TOutput).GetClosingArguments(typeof(InputContext<>)).Single();
-
-                return (IPipeContextConverter<CommandContext, TOutput>)Activator.CreateInstance(typeof(Converter<>).MakeGenericType(innerType));
-            }
-
-
-            class Converter<T> :
-                IPipeContextConverter<CommandContext, CommandContext<T>>
-                where T : class
-            {
-                bool IPipeContextConverter<CommandContext, CommandContext<T>>.TryConvert(CommandContext input, out CommandContext<T> output)
-                {
-                    output = input as CommandContext<T>;
-
-                    return output != null;
-                }
-            }
         }
     }
 }

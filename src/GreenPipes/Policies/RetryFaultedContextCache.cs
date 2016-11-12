@@ -16,6 +16,7 @@ namespace GreenPipes.Policies
     using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals.Extensions;
 
 
     public class RetryFaultedContextCache
@@ -59,6 +60,8 @@ namespace GreenPipes.Policies
                     throw new ArgumentNullException(nameof(context));
 
                 var retryContext = context as RetryContext<T>;
+                if (retryContext == null)
+                    throw new ArgumentException($"The RetryContext was not an expected type: {TypeCache<T>.ShortName}");
 
                 return retryContext.RetryFaulted(exception);
             }

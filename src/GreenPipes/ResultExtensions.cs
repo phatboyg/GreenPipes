@@ -10,18 +10,27 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Pipes
+namespace GreenPipes
 {
-    using Contexts;
+    using System.Threading.Tasks;
 
 
-    public class PipeRouter :
-        DynamicRouter<PipeContext>,
-        IPipeRouter
+    public static class ResultExtensions
     {
-        public PipeRouter()
-            : base(new PipeContextConverterFactory())
+        public static async Task<TResult> Result<TResult>(this Task<ResultContext> result)
+            where TResult : class
         {
+            var resultContext = await result.ConfigureAwait(false);
+
+            return resultContext.GetResult<TResult>();
+        }
+
+        public static async Task<TResult> Result<TResult>(this Task<ResultContext<TResult>> result)
+            where TResult : class
+        {
+            ResultContext<TResult> resultContext = await result.ConfigureAwait(false);
+
+            return resultContext.Result;
         }
     }
 }

@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "GreenPipes": { "target": "project" },
     "NUnit": "3.5.0",
-    "dotnet-test-nunit": "3.4.0-beta-3"    
+    "GreenPipes": "1.0.0-*",
+    "dotnet-test-nunit": "3.4.0-beta-3"
   },
   "testRunner": "nunit",
   "frameworks": {
@@ -14,9 +14,20 @@
           "type": "platform"
         },
         "System.Security.Claims": "4.0.1"
+      },
+      "buildOptions": {
+        "compile": {
+          "exclude": [
+            "CacheRequest_Specs.cs"
+          ]
+        }
       }
     },
-    "net452": {}
+    "net452": {
+      "frameworkAssemblies": {
+        "System.Runtime.Caching": "4.0.0.0" 
+      }
+    }
   },
   "buildOptions": {
     "allowUnsafe": true,

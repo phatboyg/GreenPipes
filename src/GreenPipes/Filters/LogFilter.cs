@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -40,16 +40,16 @@ namespace GreenPipes.Filters
         [DebuggerNonUserCode]
         async Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
-            DateTime startTime = DateTime.UtcNow;
-            Stopwatch timer = Stopwatch.StartNew();
+            var startTime = DateTime.UtcNow;
+            var timer = Stopwatch.StartNew();
 
             await next.Send(context).ConfigureAwait(false);
 
             timer.Stop();
 
-            var logContext = new LogContext(startTime, timer.Elapsed);
+            var logContext = new LogContext<TContext>(context, startTime, timer.Elapsed);
 
-            string text = await _formatter(context, logContext).ConfigureAwait(false);
+            var text = await _formatter(logContext).ConfigureAwait(false);
 
             await _writer.WriteLineAsync(text).ConfigureAwait(false);
         }

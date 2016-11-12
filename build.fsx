@@ -53,6 +53,7 @@ Target "Clean" (fun _ ->
 )
 
 Target "RestorePackages" (fun _ -> 
+     Shell.Exec("dotnet", "restore ./src")
      "./src/GreenPipes.NetCore.sln"
      |> RestoreMSSolutionPackages (fun p ->
          { p with
