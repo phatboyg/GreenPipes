@@ -14,9 +14,20 @@
           "type": "platform"
         },
         "System.Security.Claims": "4.0.1"
+      },
+      "buildOptions": {
+        "compile": {
+          "exclude": [
+            "CacheRequest_Specs.cs"
+          ]
+        }
       }
     },
-    "net452": {}
+    "net452": {
+      "frameworkAssemblies": {
+        "System.Runtime.Caching": "4.0.0.0" 
+      }
+    }
   },
   "buildOptions": {
     "allowUnsafe": true,
