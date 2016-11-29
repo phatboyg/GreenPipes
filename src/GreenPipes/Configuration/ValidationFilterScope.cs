@@ -10,18 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Configurators
+namespace GreenPipes
 {
     using System.Collections.Generic;
 
 
-    public interface PayloadProvider
+    public interface ValidationFilterScope :
+        ValidationContext
     {
         /// <summary>
-        /// Checks if the payload provider provides the requested type
+        /// Specifies that the payload is provided by the filter.
+        /// </summary>
+        /// <typeparam name="T">The payload type</typeparam>
+        IEnumerable<ValidationResult> ProvidesPayload<T>()
+            where T : class;
+
+        /// <summary>
+        /// Specifies that the payload type is required by the filter, and that the filter will
+        /// fault if the payload is not present.
         /// </summary>
         /// <typeparam name="T">The payload type</typeparam>
         /// <returns></returns>
-        IEnumerable<PayloadProviderInfo> IsProvided<T>();
+        IEnumerable<ValidationResult> RequiresPayload<T>()
+            where T : class;
     }
 }

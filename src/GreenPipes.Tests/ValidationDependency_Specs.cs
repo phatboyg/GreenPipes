@@ -52,11 +52,9 @@ namespace GreenPipes.Tests
 
             public IEnumerable<ValidationResult> Validate(ValidationContext context)
             {
-                ValidationScope<InputContext> scope = context.CreateFilterScope(this, typeof(ProviderFilter));
+                ValidationFilterScope scope = context.CreateFilterScope(this, typeof(ProviderFilter));
 
-                scope.ProvidesPayload<ISpecialPayload>();
-
-                return this.ValidationOk();
+                return scope.ProvidesPayload<ISpecialPayload>();
             }
         }
 
@@ -84,7 +82,7 @@ namespace GreenPipes.Tests
 
             public IEnumerable<ValidationResult> Validate(ValidationContext context)
             {
-                ValidationScope<InputContext> scope = context.CreateFilterScope(this, typeof(SomeFilter));
+                ValidationFilterScope scope = context.CreateFilterScope(this, typeof(SomeFilter));
                 foreach (ValidationResult result in scope.RequiresPayload<ISpecialPayload>())
                     yield return result;
             }

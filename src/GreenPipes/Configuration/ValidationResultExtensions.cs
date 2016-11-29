@@ -21,11 +21,6 @@ namespace GreenPipes
     {
         static readonly IEnumerable<ValidationResult> Empty = Enumerable.Empty<ValidationResult>();
 
-        public static IEnumerable<ValidationResult> ValidationOk(this ISpecification configuration)
-        {
-            return Empty;
-        }
-
         public static ValidationResult Failure(this ISpecification configurator, string message)
         {
             return new ConfigurationValidationResult(ValidationResultDisposition.Failure, message);
@@ -75,7 +70,7 @@ namespace GreenPipes
         {
             //string key = result.Key.Contains(".") ? result.Key.Substring(result.Key.IndexOf('.')) : "";
 
-            string key = parentKey + "." + result.Key;
+            var key = parentKey + "." + result.Key;
 
             return new ConfigurationValidationResult(result.Disposition, key, result.Value, result.Message);
         }

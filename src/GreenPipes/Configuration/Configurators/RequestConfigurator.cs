@@ -79,7 +79,9 @@ namespace GreenPipes.Configurators
 
             configure?.Invoke(requestConfigurator);
 
-            IPipeConfigurationResult result = new PipeConfigurationResult(requestConfigurator.Validate());
+            var context = new PipeValidationContext();
+
+            IPipeConfigurationResult result = new PipeConfigurationResult(requestConfigurator.Validate(context));
             if (result.ContainsFailure)
                 throw new PipeConfigurationException(result.GetMessage("The result configuration was invalid"));
 
@@ -125,11 +127,6 @@ namespace GreenPipes.Configurators
             return new MultipleResultRequestPipe<TRequest>(_pipe, resultPipe);
         }
 
-        public IEnumerable<ValidationResult> Validate()
-        {
-            return _pipeConfigurator.Validate();
-        }
-
         public void Connect(IPipeConnector connector)
         {
             IPipe<ResultContext<TRequest, TResult>> responsePipe = _pipeConfigurator.Build();
@@ -140,6 +137,11 @@ namespace GreenPipes.Configurators
         public void AddPipeSpecification(IPipeSpecification<ResultContext<TRequest, TResult>> specification)
         {
             _pipeConfigurator.AddPipeSpecification(specification);
+        }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
+        {
+            return _pipeConfigurator.Validate(context);
         }
     }
 }

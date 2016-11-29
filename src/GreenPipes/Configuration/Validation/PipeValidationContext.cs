@@ -10,11 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Configurators
+namespace GreenPipes.Validation
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Configurators;
     using Internals.Extensions;
 
 
@@ -30,20 +31,24 @@ namespace GreenPipes.Configurators
 
         public ISpecification Current { get; set; }
 
-        public ValidationScope<T> CreateFilterScope<T>(IPipeSpecification<T> specification, Type filterType) where T : class, PipeContext
+        public ValidationFilterScope CreateFilterScope<T>(IPipeSpecification<T> specification, Type filterType) where T : class, PipeContext
         {
-            return new PipeValidationScope<T>(this, specification, filterType);
+            return new PipeValidationFilterScope<T>(this, specification, filterType);
         }
 
-        public void ProvidesPayload<T>(PayloadProviderInfo payloadProviderInfo)
+        public IEnumerable<ValidationResult> ProvidesPayload<T>(PayloadProviderInfo payloadProviderInfo)
         {
+            PayloadProviderInfo[] existingProviders = _payloadProviders.SelectMany(x => x.IsProvided<T>()).ToArray();
+            if (existingProviders.Any())
+                yield return
+                    Current.Warning($"The payload type {TypeCache<T>.ShortName} is already provided by {string.Join(", ", existingProviders.Select(x => TypeCache.GetShortName(x.FilterType)))}.");
+
             _payloadProviders.Add(new PipePayloadProvider<T>(payloadProviderInfo));
         }
 
         public IEnumerable<ValidationResult> RequiresPayload<T>()
         {
-            PayloadProviderInfo providerInfo;
-            if (false == _payloadProviders.Any(x => x.IsProvided<T>(out providerInfo)))
+            if (false == _payloadProviders.SelectMany(x => x.IsProvided<T>()).Any())
                 yield return Current.Failure($"A payload provider for {TypeCache<T>.ShortName} was not found.");
         }
     }

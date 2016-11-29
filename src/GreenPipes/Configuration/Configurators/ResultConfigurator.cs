@@ -51,9 +51,9 @@ namespace GreenPipes.Configurators
             return new SingleResultRequestPipe<TRequest, TResult>(_pipe, responsePipe);
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
-            return _pipeConfigurator.Validate();
+            return _pipeConfigurator.Validate(context);
         }
 
         public void AddPipeSpecification(IPipeSpecification<ResultContext<TRequest, TResult>> specification)

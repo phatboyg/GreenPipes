@@ -58,7 +58,7 @@ namespace GreenPipes.Specifications
             if (_pipeContextConverterFactory == null)
                 yield return this.Failure("PipeContextProviderFactory", "must not be null");
 
-            foreach (var result in _specifications.SelectMany(x => x.Validate()))
+            foreach (var result in _specifications.SelectMany(x => x.Validate(context)))
                 yield return result.WithParentKey("Dispatch");
         }
     }

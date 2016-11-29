@@ -10,30 +10,30 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Configurators
+namespace GreenPipes.Validation
 {
     using System;
     using System.Collections.Generic;
 
 
-    public class PipeValidationScope<TContext> :
-        ValidationScope<TContext>
+    public class PipeValidationFilterScope<TContext> :
+        ValidationFilterScope
         where TContext : class, PipeContext
     {
         readonly PipeValidationContext _context;
         readonly IPipeSpecification<TContext> _specification;
         readonly Type _filterType;
 
-        public PipeValidationScope(PipeValidationContext context, IPipeSpecification<TContext> specification, Type filterType)
+        public PipeValidationFilterScope(PipeValidationContext context, IPipeSpecification<TContext> specification, Type filterType)
         {
             _context = context;
             _specification = specification;
             _filterType = filterType;
         }
 
-        public void ProvidesPayload<T>() where T : class
+        public IEnumerable<ValidationResult> ProvidesPayload<T>() where T : class
         {
-            _context.ProvidesPayload<T>(new ProviderInfo
+            return _context.ProvidesPayload<T>(new ProviderInfo
             {
                 PayloadType = typeof(T),
                 FilterType = _filterType,
@@ -41,12 +41,12 @@ namespace GreenPipes.Configurators
             });
         }
 
-        IEnumerable<ValidationResult> ValidationScope<TContext>.RequiresPayload<T>()
+        IEnumerable<ValidationResult> ValidationFilterScope.RequiresPayload<T>()
         {
             return _context.RequiresPayload<T>();
         }
 
-        ValidationScope<T> ValidationContext.CreateFilterScope<T>(IPipeSpecification<T> specification, Type filterType)
+        ValidationFilterScope ValidationContext.CreateFilterScope<T>(IPipeSpecification<T> specification, Type filterType)
         {
             return _context.CreateFilterScope(specification, filterType);
         }

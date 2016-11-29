@@ -41,9 +41,9 @@ namespace GreenPipes.Specifications
             connector.ConnectPipe(pipe);
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate(ValidationContext context)
         {
-            return _configurator.Validate();
+            return _configurator.Validate(context);
         }
     }
 }

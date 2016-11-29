@@ -13,7 +13,6 @@
 namespace GreenPipes
 {
     using System;
-    using System.Collections.Generic;
 
 
     /// <summary>
@@ -21,29 +20,7 @@ namespace GreenPipes
     /// </summary>
     public interface ValidationContext
     {
-        ValidationScope<T> CreateFilterScope<T>(IPipeSpecification<T> specification, Type filterType)
+        ValidationFilterScope CreateFilterScope<T>(IPipeSpecification<T> specification, Type filterType)
             where T : class, PipeContext;
-    }
-
-
-    public interface ValidationScope<TContext> :
-        ValidationContext
-        where TContext : class, PipeContext
-    {
-        /// <summary>
-        /// Specifies that the payload is provided by the filter.
-        /// </summary>
-        /// <typeparam name="T">The payload type</typeparam>
-        void ProvidesPayload<T>()
-            where T : class;
-
-        /// <summary>
-        /// Specifies that the payload type is required by the filter, and that the filter will
-        /// fault if the payload is not present.
-        /// </summary>
-        /// <typeparam name="T">The payload type</typeparam>
-        /// <returns></returns>
-        IEnumerable<ValidationResult> RequiresPayload<T>()
-            where T : class;
     }
 }

@@ -10,8 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Configurators
+namespace GreenPipes.Validation
 {
+    using System.Collections.Generic;
+    using Configurators;
+
+
     public class PipePayloadProvider<TPayload> :
         PayloadProvider
     {
@@ -22,16 +26,10 @@ namespace GreenPipes.Configurators
             _providerInfo = providerInfo;
         }
 
-        public bool IsProvided<T>(out PayloadProviderInfo providerInfo)
+        public IEnumerable<PayloadProviderInfo> IsProvided<T>()
         {
             if (typeof(T).IsAssignableFrom(typeof(TPayload)))
-            {
-                providerInfo = _providerInfo;
-                return true;
-            }
-
-            providerInfo = null;
-            return false;
+                yield return _providerInfo;
         }
     }
 }
