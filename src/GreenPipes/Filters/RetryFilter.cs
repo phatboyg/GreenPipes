@@ -42,7 +42,8 @@ namespace GreenPipes.Filters
             _retryPolicy.Probe(scope);
         }
 
-        [DebuggerNonUserCode, DebuggerStepThrough]
+        [DebuggerNonUserCode]
+        [DebuggerStepThrough]
         async Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
             RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context);
@@ -82,7 +83,9 @@ namespace GreenPipes.Filters
 
                     await _observers.RetryFault(retryContext).ConfigureAwait(false);
 
-                    context.GetOrAddPayload(() => retryContext);
+                    if (_retryPolicy.IsHandled(exception))
+                        context.GetOrAddPayload(() => retryContext);
+
                     throw;
                 }
 
@@ -92,7 +95,8 @@ namespace GreenPipes.Filters
             }
         }
 
-        [DebuggerNonUserCode, DebuggerStepThrough]
+        [DebuggerNonUserCode]
+        [DebuggerStepThrough]
         async Task Attempt(RetryContext<TContext> retryContext, IPipe<TContext> next)
         {
             while (retryContext.CancellationToken.IsCancellationRequested == false)
@@ -146,7 +150,8 @@ namespace GreenPipes.Filters
 
                         await _observers.RetryFault(nextRetryContext).ConfigureAwait(false);
 
-                        retryContext.Context.GetOrAddPayload(() => nextRetryContext);
+                        if (_retryPolicy.IsHandled(exception))
+                            retryContext.Context.GetOrAddPayload(() => nextRetryContext);
 
                         throw;
                     }

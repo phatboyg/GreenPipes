@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes
 {
+    using System;
+
+
     /// <summary>
     /// A retry policy determines how exceptions are handled, and whether or not the
     /// remaining filters should be retried
@@ -19,7 +22,20 @@ namespace GreenPipes
     public interface IRetryPolicy :
         IProbeSite
     {
+        /// <summary>
+        /// Creates a retry policy context for the retry, which initiates the exception tracking
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="context"></param>
+        /// <returns></returns>
         RetryPolicyContext<T> CreatePolicyContext<T>(T context)
             where T : class, PipeContext;
+
+        /// <summary>
+        /// If the retry policy handles the exception, should return true
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <returns></returns>
+        bool IsHandled(Exception exception);
     }
 }

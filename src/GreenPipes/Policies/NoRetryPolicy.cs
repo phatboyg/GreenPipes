@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2016 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,9 +12,19 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Policies
 {
+    using System;
+
+
     public class NoRetryPolicy :
         IRetryPolicy
     {
+        readonly IExceptionFilter _filter;
+
+        public NoRetryPolicy(IExceptionFilter filter)
+        {
+            _filter = filter;
+        }
+
         void IProbeSite.Probe(ProbeContext context)
         {
             context.Set(new
@@ -26,6 +36,11 @@ namespace GreenPipes.Policies
         RetryPolicyContext<T> IRetryPolicy.CreatePolicyContext<T>(T context)
         {
             return new NoRetryPolicyContext<T>(context);
+        }
+
+        public bool IsHandled(Exception exception)
+        {
+            return _filter.Match(exception);
         }
 
         public override string ToString()

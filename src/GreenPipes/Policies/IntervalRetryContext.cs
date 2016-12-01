@@ -56,7 +56,7 @@ namespace GreenPipes.Policies
         {
             retryContext = new IntervalRetryContext<TContext>(_policy, Context, Exception, _retryCount + 1);
 
-            return (_retryCount < _policy.Intervals.Length) && _policy.Matches(exception);
+            return (_retryCount < _policy.Intervals.Length) && _policy.IsHandled(exception);
         }
     }
 }

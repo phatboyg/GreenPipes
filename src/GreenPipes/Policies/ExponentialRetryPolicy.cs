@@ -62,7 +62,7 @@ namespace GreenPipes.Policies
             return new ExponentialRetryPolicyContext<T>(this, context);
         }
 
-        public bool Matches(Exception exception)
+        public bool IsHandled(Exception exception)
         {
             return _filter.Match(exception);
         }

@@ -36,7 +36,7 @@ namespace GreenPipes.Policies
         {
             retryContext = new ExponentialRetryContext<TContext>(_policy, _context, exception, 1);
 
-            return _policy.Matches(exception);
+            return _policy.IsHandled(exception);
         }
 
         public Task RetryFaulted(Exception exception)

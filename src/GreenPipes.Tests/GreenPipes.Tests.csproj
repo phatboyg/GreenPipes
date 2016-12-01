@@ -76,6 +76,7 @@
     <Compile Include="Request_Specs.cs" />
     <Compile Include="RescueContext_Specs.cs" />
     <Compile Include="Rescue_Specs.cs" />
+    <Compile Include="RetryDifferent_Specs.cs" />
     <Compile Include="Retry_Specs.cs" />
     <Compile Include="SerializerCache.cs" />
   </ItemGroup>

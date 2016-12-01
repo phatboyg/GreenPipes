@@ -45,7 +45,7 @@ namespace GreenPipes
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            configurator.SetRetryPolicy(filter => new NoRetryPolicy());
+            configurator.SetRetryPolicy(filter => new NoRetryPolicy(filter));
 
             return configurator;
         }

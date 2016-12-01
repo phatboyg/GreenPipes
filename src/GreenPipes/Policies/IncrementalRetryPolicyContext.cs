@@ -36,7 +36,7 @@ namespace GreenPipes.Policies
         {
             retryContext = new IncrementalRetryContext<TContext>(_policy, _context, exception, 1, _policy.InitialInterval, _policy.IntervalIncrement);
 
-            return _policy.Matches(exception);
+            return _policy.IsHandled(exception);
         }
 
         public Task RetryFaulted(Exception exception)

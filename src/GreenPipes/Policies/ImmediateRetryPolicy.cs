@@ -45,7 +45,7 @@ namespace GreenPipes.Policies
             return new ImmediateRetryPolicyContext<T>(this, context);
         }
 
-        public bool Matches(Exception exception)
+        public bool IsHandled(Exception exception)
         {
             return _filter.Match(exception);
         }

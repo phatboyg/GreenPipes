@@ -60,7 +60,7 @@ namespace GreenPipes.Policies
         {
             retryContext = new IncrementalRetryContext<TContext>(_policy, Context, Exception, _retryCount + 1, _delay + _delayIncrement, _delayIncrement);
 
-            return _retryCount < _policy.RetryLimit && _policy.Matches(exception);
+            return _retryCount < _policy.RetryLimit && _policy.IsHandled(exception);
         }
     }
 }

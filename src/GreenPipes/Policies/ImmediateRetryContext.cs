@@ -55,7 +55,7 @@ namespace GreenPipes.Policies
         {
             retryContext = new ImmediateRetryContext<TContext>(_policy, Context, Exception, RetryCount + 1);
 
-            return (RetryCount < _policy.RetryLimit) && _policy.Matches(exception);
+            return (RetryCount < _policy.RetryLimit) && _policy.IsHandled(exception);
         }
     }
 }
