@@ -173,6 +173,56 @@ namespace GreenPipes.Tests
         }
 
         [Test]
+        public void Should_ignore_the_exception()
+        {
+            var count = 0;
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            {
+                x.UseRetry(r =>
+                {
+                    r.Ignore<IntentionalTestException>();
+                    r.Immediate(4);
+                });
+                x.UseExecute(payload =>
+                {
+                    count++;
+                    throw new IntentionalTestException("Kaboom!");
+                });
+            });
+
+            var context = new TestContext();
+
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
+
+            Assert.That(count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Should_ignore_the_inner_exception()
+        {
+            var count = 0;
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            {
+                x.UseRetry(r =>
+                {
+                    r.Ignore<IntentionalTestException>();
+                    r.Immediate(4);
+                });
+                x.UseExecute(payload =>
+                {
+                    count++;
+                    throw new ApplicationException("Inside is death", new IntentionalTestException("Kaboom!"));
+                });
+            });
+
+            var context = new TestContext();
+
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<ApplicationException>());
+
+            Assert.That(count, Is.EqualTo(1));
+        }
+
+        [Test]
         public void Should_not_stack_overflow_with_a_ridiculous_retry_count()
         {
             var count = 0;

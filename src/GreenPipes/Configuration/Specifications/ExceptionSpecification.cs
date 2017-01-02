@@ -52,7 +52,7 @@ namespace GreenPipes.Specifications
 
         void IExceptionConfigurator.Ignore<T>()
         {
-            _exceptionFilter.Excludes += exception => exception is T;
+            _exceptionFilter.Excludes += exception => Match(exception, typeof(T));
         }
 
         void IExceptionConfigurator.Ignore<T>(Func<T, bool> filter)
