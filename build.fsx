@@ -12,7 +12,7 @@ let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./GreenPipes.snk"
 
 let assemblyVersion = "1.0.0.0"
-let baseVersion = "1.0.6"
+let baseVersion = "1.0.7"
 
 let semVersion : SemVerInfo = parse baseVersion
 
@@ -33,6 +33,7 @@ let informationalVersion = (fun _ ->
 let nugetVersion = (fun _ ->
   let branchName = (branch ".")
   let label = if branchName="master" then "" else "-" + (if branchName="mt3" then "beta" else branchName)
+  let version = if branchName="master" then Version else FileVersion
   (Version + label)
 )
 

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2017 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,28 +32,22 @@ namespace GreenPipes.Specifications
 
         void IExceptionConfigurator.Handle(params Type[] exceptionTypes)
         {
-            foreach (var exceptionType in exceptionTypes)
-            {
-                _exceptionFilter.Includes += exception => exceptionType.IsInstanceOfType(exception);
-            }
+            _exceptionFilter.Includes += exception => Match(exception, exceptionTypes);
         }
 
         void IExceptionConfigurator.Handle<T>()
         {
-            _exceptionFilter.Includes += exception => exception is T;
+            _exceptionFilter.Includes += exception => Match(exception, typeof(T));
         }
 
         void IExceptionConfigurator.Handle<T>(Func<T, bool> filter)
         {
-            _exceptionFilter.Includes += exception => exception is T && filter((T)exception);
+            _exceptionFilter.Includes += exception => Match(exception, filter);
         }
 
         void IExceptionConfigurator.Ignore(params Type[] exceptionTypes)
         {
-            foreach (var exceptionType in exceptionTypes)
-            {
-                _exceptionFilter.Excludes += exception => exceptionType.IsInstanceOfType(exception);
-            }
+            _exceptionFilter.Excludes += exception => Match(exception, exceptionTypes);
         }
 
         void IExceptionConfigurator.Ignore<T>()
@@ -63,7 +57,39 @@ namespace GreenPipes.Specifications
 
         void IExceptionConfigurator.Ignore<T>(Func<T, bool> filter)
         {
-            _exceptionFilter.Excludes += exception => exception is T && filter((T)exception);
+            _exceptionFilter.Excludes += exception => Match(exception, filter);
+        }
+
+        static bool Match(Exception exception, params Type[] exceptionTypes)
+        {
+            var baseException = exception.GetBaseException();
+
+            for (var i = 0; i < exceptionTypes.Length; i++)
+            {
+                if (exceptionTypes[i].IsInstanceOfType(exception))
+                    return true;
+
+                if (exceptionTypes[i].IsInstanceOfType(baseException))
+                    return true;
+            }
+
+            return false;
+        }
+
+        static bool Match<T>(Exception exception, Func<T, bool> filter)
+            where T : Exception
+        {
+            var exceptionOfT = exception as T;
+            if (exceptionOfT != null)
+                return filter(exceptionOfT);
+
+            var baseException = exception.GetBaseException();
+
+            exceptionOfT = baseException as T;
+            if (exceptionOfT != null)
+                return filter(exceptionOfT);
+
+            return false;
         }
     }
 }
