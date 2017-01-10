@@ -173,6 +173,29 @@ namespace GreenPipes.Tests
         }
 
         [Test]
+        public async Task Should_retry_and_then_succeed_without_repeating_forever()
+        {
+            var count = 0;
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            {
+                x.UseRetry(r => r.Immediate(1));
+                x.UseExecute(payload =>
+                {
+                    var current = Interlocked.Increment(ref count);
+
+                    if(current == 1)
+                        throw new IntentionalTestException("Kaboom!");
+                });
+            });
+
+            var context = new TestContext();
+
+            await pipe.Send(context);
+
+            Assert.That(count, Is.EqualTo(2));
+        }
+
+        [Test]
         public void Should_ignore_the_exception()
         {
             var count = 0;

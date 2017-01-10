@@ -56,6 +56,15 @@ namespace GreenPipes.Filters
             }
             catch (Exception exception)
             {
+                if (context.CancellationToken.IsCancellationRequested)
+                {
+                    var canceledException = exception as OperationCanceledException;
+                    if (canceledException != null && canceledException.CancellationToken == context.CancellationToken)
+                        throw;
+
+                    context.CancellationToken.ThrowIfCancellationRequested();
+                }
+
                 RetryContext<TContext> payloadRetryContext;
                 if (context.TryGetPayload(out payloadRetryContext))
                 {
@@ -102,7 +111,7 @@ namespace GreenPipes.Filters
             while (retryContext.CancellationToken.IsCancellationRequested == false)
             {
                 if (retryContext.Delay.HasValue)
-                    await Task.Delay(retryContext.Delay.Value).ConfigureAwait(false);
+                    await Task.Delay(retryContext.Delay.Value, retryContext.CancellationToken).ConfigureAwait(false);
 
                 await retryContext.PreRetry().ConfigureAwait(false);
 
@@ -111,13 +120,15 @@ namespace GreenPipes.Filters
                 try
                 {
                     await next.Send(retryContext.Context).ConfigureAwait(false);
+
+                    return;
                 }
                 catch (Exception exception)
                 {
                     if (retryContext.CancellationToken.IsCancellationRequested)
                     {
                         var canceledException = exception as OperationCanceledException;
-                        if ((canceledException != null) && (canceledException.CancellationToken == retryContext.CancellationToken))
+                        if (canceledException != null && canceledException.CancellationToken == retryContext.CancellationToken)
                             throw;
 
                         retryContext.CancellationToken.ThrowIfCancellationRequested();
