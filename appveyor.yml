@@ -1,5 +1,8 @@
 version: 1.0.9.{build}
-build_script:
+skip_commits:
+  files:
+    - docs/*
+    - '**/*.html'build_script:
 - cmd: >-
     @echo off
 
