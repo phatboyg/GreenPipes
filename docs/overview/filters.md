@@ -1,8 +1,4 @@
----
-layout: default
-title: Filters
-subtitle: A unit of action in the pipeline
----
+# Filters
 
 A filter in GreenPipes is a middleware component that performs a specific function. You can think of them as HTTP Modules in ASP.Net or the Filters in ASP.Net MVC. All of these types serve to do the same general thing, which is to provide a common service to all requests that pass through the pipeline. Because its a common service, each filter should strongly adhere to the [single responsibility principle](http://en.wikipedia.org/wiki/Single_responsibility_principle) -- do one thing and one thing only. This fine-grained approach ensures that developers are able to opt-in to each behavior without including unnecessary or unwatched functionality.
 
@@ -25,7 +21,7 @@ GreenPipes itself follows a fairly common pattern when creating a new filter. Be
 
 1. Create the Filter itself, which is a class that implements `IFilter<T>`.
 
-```
+```csharp
 public class AuthorizationFilter<T> : IFilter<T>
         where T : class, PipeContext
     {
@@ -64,7 +60,7 @@ public class AuthorizationFilter<T> : IFilter<T>
 
 2. Create the Filter Specification. This will allow you to create the instance of the filter using the configuration data as well as validate the filter usage.
 
-```
+```csharp
 public class AuthorizationFilterSpecification<T> : IPipeSpecification<T>
     where T : class, PipeContext
 {
@@ -92,7 +88,7 @@ public class AuthorizationFilterSpecification<T> : IPipeSpecification<T>
 
 3. Write a simple extension method to bring a nice DSL to using your filter by building the specification with a nice configuration syntax.
 
-```
+```csharp
 public static class AuthorizationFilterExtensions
 {
     public static void UseAuthorizationFilter<T>(this IPipeConfigurator<T> cfg, IPipe<T> unauthPipe,
@@ -106,7 +102,7 @@ public static class AuthorizationFilterExtensions
 
 4. Finally lets test it.
 
-```
+```csharp
 public class Authentication_Specs
 {
    IPipe<RequestContext> _thePipe;
