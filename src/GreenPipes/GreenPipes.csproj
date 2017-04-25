@@ -1,311 +1,41 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{59052DB9-B527-4683-A56A-56C4D8FB6584}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GreenPipes</RootNamespace>
+    <TargetFrameworks>net452;netstandard1.5</TargetFrameworks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>portable</DebugType>
     <AssemblyName>GreenPipes</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <PackageId>GreenPipes</PackageId>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NoWarn>1591</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>bin\Release\GreenPipes.XML</DocumentationFile>
-    <NoWarn>1591</NoWarn>
-  </PropertyGroup>
+
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />
-    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\SolutionVersion.cs">
-      <Link>Properties\SolutionVersion.cs</Link>
-    </Compile>
-    <Compile Include="BasePipeContext.cs" />
-    <Compile Include="BindContext.cs" />
-    <Compile Include="CommandExtensions.cs" />
-    <Compile Include="ConcurrencyLimitExtensions.cs" />
-    <Compile Include="Configuration\BindConfigurationExtensions.cs" />
-    <Compile Include="Configuration\Builders\IBuildPipeConfigurator.cs" />
-    <Compile Include="Configuration\Builders\PipeBuilder.cs" />
-    <Compile Include="Configuration\CircuitBreakerConfigurationExtensions.cs" />
-    <Compile Include="Configuration\ConcurrencyLimitConfigurationExtensions.cs" />
-    <Compile Include="Configuration\Configurators\BindConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\IBindConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\IDispatchConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\IExceptionConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\IRescueConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\IRetryConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\RetryPolicyFactory.cs" />
-    <Compile Include="Configuration\DispatchConfigurationExtensions.cs" />
-    <Compile Include="Configuration\ForkConfigurationExtensions.cs" />
-    <Compile Include="Configuration\InlineFilterConfigurationExtensions.cs" />
-    <Compile Include="Configuration\InterceptConfigurationExtensions.cs" />
-    <Compile Include="Configuration\ISpecification.cs" />
-    <Compile Include="Configuration\Configurators\ICircuitBreakerConfigurator.cs" />
-    <Compile Include="Configuration\Configurators\PipeConfigurator.cs" />
-    <Compile Include="Configuration\ContextFilterConfigurationExtensions.cs" />
-    <Compile Include="Configuration\DelegateConfigurationExtensions.cs" />
-    <Compile Include="Configuration\FilterConfigurationExtensions.cs" />
-    <Compile Include="Configuration\IPipeBuilder.cs" />
-    <Compile Include="Configuration\IPipeConfigurationResult.cs" />
-    <Compile Include="Configuration\IPipeConfigurator.cs" />
-    <Compile Include="Configuration\IPipeSpecification.cs" />
-    <Compile Include="Configuration\LogConfigurationExtensions.cs" />
-    <Compile Include="Configuration\PartitionerConfigurationExtensions.cs" />
-    <Compile Include="Configuration\ProfileConfigurationExtensions.cs" />
-    <Compile Include="Configuration\RateLimitConfigurationExtensions.cs" />
-    <Compile Include="Configuration\RepeatPipeConfigurationExtensions.cs" />
-    <Compile Include="Configuration\RescueConfigurationExtensions.cs" />
-    <Compile Include="Configuration\RetryConfigurationExtensions.cs" />
-    <Compile Include="Configuration\Specifications\AsyncDelegatePipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\BindPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\InlineFilterPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\SplitFilterPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\CircuitBreakerPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\ConcurrencyLimitPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\ContextFilterPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\DelegatePipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\DispatchPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\ExceptionSpecification.cs" />
-    <Compile Include="Configuration\Specifications\FilterPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\ForkPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\InterceptPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\LogPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\PartitionerPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\ProfilePipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\RateLimitPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\RepeatPipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\RescuePipeSpecification.cs" />
-    <Compile Include="Configuration\Specifications\RetryPipeSpecification.cs" />
-    <Compile Include="Configuration\ValidationResult.cs" />
-    <Compile Include="Configuration\ValidationResultDisposition.cs" />
-    <Compile Include="Configuration\ValidationResultExtensions.cs" />
-    <Compile Include="Configuration\Validation\ConfigurationValidationResult.cs" />
-    <Compile Include="Configuration\Validation\PipeConfigurationResult.cs" />
-    <Compile Include="ConnectHandle.cs" />
-    <Compile Include="Contracts\CircuitBreakerClosed.cs" />
-    <Compile Include="Contracts\CircuitBreakerOpened.cs" />
-    <Compile Include="Contracts\EventContext.cs" />
-    <Compile Include="Contracts\ProfileData.cs" />
-    <Compile Include="Contracts\SetRateLimit.cs" />
-    <Compile Include="EventExtensions.cs" />
-    <Compile Include="Exceptions\DuplicateKeyPipeConfigurationException.cs" />
-    <Compile Include="Exceptions\PayloadException.cs" />
-    <Compile Include="Exceptions\PayloadFactoryException.cs" />
-    <Compile Include="Exceptions\PayloadNotFoundException.cs" />
-    <Compile Include="Exceptions\PipeConfigurationException.cs" />
-    <Compile Include="Filters\AsyncDelegateFilter.cs" />
-    <Compile Include="Filters\BindFilter.cs" />
-    <Compile Include="Filters\CircuitBreaker\CircuitBreakerEventExtensions.cs" />
-    <Compile Include="Filters\ConcurrencyLimitFilter.cs" />
-    <Compile Include="Contracts\SetConcurrencyLimit.cs" />
-    <Compile Include="Filters\IDynamicFilter.cs" />
-    <Compile Include="Filters\InlineFilter.cs" />
-    <Compile Include="Filters\IOutputPipeFilter.cs" />
-    <Compile Include="Filters\InterceptFilter.cs" />
-    <Compile Include="Filters\IPipeContextConverterFactory.cs" />
-    <Compile Include="Filters\IPipeContextConverter.cs" />
-    <Compile Include="Filters\ITeeFilter.cs" />
-    <Compile Include="Filters\KeyFilter.cs" />
-    <Compile Include="Filters\OutputPipeFilter.cs" />
-    <Compile Include="InlineFilterMethod.cs" />
-    <Compile Include="Internals\Extensions\ITypeCache.cs" />
-    <Compile Include="Internals\Mapping\DictionaryConverterCache.cs" />
-    <Compile Include="Internals\Mapping\DictionaryObjectValueProvider.cs" />
-    <Compile Include="Internals\Mapping\DynamicObjectConverter.cs" />
-    <Compile Include="Internals\Mapping\DynamicObjectConverterCache.cs" />
-    <Compile Include="Internals\Mapping\EnumDictionaryMapper.cs" />
-    <Compile Include="Internals\Mapping\EnumObjectMapper.cs" />
-    <Compile Include="Internals\Mapping\IArrayValueProvider.cs" />
-    <Compile Include="Internals\Mapping\IDictionaryConverter.cs" />
-    <Compile Include="Internals\Mapping\IDictionaryConverterCache.cs" />
-    <Compile Include="Internals\Mapping\IDictionaryMapper.cs" />
-    <Compile Include="Internals\Mapping\IObjectConverter.cs" />
-    <Compile Include="Internals\Mapping\IObjectConverterCache.cs" />
-    <Compile Include="Internals\Mapping\IObjectMapper.cs" />
-    <Compile Include="Internals\Mapping\IObjectMapperCache.cs" />
-    <Compile Include="Internals\Mapping\IObjectValueProvider.cs" />
-    <Compile Include="Internals\Mapping\NullableValueDictionaryMapper.cs" />
-    <Compile Include="Internals\Mapping\NullableValueObjectMapper.cs" />
-    <Compile Include="Internals\Mapping\ObjectArrayDictionaryMapper.cs" />
-    <Compile Include="Internals\Mapping\ObjectArrayObjectMapper.cs" />
-    <Compile Include="Internals\Mapping\ObjectArrayValueProvider.cs" />
-    <Compile Include="Internals\Mapping\ObjectConverterExtensions.cs" />
-    <Compile Include="Internals\Mapping\ObjectDictionaryConverter.cs" />
-    <Compile Include="Internals\Mapping\ObjectDictionaryMapper.cs" />
-    <Compile Include="Internals\Mapping\ObjectListDictionaryMapper.cs" />
-    <Compile Include="Internals\Mapping\ObjectListObjectMapper.cs" />
-    <Compile Include="Internals\Mapping\ObjectObjectMapper.cs" />
-    <Compile Include="Internals\Mapping\ValueArrayObjectMapper.cs" />
-    <Compile Include="Internals\Mapping\ValueDictionaryMapper.cs" />
-    <Compile Include="Internals\Mapping\ValueListObjectMapper.cs" />
-    <Compile Include="Internals\Mapping\ValueObject.cs" />
-    <Compile Include="Internals\Mapping\ValueObjectDictionaryDictionaryMapper.cs" />
-    <Compile Include="Internals\Mapping\ValueObjectDictionaryObjectMapper.cs" />
-    <Compile Include="Internals\Mapping\ValueObjectMapper.cs" />
-    <Compile Include="Internals\Mapping\ValueValueDictionaryDictionaryMapper.cs" />
-    <Compile Include="Internals\Mapping\ValueValueDictionaryObjectMapper.cs" />
-    <Compile Include="Internals\Reflection\IReadWritePropertyCache.cs" />
-    <Compile Include="Observers\FilterObservable.cs" />
-    <Compile Include="Filters\ContextFilter.cs" />
-    <Compile Include="Filters\DelegateFilter.cs" />
-    <Compile Include="Filters\DynamicFilter.cs" />
-    <Compile Include="Filters\ForkFilter.cs" />
-    <Compile Include="Filters\LogFilter.cs" />
-    <Compile Include="Filters\Log\LogContext.cs" />
-    <Compile Include="Filters\Log\LogFormatter.cs" />
-    <Compile Include="Filters\CircuitBreakerFilter.cs" />
-    <Compile Include="Filters\CircuitBreaker\CircuitBreakerSettings.cs" />
-    <Compile Include="Filters\CircuitBreaker\CircuitBreakerState.cs" />
-    <Compile Include="Filters\CircuitBreaker\ClosedBehavior.cs" />
-    <Compile Include="Filters\CircuitBreaker\HalfOpenBehavior.cs" />
-    <Compile Include="Filters\CircuitBreaker\ICircuitBreaker.cs" />
-    <Compile Include="Filters\CircuitBreaker\OpenBehavior.cs" />
-    <Compile Include="Filters\ProfileFilter.cs" />
-    <Compile Include="Filters\RateLimitFilter.cs" />
-    <Compile Include="Filters\RepeatFilter.cs" />
-    <Compile Include="Filters\Profile\ReportProfileData.cs" />
-    <Compile Include="Filters\RescueContextFactory.cs" />
-    <Compile Include="Filters\RescueFilter.cs" />
-    <Compile Include="Filters\RetryFilter.cs" />
-    <Compile Include="Filters\FactoryTargetFilter.cs" />
-    <Compile Include="Observers\ObservableAdapter.cs" />
-    <Compile Include="Observers\RetryFaultObserverCache.cs" />
-    <Compile Include="Observers\RetryObservable.cs" />
-    <Compile Include="Filters\SplitFilter.cs" />
-    <Compile Include="Filters\TeeFilter.cs" />
-    <Compile Include="IRetryObserver.cs" />
-    <Compile Include="IRetryObserverConnector.cs" />
-    <Compile Include="ITargetFilter.cs" />
-    <Compile Include="IPipeRouter.cs" />
-    <Compile Include="IExceptionFilter.cs" />
-    <Compile Include="IFilterObserver.cs" />
-    <Compile Include="IDynamicRouter.cs" />
-    <Compile Include="Internals\Extensions\ExpressionExtensions.cs" />
-    <Compile Include="Internals\Extensions\InterfaceExtensions.cs" />
-    <Compile Include="Internals\Extensions\TypeExtensions.cs" />
-    <Compile Include="Internals\Extensions\TypeCache.cs" />
-    <Compile Include="Internals\Reflection\DynamicImplementationBuilder.cs" />
-    <Compile Include="Internals\Reflection\IImplementationBuilder.cs" />
-    <Compile Include="Internals\Reflection\InterfaceReflectionCache.cs" />
-    <Compile Include="Internals\Reflection\ReadOnlyProperty.cs" />
-    <Compile Include="Internals\Reflection\ReadOnlyPropertyCache.cs" />
-    <Compile Include="Internals\Reflection\ReadWriteProperty.cs" />
-    <Compile Include="Internals\Reflection\ReadWritePropertyCache.cs" />
-    <Compile Include="Internals\Reflection\TypeNameFormatter.cs" />
-    <Compile Include="IntrospectionExtensions.cs" />
-    <Compile Include="Introspection\GreenPipesHostInfo.cs" />
-    <Compile Include="Introspection\IProbeResultBuilder.cs" />
-    <Compile Include="Introspection\ProbeHostInfo.cs" />
-    <Compile Include="Introspection\ProbeHostInfoCache.cs" />
-    <Compile Include="Introspection\ProbeResult.cs" />
-    <Compile Include="Introspection\ProbeResultBuilder.cs" />
-    <Compile Include="IObserverConnector.cs" />
-    <Compile Include="IPipeConnector.cs" />
-    <Compile Include="ITargetFactory.cs" />
-    <Compile Include="KeyAccessor.cs" />
-    <Compile Include="Contracts\CommandContext.cs" />
-    <Compile Include="Policies\BaseRetryContext.cs" />
-    <Compile Include="Policies\RetryFaultedContextCache.cs" />
-    <Compile Include="RetryFaultedExtensions.cs" />
-    <Compile Include="Routers\PipeContextConverterFactory.cs" />
-    <Compile Include="FilterContextProvider.cs" />
-    <Compile Include="MergeFilterContextProvider.cs" />
-    <Compile Include="Payloads\PipeContextPayloadAdapter.cs" />
-    <Compile Include="Pipes\PipeRouter.cs" />
-    <Compile Include="Pipes\DynamicRouter.cs" />
-    <Compile Include="Pipes\MergePipe.cs" />
-    <Compile Include="Policies\ExceptionFilters\AllExceptionFilter.cs" />
-    <Compile Include="Policies\ExceptionFilters\CompositeExceptionFilter.cs" />
-    <Compile Include="Policies\ExceptionFilters\CompositeFilter.cs" />
-    <Compile Include="Policies\ExceptionFilters\CompositePredicate.cs" />
-    <Compile Include="Policies\ExponentialRetryContext.cs" />
-    <Compile Include="Policies\ExponentialRetryPolicy.cs" />
-    <Compile Include="Policies\ExceptionFilters\FilterExceptionFilter.cs" />
-    <Compile Include="Policies\ExponentialRetryPolicyContext.cs" />
-    <Compile Include="Policies\ImmediateRetryContext.cs" />
-    <Compile Include="Policies\ImmediateRetryPolicy.cs" />
-    <Compile Include="Policies\ImmediateRetryPolicyContext.cs" />
-    <Compile Include="Policies\IncrementalRetryContext.cs" />
-    <Compile Include="Policies\IncrementalRetryPolicy.cs" />
-    <Compile Include="Policies\IncrementalRetryPolicyContext.cs" />
-    <Compile Include="Policies\IntervalRetryContext.cs" />
-    <Compile Include="Policies\IntervalRetryPolicy.cs" />
-    <Compile Include="Policies\IntervalRetryPolicyContext.cs" />
-    <Compile Include="Policies\NoRetryContext.cs" />
-    <Compile Include="Policies\NoRetryPolicy.cs" />
-    <Compile Include="Policies\ExceptionFilters\IgnoreExceptionFilter.cs" />
-    <Compile Include="Policies\ExceptionFilters\HandleExceptionFilter.cs" />
-    <Compile Include="IRetryPolicy.cs" />
-    <Compile Include="Partitioning\IHashGenerator.cs" />
-    <Compile Include="Partitioning\IPartitioner.cs" />
-    <Compile Include="Partitioning\Murmur3UnsafeHashGenerator.cs" />
-    <Compile Include="Partitioning\Partition.cs" />
-    <Compile Include="Partitioning\Partitioner.cs" />
-    <Compile Include="Filters\PartitionFilter.cs" />
-    <Compile Include="Partitioning\PartitionKeyProvider.cs" />
-    <Compile Include="IAsyncDisposable.cs" />
-    <Compile Include="IFilter.cs" />
-    <Compile Include="Introspection\ScopeProbeContext.cs" />
-    <Compile Include="IPipe.cs" />
-    <Compile Include="IProbeSite.cs" />
-    <Compile Include="PayloadFactory.cs" />
-    <Compile Include="Payloads\Collections\ArrayPayloadCollection.cs" />
-    <Compile Include="Payloads\Collections\BasePayloadCollection.cs" />
-    <Compile Include="Payloads\Collections\EmptyPayloadCollection.cs" />
-    <Compile Include="Payloads\IPayloadCache.cs" />
-    <Compile Include="Payloads\IPayloadCollection.cs" />
-    <Compile Include="Payloads\IPayloadValue.cs" />
-    <Compile Include="Payloads\IReadOnlyPayloadCollection.cs" />
-    <Compile Include="Payloads\PayloadCache.cs" />
-    <Compile Include="Payloads\PayloadCacheProxy.cs" />
-    <Compile Include="Payloads\PayloadCacheScope.cs" />
-    <Compile Include="Payloads\PayloadValue.cs" />
-    <Compile Include="Payloads\Collections\SinglePayloadCollection.cs" />
-    <Compile Include="Pipe.cs" />
-    <Compile Include="PipeContext.cs" />
-    <Compile Include="PipeExtensions.cs" />
-    <Compile Include="Pipes\EmptyPipe.cs" />
-    <Compile Include="Pipes\FilterPipe.cs" />
-    <Compile Include="Pipes\LastPipe.cs" />
-    <Compile Include="Policies\NoRetryPolicyContext.cs" />
-    <Compile Include="ProbeContext.cs" />
-    <Compile Include="ProbeContextExtensions.cs" />
-    <Compile Include="RateLimitExtensions.cs" />
-    <Compile Include="RetryContext.cs" />
-    <Compile Include="RetryPolicyContext.cs" />
-    <Compile Include="Util\Connectable.cs" />
-    <Compile Include="Util\TaskUtil.cs" />
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+    <Compile Remove="CorePolyfills.cs" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+    <PackageReference Include="System.Threading.Timer" Version="4.0.1" />
+    <PackageReference Include="System.Collections.Concurrent" Version="4.0.12" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.0.1" />
+    <PackageReference Include="System.Reflection.Extensions" Version="4.0.1" />
+    <PackageReference Include="System.Console" Version="4.0.0" />
+    <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.0.0" />
+    <PackageReference Include="System.Diagnostics.Process" Version="4.1.0" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.0.0" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.1.0" />
+    <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.0.0" />
+  </ItemGroup>
+
 </Project>
