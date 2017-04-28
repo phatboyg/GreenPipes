@@ -8,7 +8,7 @@ build_script:
 skip_commits:
   files:
     - docs/*
-    - '**/*.html'build_script:
+    - '**/*.html'
 artifacts:
 - path: build_artifacts/*.nupkg
   name: Packages
