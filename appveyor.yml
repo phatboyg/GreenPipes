@@ -1,4 +1,5 @@
 version: 1.0.9.{build}
+skip_tags: true
 image: Visual Studio 2017
 skip_commits:
   files:
