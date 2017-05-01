@@ -53,7 +53,7 @@ Target "Clean" (fun _ ->
 )
 
 Target "RestorePackages" (fun _ -> 
-     "./src/GreenPipes.NetCore.sln"
+     "./src/GreenPipes.sln"
      |> RestoreMSSolutionPackages (fun p ->
          { p with
              OutputPath = packagesPath
@@ -89,7 +89,7 @@ Target "Build" (fun _ ->
             ]
   }
 
-  build setParams @".\src\GreenPipes.NetCore.sln"
+  build setParams @".\src\GreenPipes.sln"
       |> DoNothing
 )
 
