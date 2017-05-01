@@ -5,9 +5,8 @@ open Fake.AssemblyInfoFile
 open Fake.Git.Information
 open Fake.SemVerHelper
 
-let buildOutputPath = "./build_output"
-let buildArtifactPath = "./build_artifacts"
-let nugetWorkingPath = FullName "./build_temp"
+let buildOutputPath = FullName "./build_output"
+let buildArtifactPath = FullName "./build_artifacts"
 let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./GreenPipes.snk"
 
@@ -45,19 +44,13 @@ printfn "Using version: %s" Version
 Target "Clean" (fun _ ->
   ensureDirectory buildOutputPath
   ensureDirectory buildArtifactPath
-  ensureDirectory nugetWorkingPath
 
   CleanDir buildOutputPath
   CleanDir buildArtifactPath
-  CleanDir nugetWorkingPath
 )
 
 Target "RestorePackages" (fun _ -> 
-     "./src/GreenPipes.sln"
-     |> RestoreMSSolutionPackages (fun p ->
-         { p with
-             OutputPath = packagesPath
-             Retries = 4 })
+  DotNetCli.Restore (fun p -> { p with Project = "./src/" } )
 )
 
 Target "Build" (fun _ ->
@@ -70,69 +63,16 @@ Target "Build" (fun _ ->
       Attribute.FileVersion FileVersion
       Attribute.InformationalVersion InfoVersion
     ]
-
-  let buildMode = getBuildParamOrDefault "buildMode" "Release"
-  let setParams defaults = { 
-    defaults with
-        Verbosity = Some(Quiet)
-        Targets = ["Clean"; "Build"]
-        Properties =
-            [
-                "Optimize", "True"
-                "DebugSymbols", "True"
-                "RestorePackages", "True"
-                "Configuration", buildMode
-                "SignAssembly", "True"
-                "AssemblyOriginatorKeyFile", keyFile
-                "TargetFrameworkVersion", "v4.5.2"
-                "Platform", "Any CPU"
-            ]
-  }
-
-  build setParams @".\src\GreenPipes.sln"
-      |> DoNothing
+  DotNetCli.Build (fun p-> { p with Project = @".\src\GreenPipes"
+                                    Configuration= "Release"
+                                    Output = buildArtifactPath})
 )
 
-type packageInfo = {
-    Project: string
-    PackageFile: string
-    Summary: string
-    Files: list<string*string option*string option>
-}
-
 Target "Package" (fun _ ->
-
-  let nugs = [| { Project = "GreenPipes"
-                  Summary = "GreenPipes, a pipes and filters library for the Task Parallel Library"
-                  PackageFile = @".\src\GreenPipes\packages.config"
-                  Files = [ (@"..\src\GreenPipes\bin\Release\net452\GreenPipes.*", Some @"lib\net452", None);
-                            (@"..\src\GreenPipes\bin\Release\netstandard1.5\GreenPipes.*", Some @"lib\netstandard15", None);
-                            (@"..\src\GreenPipes\**\*.cs", Some "src", None) ] }
-             |]
-
-  nugs
-    |> Array.iter (fun nug ->
-
-      let getDeps daNug : NugetDependencies =
-        if daNug.Project = "GreenPipes" then (getDependencies daNug.PackageFile)
-        else ("GreenPipes", NuGetVersion) :: (getDependencies daNug.PackageFile)
-
-      let setParams defaults = {
-        defaults with 
-          Authors = ["Chris Patterson"]
-          Description = "GreenPipes, a pipes and filters library for the Task Parallel Library"
-          OutputPath = buildArtifactPath
-          Project = nug.Project
-          Dependencies = (getDeps nug)
-          Summary = nug.Summary
-          SymbolPackage = NugetSymbolPackage.Nuspec
-          Version = NuGetVersion
-          WorkingDir = nugetWorkingPath
-          Files = nug.Files
-      } 
-
-      NuGet setParams (FullName "./template.nuspec")
-    )
+  DotNetCli.Pack (fun p-> { p with 
+                                Project = @".\src\GreenPipes"
+                                Configuration= "Release"
+                                OutputPath= buildArtifactPath })
 )
 
 Target "Default" (fun _ ->
