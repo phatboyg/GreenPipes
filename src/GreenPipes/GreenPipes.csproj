@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>netstandard1.5;net452</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -7,24 +6,26 @@
     <AssemblyName>GreenPipes</AssemblyName>
     <PackageId>GreenPipes</PackageId>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
-  </ItemGroup>
-
+  <PropertyGroup>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\GreenPipes.xml</DocumentationFile>
+    <Description>GreenPipes, a pipes and filters library for the Task Parallel Library</Description>
+    <Version>1.0.0</Version>
+    <PackageProjectUrl>https://github.com/MassTransit/GreenPipes</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/MassTransit/GreenPipes/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/MassTransit/GreenPipes</RepositoryUrl>
+    <PackageTags>GreenPipes</PackageTags>
+    <Authors>Chris Patterson</Authors>
+  </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Compile Remove="CorePolyfills.cs" />
   </ItemGroup>
-
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
     <PackageReference Include="System.Threading.Timer" Version="4.3.0" />
     <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
@@ -38,5 +39,4 @@
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
   </ItemGroup>
-
 </Project>
