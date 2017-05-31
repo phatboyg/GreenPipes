@@ -30,8 +30,7 @@ let informationalVersion = (fun _ ->
 
 let nugetVersion = (fun _ ->
   let branchName = (branch ".")
-  let label = if branchName="master" then "" else "-" + (if branchName="mt3" then "beta" else branchName)
-  let version = if branchName="master" then Version else FileVersion
+  let label = if branchName="master" then "" else "-" + (branchName)
   (Version + label)
 )
 

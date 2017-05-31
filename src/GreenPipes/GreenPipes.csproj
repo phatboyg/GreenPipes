@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard1.5;net452</TargetFrameworks>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>../../GreenPipes.snk</AssemblyOriginatorKeyFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>portable</DebugType>
     <AssemblyName>GreenPipes</AssemblyName>
@@ -13,7 +15,7 @@
     <PackageProjectUrl>https://github.com/MassTransit/GreenPipes</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/MassTransit/GreenPipes/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/MassTransit/GreenPipes</RepositoryUrl>
-    <PackageTags>GreenPipes</PackageTags>
+    <PackageTags>MassTransit</PackageTags>
     <Authors>Chris Patterson</Authors>
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
