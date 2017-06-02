@@ -22,5 +22,5 @@ build_script:
   - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
   - gitbook install
   - ps: bash -c "rm -rf _book" ; gitbook build
-  - ps: cd _book ; git init ; git commit --allow-empty -m "Update docs" ; git checkout -b gh-pages ; git add . ; git commit -am "Update docs" ; git push https://github.com/MassTransit/GreenPipes.git gh-pages --force
-  - "%CMD_IN_ENV% npm run docs:publish"
+  - ps: cd _book ; git init ; git commit --allow-empty -m "Update docs" ; git checkout -b gh-pages ; git add . ; git commit -am "Update docs"
+  - git push https://github.com/MassTransit/GreenPipes.git gh-pages --force
