@@ -183,7 +183,7 @@ namespace GreenPipes.Tests
                 {
                     var current = Interlocked.Increment(ref count);
 
-                    if(current == 1)
+                    if (current == 1)
                         throw new IntentionalTestException("Kaboom!");
                 });
             });

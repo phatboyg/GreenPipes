@@ -44,3 +44,4 @@ _book
 .vs/
 .vscode/
 *.lock.json
+src/.idea
