@@ -10,7 +10,10 @@ let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./GreenPipes.snk"
 
 let assemblyVersion = "1.0.0.0"
-let baseVersion = "1.0.10"
+let baseVersion = "1.1.1"
+
+let envVersion = (environVarOrDefault "APPVEYOR_BUILD_VERSION" (baseVersion + ".0"))
+let buildVersion = (envVersion.Substring(0, envVersion.LastIndexOf('.')))
 
 let semVersion : SemVerInfo = parse baseVersion
 
@@ -31,13 +34,14 @@ let informationalVersion = (fun _ ->
 let nugetVersion = (fun _ ->
   let branchName = (branch ".")
   let label = if branchName="master" then "" else "-" + (branchName)
-  (Version + label)
+  let version = if branchName="master" then Version else FileVersion
+  (version + label)
 )
 
 let InfoVersion = informationalVersion()
 let NuGetVersion = nugetVersion()
 
-let versionArgs = [ @"/p:Version=""" + NuGetVersion + @""""; @"/p:AssemblyVersion=""" + FileVersion + @""""; @"/p:FileVersion=""" + FileVersion + @""""; @"/p:InformationalVersion=""" + InfoVersion + @"""" ]
+let versionArgs = [ @"/p:Version=""" + NuGetVersion + @""""; @"/p:PackageVersion=""" + NuGetVersion + @""""; @"/p:AssemblyVersion=""" + FileVersion + @""""; @"/p:FileVersion=""" + FileVersion + @""""; @"/p:InformationalVersion=""" + InfoVersion + @"""" ]
 
 printfn "Using version: %s" Version
 
