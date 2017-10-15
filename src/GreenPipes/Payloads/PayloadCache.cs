@@ -52,8 +52,7 @@ namespace GreenPipes.Payloads
                 IPayloadCollection currentCollection;
                 do
                 {
-                    T existingValue;
-                    if (_collection.TryGetPayload(out existingValue))
+                    if (_collection.TryGetPayload(out T existingValue))
                         return existingValue;
 
                     IPayloadValue<T> contextProperty = payload ?? (payload = new PayloadValue<T>(payloadFactory()));

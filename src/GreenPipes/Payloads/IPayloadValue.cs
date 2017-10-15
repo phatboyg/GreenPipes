@@ -27,6 +27,13 @@ namespace GreenPipes.Payloads
         Type ValueType { get; }
 
         /// <summary>
+        /// Checks if the payload value implements the <paramref name="type"/>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        bool Implements(Type type);
+        
+        /// <summary>
         /// Returns the value if it can be assigned to the specified type
         /// </summary>
         /// <typeparam name="T">The requested type</typeparam>

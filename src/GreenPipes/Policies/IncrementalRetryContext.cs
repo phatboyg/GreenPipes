@@ -28,7 +28,7 @@ namespace GreenPipes.Policies
         readonly int _retryCount;
 
         public IncrementalRetryContext(IncrementalRetryPolicy policy, TContext context, Exception exception, int retryCount, TimeSpan delay, TimeSpan delayIncrement)
-            : base(context, typeof(TContext), retryCount)
+            : base(typeof(TContext), retryCount)
         {
             _policy = policy;
             _retryCount = retryCount;

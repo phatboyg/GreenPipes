@@ -111,7 +111,7 @@ namespace GreenPipes.Filters
             while (context.CancellationToken.IsCancellationRequested == false)
             {
                 if (retryContext.Delay.HasValue)
-                    await Task.Delay(retryContext.Delay.Value, retryContext.CancellationToken).ConfigureAwait(false);
+                    await Task.Delay(retryContext.Delay.Value, context.CancellationToken).ConfigureAwait(false);
 
                 await retryContext.PreRetry().ConfigureAwait(false);
 
@@ -127,7 +127,7 @@ namespace GreenPipes.Filters
                 {
                     if (context.CancellationToken.IsCancellationRequested)
                     {
-                        if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == retryContext.CancellationToken)
+                        if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == context.CancellationToken)
                             throw;
 
                         context.CancellationToken.ThrowIfCancellationRequested();
@@ -173,7 +173,7 @@ namespace GreenPipes.Filters
                 }
             }
 
-            retryContext.CancellationToken.ThrowIfCancellationRequested();
+            context.CancellationToken.ThrowIfCancellationRequested();
         }
     }
 }

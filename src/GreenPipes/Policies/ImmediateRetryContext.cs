@@ -25,7 +25,7 @@ namespace GreenPipes.Policies
         readonly ImmediateRetryPolicy _policy;
 
         public ImmediateRetryContext(ImmediateRetryPolicy policy, TContext context, Exception exception, int retryCount)
-            : base(context, typeof(TContext), retryCount)
+            : base(typeof(TContext), retryCount)
         {
             _policy = policy;
             Context = context;

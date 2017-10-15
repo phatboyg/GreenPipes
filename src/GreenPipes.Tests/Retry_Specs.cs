@@ -18,6 +18,8 @@ namespace GreenPipes.Tests
     using Contexts;
     using Contracts;
     using NUnit.Framework;
+    using Policies;
+    using Policies.ExceptionFilters;
     using Util;
 
 
@@ -348,6 +350,58 @@ namespace GreenPipes.Tests
                     d.Pipe<CommandContext<SetConcurrencyLimit>>(p =>
                     {
                         p.UseRetry(r => r.None());
+                        p.UseExecute(payload =>
+                        {
+                            count++;
+                            throw new IntentionalTestException("Kaboom!");
+                        });
+                    });
+                });
+            });
+
+            Assert.That(async () => await pipe.SetConcurrencyLimit(32), Throws.TypeOf<IntentionalTestException>());
+
+            Assert.That(count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Should_support_overloading_downstream_with_dispatch_either_that()
+        {
+            var count = 0;
+            IPipe<CommandContext> pipe = Pipe.New<CommandContext>(x =>
+            {
+                x.UseRetry(r => r.Interval(4, TimeSpan.FromMilliseconds(2)));
+                x.UseRetry(r => r.None());
+                x.UseDispatch(new PipeContextConverterFactory(), d =>
+                {
+                    d.Pipe<CommandContext<SetConcurrencyLimit>>(p =>
+                    {
+                        p.UseExecute(payload =>
+                        {
+                            count++;
+                            throw new IntentionalTestException("Kaboom!");
+                        });
+                    });
+                });
+            });
+
+            Assert.That(async () => await pipe.SetConcurrencyLimit(32), Throws.TypeOf<IntentionalTestException>());
+
+            Assert.That(count, Is.EqualTo(1));
+        }
+        
+        [Test]
+        public void Should_support_overloading_downstream_with_dispatch_either_that_thang()
+        {
+            var count = 0;
+            IPipe<CommandContext> pipe = Pipe.New<CommandContext>(x =>
+            {
+                x.UseRetry(r => r.SetRetryPolicy(filter => new CommandContextRetryPolicy(new IntervalRetryPolicy(filter, 4, 4, 4, 4))));
+                x.UseRetry(r => r.SetRetryPolicy(filter => new CommandContextRetryPolicy(new NoRetryPolicy(filter))));
+                x.UseDispatch(new PipeContextConverterFactory(), d =>
+                {
+                    d.Pipe<CommandContext<SetConcurrencyLimit>>(p =>
+                    {
                         p.UseExecute(payload =>
                         {
                             count++;

@@ -16,8 +16,7 @@ namespace GreenPipes
     using System.Threading.Tasks;
 
 
-    public interface RetryContext :
-        PipeContext
+    public interface RetryContext
     {
         /// <summary>
         /// The retry attempt currently being attempted

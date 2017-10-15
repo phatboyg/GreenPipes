@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2012-2017 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,7 @@ namespace GreenPipes.Payloads.Collections
 {
     using System;
     using System.Linq;
-    using System.Reflection;
+
 
     public class ArrayPayloadCollection :
         BasePayloadCollection
@@ -41,7 +41,7 @@ namespace GreenPipes.Payloads.Collections
 
         public override bool HasPayloadType(Type payloadType)
         {
-            if (_payloads.Any(x => payloadType.GetTypeInfo().IsAssignableFrom(x.ValueType)))
+            if (_payloads.Any(x => x.Implements(payloadType)))
                 return true;
 
             return base.HasPayloadType(payloadType);
@@ -50,12 +50,8 @@ namespace GreenPipes.Payloads.Collections
         public override bool TryGetPayload<TPayload>(out TPayload payload)
         {
             for (var i = 0; i < _payloads.Length; i++)
-            {
                 if (_payloads[i].TryGetValue(out payload))
-                {
                     return true;
-                }
-            }
 
             return base.TryGetPayload(out payload);
         }

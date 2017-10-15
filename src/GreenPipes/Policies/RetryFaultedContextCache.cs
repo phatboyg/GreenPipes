@@ -59,11 +59,10 @@ namespace GreenPipes.Policies
                 if (context == null)
                     throw new ArgumentNullException(nameof(context));
 
-                var retryContext = context as RetryContext<T>;
-                if (retryContext == null)
-                    throw new ArgumentException($"The RetryContext was not an expected type: {TypeCache<T>.ShortName}");
+                if (context is RetryContext<T> retryContext)
+                    return retryContext.RetryFaulted(exception);
 
-                return retryContext.RetryFaulted(exception);
+                throw new ArgumentException($"The RetryContext was not an expected type: {TypeCache<T>.ShortName}");
             }
         }
 
