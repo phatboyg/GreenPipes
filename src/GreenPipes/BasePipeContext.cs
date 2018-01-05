@@ -1,4 +1,4 @@
-// Copyright 2012-2016 Chris Patterson
+// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,9 @@
 namespace GreenPipes
 {
     using System;
+    using System.Reflection;
     using System.Threading;
     using Payloads;
-    using System.Reflection;
 
 
     /// <summary>
@@ -34,6 +34,18 @@ namespace GreenPipes
         protected BasePipeContext()
         {
             CancellationToken = CancellationToken.None;
+
+            _payloadCache = new PayloadCache();
+        }
+
+        /// <summary>
+        /// A new pipe context with an existing payload cache -- includes a new CancellationTokenSource. If 
+        /// cancellation is not supported, use the above constructor with CancellationToken.None to avoid
+        /// creating a token source.
+        /// </summary>
+        protected BasePipeContext(CancellationToken cancellationToken)
+        {
+            CancellationToken = cancellationToken;
 
             _payloadCache = new PayloadCache();
         }
