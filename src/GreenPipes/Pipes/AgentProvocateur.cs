@@ -25,6 +25,7 @@ namespace GreenPipes.Pipes
     public class AgentProvocateur :
         IAgentProvocateur
     {
+        readonly string _caption;
         readonly TaskCompletionSource<DateTime> _completed;
         readonly object _lock = new object();
         readonly TaskCompletionSource<DateTime> _ready;
@@ -37,8 +38,14 @@ namespace GreenPipes.Pipes
         TaskCompletionSource<DateTime> _setReady;
         CancellationTokenSource _setReadyCancel;
 
-        public AgentProvocateur()
+        /// <summary>
+        /// Creates the Agent
+        /// </summary>
+        /// <param name="caption">The caption displayed if trace is enabled</param>
+        public AgentProvocateur(string caption)
         {
+            _caption = caption ?? "Unknown";
+
             _ready = new TaskCompletionSource<DateTime>();
             _completed = new TaskCompletionSource<DateTime>();
 
@@ -104,17 +111,18 @@ namespace GreenPipes.Pipes
             {
                 if (_setReady != null)
                 {
+                    // if a previous readyTask is already completed, no sense in trying
+                    if (_setReady.Task.IsCompleted)
+                        return;
+
                     _setReadyCancel.Cancel();
 
                     _setReady = null;
                     _setReadyCancel = null;
                 }
 
-                if (readyTask.Status == TaskStatus.RanToCompletion)
-                {
-                    _ready.TrySetResult(DateTime.UtcNow);
+                if (_ready.Task.IsCompleted)
                     return;
-                }
 
                 var setReady = _setReady = new TaskCompletionSource<DateTime>();
                 setReady.Task.ContinueWith(SetReadyInternal, TaskScheduler.Default);
@@ -123,25 +131,18 @@ namespace GreenPipes.Pipes
 
                 void OnCompleted(Task task)
                 {
-                    if (!setReadyCancel.IsCancellationRequested)
+                    if (setReadyCancel.IsCancellationRequested)
+                        return;
+
+                    if (task.IsCanceled)
+                        setReady.TrySetCanceled();
+                    else if (task.IsFaulted)
+                        setReady.TrySetException(task.Exception.InnerExceptions);
+                    else
                         setReady.TrySetResult(DateTime.UtcNow);
                 }
 
-                void OnCanceled(Task task)
-                {
-                    if (!setReadyCancel.IsCancellationRequested)
-                        setReady.TrySetCanceled();
-                }
-
-                void OnFaulted(Task task)
-                {
-                    if (!setReadyCancel.IsCancellationRequested)
-                        setReady.TrySetException(task.Exception.InnerExceptions);
-                }
-
-                readyTask.ContinueWith(OnCompleted, CancellationToken.None, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
-                readyTask.ContinueWith(OnCanceled, CancellationToken.None, TaskContinuationOptions.OnlyOnCanceled, TaskScheduler.Default);
-                readyTask.ContinueWith(OnFaulted, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
+                readyTask.ContinueWith(OnCompleted, TaskScheduler.Default);
             }
         }
 
@@ -155,17 +156,18 @@ namespace GreenPipes.Pipes
             {
                 if (_setCompleted != null)
                 {
+                    // if a previous completedTask is already completed, no sense in trying
+                    if (_setCompleted.Task.IsCompleted)
+                        return;
+                    
                     _setCompletedCancel.Cancel();
 
                     _setCompleted = null;
                     _setCompletedCancel = null;
                 }
 
-                if (completedTask.Status == TaskStatus.RanToCompletion)
-                {
-                    _completed.TrySetResult(DateTime.UtcNow);
+                if (_completed.Task.IsCompleted)
                     return;
-                }
 
                 var setCompleted = _setCompleted = new TaskCompletionSource<DateTime>();
                 setCompleted.Task.ContinueWith(SetCompletedInternal, TaskScheduler.Default);
@@ -174,36 +176,45 @@ namespace GreenPipes.Pipes
 
                 void OnCompleted(Task task)
                 {
-                    if (!setCompletedCancel.IsCancellationRequested)
+                    if (setCompletedCancel.IsCancellationRequested)
+                        return;
+
+                    if (task.IsCanceled)
+                        setCompleted.TrySetCanceled();
+                    else if (task.IsFaulted)
+                        setCompleted.TrySetException(task.Exception.InnerExceptions);
+                    else
                         setCompleted.TrySetResult(DateTime.UtcNow);
                 }
 
-                void OnCanceled(Task task)
-                {
-                    if (!setCompletedCancel.IsCancellationRequested)
-                        setCompleted.TrySetCanceled();
-                }
-
-                void OnFaulted(Task task)
-                {
-                    if (!setCompletedCancel.IsCancellationRequested)
-                        setCompleted.TrySetException(task.Exception.InnerExceptions);
-                }
-
-                completedTask.ContinueWith(OnCompleted, CancellationToken.None, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
-                completedTask.ContinueWith(OnCanceled, CancellationToken.None, TaskContinuationOptions.OnlyOnCanceled, TaskScheduler.Default);
-                completedTask.ContinueWith(OnFaulted, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
+                completedTask.ContinueWith(OnCompleted, TaskScheduler.Default);
             }
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"Agent({_caption})";
         }
 
         void SetReadyInternal(Task<DateTime> task)
         {
-            _ready.TrySetResult(task.Result);
+            if (task.IsCanceled)
+                _ready.TrySetCanceled();
+            else if (task.IsFaulted)
+                _ready.TrySetException(task.Exception.InnerExceptions);
+            else
+                _ready.TrySetResult(task.Result);
         }
 
         void SetCompletedInternal(Task<DateTime> task)
         {
-            _completed.TrySetResult(task.Result);
+            if (task.IsCanceled)
+                _completed.TrySetCanceled();
+            else if (task.IsFaulted)
+                _completed.TrySetException(task.Exception.InnerExceptions);
+            else
+                _completed.TrySetResult(task.Result);
         }
 
         /// <summary>

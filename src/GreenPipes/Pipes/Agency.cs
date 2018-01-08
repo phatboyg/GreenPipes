@@ -15,6 +15,7 @@ namespace GreenPipes.Pipes
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -29,7 +30,8 @@ namespace GreenPipes.Pipes
         readonly ConcurrentDictionary<long, IAgent> _agents;
         long _nextId;
 
-        public Agency()
+        public Agency(string caption)
+            : base(caption)
         {
             _agents = new ConcurrentDictionary<long, IAgent>();
         }
@@ -45,8 +47,7 @@ namespace GreenPipes.Pipes
             while (_agents.TryAdd(id, agent) == false)
                 id = Interlocked.Increment(ref _nextId);
 
-            SetReady(Task.WhenAll(_agents.Values.Select(x => x.Ready).ToArray()));
-            SetCompleted(Task.WhenAll(_agents.Values.Select(x => x.Completed).ToArray()));
+            SetReady(WhenAll(_agents.ToArray(), x => x.Ready));
 
             void RemoveAgent(Task task)
             {
@@ -63,37 +64,75 @@ namespace GreenPipes.Pipes
         public void SetReady()
         {
             ICollection<IAgent> agents = _agents.Values;
-            if (agents.Count == 0)
+            if (_agents.Count == 0)
             {
                 SetReady(TaskUtil.Completed);
             }
             else
             {
-                SetReady(Task.WhenAll(agents.Select(x => x.Ready).ToArray()));
-                SetCompleted(Task.WhenAll(agents.Select(x => x.Completed).ToArray()));
+                SetReady(WhenAll(_agents.ToArray(), x => x.Ready));
             }
         }
 
         /// <inheritdoc />
         protected override Task StopAgent(StopContext context)
         {
-            ICollection<IAgent> agents = _agents.Values;
-            if (agents.Count == 0)
+            if (_agents.Count == 0)
             {
                 SetCompleted(TaskUtil.Completed);
 
                 return TaskUtil.Completed;
             }
 
-            return Task.WhenAll(agents.Select(x => x.Stop(context)).ToArray());
+            KeyValuePair<long, IAgent>[] agents = _agents.ToArray();
+
+            SetCompleted(WhenAll(agents, x => x.Completed));
+
+            return Task.WhenAll(_agents.Select(x => x.Value.Stop(context)).ToArray());
         }
 
         void Remove(long id)
         {
             _agents.TryRemove(id, out var _);
+        }
 
-            SetReady(Task.WhenAll(_agents.Values.Select(x => x.Ready).ToArray()));
-            SetCompleted(Task.WhenAll(_agents.Values.Select(x => x.Completed).ToArray()));
+        async Task WhenAll(KeyValuePair<long, IAgent>[] agents, Func<IAgent, Task> selector)
+        {
+            do
+            {
+                var delayTask = Task.Delay(1000);
+
+                var readyTask = await Task.WhenAny(agents.Select(x => selector(x.Value)).Concat(Enumerable.Repeat(delayTask, 1))).ConfigureAwait(false);
+                if (delayTask == readyTask)
+                {
+                    if (Trace.Listeners.Count > 0)
+                    {
+                        Trace.WriteLine($"Waiting: {ToString()}");
+                        foreach (var task in agents)
+                        {
+                            Trace.WriteLine($"{task} - {selector(task.Value).Status}");
+                        }
+                    }
+                }
+                else
+                {
+                    if (Trace.Listeners.Count > 0)
+                    {
+                        IEnumerable<KeyValuePair<long, IAgent>> ready = agents
+                            .Where(x => selector(x.Value).Status == TaskStatus.RanToCompletion || selector(x.Value).Status == TaskStatus.Canceled);
+
+                        foreach (var agent in ready)
+                        {
+                            Trace.WriteLine($"Completed: {agent} - {ToString()}");
+                        }
+                    }
+
+                    agents = agents
+                        .Where(x => selector(x.Value).Status != TaskStatus.RanToCompletion && selector(x.Value).Status != TaskStatus.Canceled)
+                        .ToArray();
+                }
+            }
+            while (agents.Length > 0);
         }
     }
 }

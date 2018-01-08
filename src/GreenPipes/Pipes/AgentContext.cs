@@ -15,6 +15,7 @@ namespace GreenPipes.Pipes
     using System;
     using System.Threading.Tasks;
     using Agents;
+    using Internals.Extensions;
 
 
     /// <summary>
@@ -30,10 +31,11 @@ namespace GreenPipes.Pipes
         readonly TaskCompletionSource<DateTime> _inactive;
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="context"></param>
-        public AgentContext(TContext context)
+        /// <param name="caption"></param>
+        public AgentContext(TContext context, string caption = null)
+            : base(caption ?? $"Context<{TypeCache<TContext>.ShortName}>")
         {
             _context = Task.FromResult(context);
             _inactive = new TaskCompletionSource<DateTime>();

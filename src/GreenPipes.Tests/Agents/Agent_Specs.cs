@@ -15,6 +15,7 @@ namespace GreenPipes.Tests.Agents
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes.Internals.Extensions;
     using NUnit.Framework;
     using Pipes;
     using Util;
@@ -26,7 +27,7 @@ namespace GreenPipes.Tests.Agents
         [Test]
         public async Task Should_simply_stop()
         {
-            IAgency agency = new Agency();
+            IAgency agency = new Agency("MI5");
 
             agency.SetReady();
             
@@ -40,9 +41,9 @@ namespace GreenPipes.Tests.Agents
         [Test]
         public async Task Should_stop_and_complete_with_an_agent()
         {
-            IAgency agency = new Agency();
+            IAgency agency = new Agency("MI5");
 
-            var agentProvocateur = new AgentProvocateur();
+            var agentProvocateur = new AgentProvocateur("007");
 
             agency.SetReady();
 
@@ -85,7 +86,7 @@ namespace GreenPipes.Tests.Agents
 
             await agency.Stop();
 
-           // await agency.Completed;
+            await agency.Completed.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
         }
 
         [Test]
@@ -198,7 +199,7 @@ namespace GreenPipes.Tests.Agents
                     Value = Interlocked.Increment(ref _id).ToString()
                 };
 
-                var agentContext = new AgentContext<SimpleContext>(simpleContext);
+                var agentContext = new AgentContext<SimpleContext>(simpleContext, $"SimpleContext[{simpleContext.Value}]");
 
                 agency.Add(agentContext);
 

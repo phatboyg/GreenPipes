@@ -15,6 +15,7 @@ namespace GreenPipes.Pipes
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals.Extensions;
 
 
     /// <summary>
@@ -27,6 +28,8 @@ namespace GreenPipes.Pipes
         ICacheContextAgency<TContext>
         where TContext : class, PipeContext
     {
+        static readonly string ActiveContextCaption = $"ActiveContext<{TypeCache<TContext>.ShortName}>";
+        
         readonly IAgentContextFactory<TContext> _agentContextFactory;
         readonly object _contextLock = new object();
         AgentContextHandle<TContext> _context;
@@ -35,7 +38,9 @@ namespace GreenPipes.Pipes
         /// Create the cache
         /// </summary>
         /// <param name="agentContextFactory">Factory used to create the underlying and active contexts</param>
-        public CacheContextAgency(IAgentContextFactory<TContext> agentContextFactory)
+        /// <param name="caption"></param>
+        public CacheContextAgency(IAgentContextFactory<TContext> agentContextFactory, string caption = null)
+            : base(caption ?? $"CacheContext<{TypeCache<TContext>.ShortName}>")
         {
             _agentContextFactory = agentContextFactory;
         }
@@ -49,7 +54,7 @@ namespace GreenPipes.Pipes
         {
             var activeContext = await CreateActiveContext(cancellationToken).ConfigureAwait(false);
 
-            IContextAgentProvocateur<TContext> contextAgent = new ContextAgentProvocateur<TContext>(activeContext);
+            IContextAgentProvocateur<TContext> contextAgent = new ActiveAgentContextAgent<TContext>(activeContext, ActiveContextCaption);
 
             Add(contextAgent);
 

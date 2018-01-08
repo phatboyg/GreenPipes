@@ -15,20 +15,23 @@ namespace GreenPipes.Pipes
     using System.Threading;
     using System.Threading.Tasks;
     using Agents;
+    using Internals.Extensions;
+    using Util;
 
 
     /// <summary>
     /// An Agent Provocateur that uses a context handle for the activate state of the agent
     /// </summary>
     /// <typeparam name="TContext"></typeparam>
-    public class ContextAgentProvocateur<TContext> :
+    public class ActiveAgentContextAgent<TContext> :
         AgentProvocateur,
         IContextAgentProvocateur<TContext>
         where TContext : class, PipeContext
     {
         readonly AgentContextHandle<TContext> _context;
 
-        public ContextAgentProvocateur(AgentContextHandle<TContext> context)
+        public ActiveAgentContextAgent(AgentContextHandle<TContext> context, string caption = null)
+            : base(caption ?? $"Context<{TypeCache<TContext>.ShortName}>")
         {
             _context = context;
 
@@ -41,6 +44,8 @@ namespace GreenPipes.Pipes
         {
             if (_context.Context.Status == TaskStatus.RanToCompletion)
                 await _context.Disavow().ConfigureAwait(false);
+
+            SetCompleted(TaskUtil.Completed);
         }
     }
 }
