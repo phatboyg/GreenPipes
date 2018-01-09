@@ -19,6 +19,7 @@ namespace GreenPipes.Internals.Extensions
 
     public static class TaskExtensions
     {
+
         public static async Task<T> UntilCompletedOrCanceled<T>(this Task<T> task, CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<bool>();

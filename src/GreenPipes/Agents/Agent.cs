@@ -10,22 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Pipes
+namespace GreenPipes.Agents
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Agents;
     using Util;
 
 
     /// <summary>
     /// An Agent Provocateur that simply exists, out of context
     /// </summary>
-    public class AgentProvocateur :
-        IAgentProvocateur
+    public class Agent :
+        IAgent
     {
-        readonly string _caption;
         readonly TaskCompletionSource<DateTime> _completed;
         readonly object _lock = new object();
         readonly TaskCompletionSource<DateTime> _ready;
@@ -41,11 +39,8 @@ namespace GreenPipes.Pipes
         /// <summary>
         /// Creates the Agent
         /// </summary>
-        /// <param name="caption">The caption displayed if trace is enabled</param>
-        public AgentProvocateur(string caption)
+        public Agent()
         {
-            _caption = caption ?? "Unknown";
-
             _ready = new TaskCompletionSource<DateTime>();
             _completed = new TaskCompletionSource<DateTime>();
 
@@ -63,19 +58,14 @@ namespace GreenPipes.Pipes
         /// </summary>
         protected bool IsStopped => _stopped.IsValueCreated && _stopped.Value.IsCancellationRequested;
 
-        Task IAgent.Ready => _ready.Task;
-        Task IAgent.Completed => _completed.Task;
-        CancellationToken IAgent.Stopping => _stopping.Value.Token;
+        /// <inheritdoc />
+        public Task Ready => _ready.Task;
 
-        void IAgentProvocateur.SetReady()
-        {
-            _ready.TrySetResult(DateTime.UtcNow);
-        }
+        /// <inheritdoc />
+        public Task Completed => _completed.Task;
 
-        void IAgentProvocateur.SetCompleted()
-        {
-            _completed.TrySetResult(DateTime.UtcNow);
-        }
+        /// <inheritdoc />
+        public CancellationToken Stopping => _stopping.Value.Token;
 
         /// <inheritdoc />
         public async Task Stop(StopContext context)
@@ -99,6 +89,23 @@ namespace GreenPipes.Pipes
             _completed.TrySetResult(DateTime.UtcNow);
 
             return TaskUtil.Completed;
+        }
+
+        /// <summary>
+        /// Puts the agent in a ready state, explicitly
+        /// </summary>
+        public virtual void SetReady()
+        {
+            _ready.TrySetResult(DateTime.UtcNow);
+        }
+
+        /// <summary>
+        /// Puts the agent in a faulted state where it will never be ready
+        /// </summary>
+        /// <param name="exception"></param>
+        public virtual void SetNotReady(Exception exception)
+        {
+            _ready.TrySetException(exception);
         }
 
         /// <summary>
@@ -137,7 +144,9 @@ namespace GreenPipes.Pipes
                     if (task.IsCanceled)
                         setReady.TrySetCanceled();
                     else if (task.IsFaulted)
-                        setReady.TrySetException(task.Exception.InnerExceptions);
+
+                        // ReSharper disable once AssignNullToNotNullAttribute
+                        setReady.TrySetException(task.Exception);
                     else
                         setReady.TrySetResult(DateTime.UtcNow);
                 }
@@ -159,7 +168,7 @@ namespace GreenPipes.Pipes
                     // if a previous completedTask is already completed, no sense in trying
                     if (_setCompleted.Task.IsCompleted)
                         return;
-                    
+
                     _setCompletedCancel.Cancel();
 
                     _setCompleted = null;
@@ -182,7 +191,9 @@ namespace GreenPipes.Pipes
                     if (task.IsCanceled)
                         setCompleted.TrySetCanceled();
                     else if (task.IsFaulted)
-                        setCompleted.TrySetException(task.Exception.InnerExceptions);
+
+                        // ReSharper disable once AssignNullToNotNullAttribute
+                        setCompleted.TrySetException(task.Exception);
                     else
                         setCompleted.TrySetResult(DateTime.UtcNow);
                 }
@@ -194,7 +205,7 @@ namespace GreenPipes.Pipes
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"Agent({_caption})";
+            return "Agent";
         }
 
         void SetReadyInternal(Task<DateTime> task)
@@ -202,7 +213,9 @@ namespace GreenPipes.Pipes
             if (task.IsCanceled)
                 _ready.TrySetCanceled();
             else if (task.IsFaulted)
-                _ready.TrySetException(task.Exception.InnerExceptions);
+
+                // ReSharper disable once AssignNullToNotNullAttribute
+                _ready.TrySetException(task.Exception);
             else
                 _ready.TrySetResult(task.Result);
         }
@@ -212,7 +225,9 @@ namespace GreenPipes.Pipes
             if (task.IsCanceled)
                 _completed.TrySetCanceled();
             else if (task.IsFaulted)
-                _completed.TrySetException(task.Exception.InnerExceptions);
+
+                // ReSharper disable once AssignNullToNotNullAttribute
+                _completed.TrySetException(task.Exception);
             else
                 _completed.TrySetResult(task.Result);
         }

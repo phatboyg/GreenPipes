@@ -15,10 +15,10 @@ namespace GreenPipes.Tests.Agents
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
     using NUnit.Framework;
     using Pipes;
-    using Util;
 
 
     [TestFixture]
@@ -27,33 +27,91 @@ namespace GreenPipes.Tests.Agents
         [Test]
         public async Task Should_simply_stop()
         {
-            IAgency agency = new Agency("MI5");
+            var supervisor = new Supervisor();
 
-            agency.SetReady();
-            
-            await agency.Ready;
-            
-            await agency.Stop();
+            supervisor.SetReady();
 
-            await agency.Completed;
+            await supervisor.Ready.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+
+            await supervisor.Stop();
+
+            await supervisor.Completed.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
         }
-        
+
         [Test]
         public async Task Should_stop_and_complete_with_an_agent()
         {
-            IAgency agency = new Agency("MI5");
+            var supervisor = new Supervisor();
 
-            var agentProvocateur = new AgentProvocateur("007");
+            var provocateur = new Agent();
 
-            agency.SetReady();
+            provocateur.SetReady();
+            supervisor.SetReady();
 
-            agency.Add(agentProvocateur);
+            supervisor.Add(provocateur);
 
-            await agency.Ready;
-            
-            await agency.Stop();
+            Console.WriteLine("Waiting for Ready...");
 
-            await agency.Completed;
+            await supervisor.Ready.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+
+            Console.WriteLine("Stopping");
+
+            await supervisor.Stop().UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+
+            Console.WriteLine("Waiting for Completed...");
+
+            await supervisor.Completed.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+        }
+
+        [Test]
+        public async Task Should_fault_on_ready_faulted()
+        {
+            var supervisor = new Supervisor();
+
+            var provocateur = new Agent();
+            provocateur.SetNotReady(new IntentionalTestException("So not ready."));
+            supervisor.Add(provocateur);
+
+            supervisor.SetReady();
+
+            Assert.That(async () => await supervisor.Ready.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token),
+                Throws.TypeOf<AggregateException>());
+
+            Console.WriteLine("Stopping");
+
+            await supervisor.Stop().UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+
+            Console.WriteLine("Waiting for Completed...");
+
+            await supervisor.Completed.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+        }
+
+        [Test]
+        public async Task Should_stop_and_complete_with_a_chain_of_command()
+        {
+            var supervisor = new Supervisor();
+
+            var manager = new Supervisor();
+            supervisor.Add(manager);
+
+            var provocateur = new Agent();
+            manager.Add(provocateur);
+
+            manager.SetReady();
+            supervisor.SetReady();
+            provocateur.SetReady();
+
+            Console.WriteLine("Waiting for Ready...");
+
+            await supervisor.Ready.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+
+            Console.WriteLine("Stopping");
+
+            await supervisor.Stop();
+
+            Console.WriteLine("Waiting for Completed...");
+
+            await supervisor.Completed.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
         }
     }
 
@@ -64,7 +122,7 @@ namespace GreenPipes.Tests.Agents
         [Test]
         public async Task Should_allow_active_instances()
         {
-            ICacheContextAgency<SimpleContext> agency = new CacheContextAgency<SimpleContext>(new SimpleContextFactory());
+            ICacheContextSupervisor<SimpleContext> supervisor = new CacheContextSupervisor<SimpleContext>(new SimpleContextFactory());
 
             int count = 0;
             string lastValue = string.Empty;
@@ -77,24 +135,22 @@ namespace GreenPipes.Tests.Agents
                 lastValue = context.Value;
             }));
 
-            await agency.Send(pipe);
-            Assert.That(async () => await agency.Send(pipe), Throws.TypeOf<IntentionalTestException>());
-            await agency.Send(pipe);
+            await supervisor.Send(pipe);
+            Assert.That(async () => await supervisor.Send(pipe), Throws.TypeOf<IntentionalTestException>());
+            await supervisor.Send(pipe);
 
             Assert.That(lastValue, Is.EqualTo("2"));
             Assert.That(count, Is.EqualTo(3));
 
-            await agency.Stop();
+            await supervisor.Stop();
 
-            await agency.Completed.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+            await supervisor.Completed.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
         }
 
         [Test]
         public async Task Should_support_disconnection()
         {
-            ICacheContextAgency<SimpleContext> agency = new CacheContextAgency<SimpleContext>(new SimpleContextFactory());
-
-            agency.SetReady();
+            ICacheContextSupervisor<SimpleContext> supervisor = new CacheContextSupervisor<SimpleContext>(new SimpleContextFactory());
 
             int count = 0;
             string lastValue = string.Empty;
@@ -107,16 +163,16 @@ namespace GreenPipes.Tests.Agents
                 lastValue = context.Value;
             }));
 
-            await agency.Send(pipe);
-            await agency.Send(pipe);
-            await agency.Send(pipe);
+            await supervisor.Send(pipe);
+            await supervisor.Send(pipe);
+            await supervisor.Send(pipe);
 
             Assert.That(lastValue, Is.EqualTo("2"));
             Assert.That(count, Is.EqualTo(3));
 
-            await agency.Stop();
+            await supervisor.Stop();
 
-            await agency.Completed;
+            await supervisor.Completed.UntilCompletedOrCanceled(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
         }
 
 
@@ -188,38 +244,34 @@ namespace GreenPipes.Tests.Agents
 
 
         class SimpleContextFactory :
-            IAgentContextFactory<SimpleContext>
+            IPipeContextFactory<SimpleContext>
         {
             long _id;
 
-            public AgentContextHandle<SimpleContext> CreateContext(IAgency agency)
+            public PipeContextHandle<SimpleContext> CreateContext(ISupervisor supervisor)
             {
-                var simpleContext = new SimpleContextImpl()
+                var context = new SimpleContextImpl()
                 {
                     Value = Interlocked.Increment(ref _id).ToString()
                 };
 
-                var agentContext = new AgentContext<SimpleContext>(simpleContext, $"SimpleContext[{simpleContext.Value}]");
+                var contextHandle = supervisor.AddContext<SimpleContext>(context);
 
-                agency.Add(agentContext);
+                void SimpleContextOnInvalid(object sender, EventArgs args) => contextHandle.DisposeAsync();
 
-                AgentContextHandle<SimpleContext> simpleContextHandle = agentContext;
+                context.OnInvalid += SimpleContextOnInvalid;
 
-                void SimpleContextOnInvalid(object sender, EventArgs args) => simpleContextHandle.Disavow();
-
-                simpleContext.OnInvalid += SimpleContextOnInvalid;
-
-                return agentContext;
+                return contextHandle;
             }
 
-            public async Task<ActiveAgentContextHandle<SimpleContext>> CreateActiveContext(AgentContextHandle<SimpleContext> context,
+            public async Task<ActivePipeContextHandle<SimpleContext>> CreateActiveContext(PipeContextHandle<SimpleContext> context,
                 CancellationToken cancellationToken = default(CancellationToken))
             {
                 var existingContext = await context.Context.ConfigureAwait(false);
 
                 var activeSimpleContext = new ActiveSimpleContext(existingContext, cancellationToken);
 
-                ActiveAgentContextHandle<SimpleContext> activeContext = new ActiveAgentContext<SimpleContext>(context, activeSimpleContext);
+                ActivePipeContextHandle<SimpleContext> activeContext = new ActivePipeContext<SimpleContext>(context, activeSimpleContext);
 
                 return activeContext;
             }

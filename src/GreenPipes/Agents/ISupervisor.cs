@@ -10,21 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Pipes
+namespace GreenPipes.Agents
 {
-    using System;
-    using System.Threading.Tasks;
-
-
-    public interface ActiveAgentContextHandle<TContext> :
-        AgentContextHandle<TContext>
-        where TContext : class, PipeContext
+    /// <summary>
+    /// A supervisor with a set of agents (a supervisor is also an agent)
+    /// </summary>
+    public interface ISupervisor :
+        IAgent
     {
         /// <summary>
-        /// If the active agent context faulted, invoked to disavow the underlying context
+        /// Add an Agent to the Supervisor
         /// </summary>
-        /// <param name="exception"></param>
-        /// <returns></returns>
-        Task Faulted(Exception exception);
+        /// <param name="agent">The agent</param>
+        void Add(IAgent agent);
     }
 }

@@ -10,36 +10,37 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Pipes
+namespace GreenPipes.Agents
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Agents;
 
 
+    /// <summary>
+    /// An agent can be supervised, and signals when it has completed
+    /// </summary>
     public interface IAgent
     {
         /// <summary>
-        /// The Task used to signal the agent is ready/faulted/cancelled
+        /// A Task which can be awaited and is completed when the agent is either ready or faulted/canceled
         /// </summary>
         Task Ready { get; }
 
         /// <summary>
-        /// Completed when the agent is finished, no longer active
+        /// A Task which is completed when the agent has completed (should never be set to Faulted, per convention)
         /// </summary>
         Task Completed { get; }
 
         /// <summary>
-        /// The token which indicates if the agent is in the process of stopping
+        /// The token which indicates if the agent is in the process of stopping (or stopped)
         /// </summary>
         CancellationToken Stopping { get; }
 
         /// <summary>
-        /// Stop the agent provocateur, signaling the agent is going to go away. This method can return immediately
-        /// as the <see cref="Completed"/> property is used to ensure it's done.
+        /// Stop the agent, and any supervised agents under it's control. Any faults related to stopping should
+        /// be returned via this method, and not propogated to the <see cref="Completed"/> Task.
         /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
+        /// <param name="context">The stop context</param>
         Task Stop(StopContext context);
     }
 }
