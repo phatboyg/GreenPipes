@@ -15,7 +15,6 @@ namespace GreenPipes.Agents
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Internals.Extensions;
 
 
     /// <summary>
@@ -38,6 +37,17 @@ namespace GreenPipes.Agents
         public PipeContextAgent(TContext context)
         {
             _context = Task.FromResult(context);
+            _inactive = new TaskCompletionSource<DateTime>();
+
+            SetReady(_context);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="context"></param>
+        public PipeContextAgent(Task<TContext> context)
+        {
+            _context = context;
             _inactive = new TaskCompletionSource<DateTime>();
 
             SetReady(_context);

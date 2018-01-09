@@ -15,6 +15,7 @@ namespace GreenPipes.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using Filters;
+    using GreenPipes.Agents;
     using NUnit.Framework;
     using Payloads;
 
@@ -36,19 +37,82 @@ namespace GreenPipes.Tests
 
 
         class Host :
-            BasePipeContext,
-            HostContext,
-            ISource<ConnectionContext>
+            ISource<ConnectionContext>,
+            ISupervisor
         {
+            readonly ICacheContextSupervisor<ConnectionContext> _supervisor;
+            readonly Context _context;
+
+            public Host()
+            {
+                _context = new Context();
+
+                _supervisor = new CacheContextSupervisor<ConnectionContext>(new ConnectionContextFactory(_context));
+            }
+
             public Task Send(IPipe<ConnectionContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
             {
-                var connection = new Connection(this, cancellationToken);
-
-                return pipe.Send(connection);
+                return _supervisor.Send(pipe, cancellationToken);
             }
 
             public void Probe(ProbeContext context)
             {
+            }
+
+
+            class ConnectionContextFactory :
+                IPipeContextFactory<ConnectionContext>
+            {
+                readonly Context _context;
+
+                public ConnectionContextFactory(Context context)
+                {
+                    _context = context;
+                }
+
+                PipeContextHandle<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
+                {
+                    return supervisor.AddContext<ConnectionContext>(new Connection(_context, supervisor.Stopping));
+                }
+
+                ActivePipeContextHandle<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
+                    PipeContextHandle<ConnectionContext> context, CancellationToken cancellationToken)
+                {
+                    return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));
+                }
+
+                async Task<ConnectionContext> CreateSharedConnection(Task<ConnectionContext> context, CancellationToken cancellationToken)
+                {
+                    var connectionContext = await context.ConfigureAwait(false);
+
+                    var sharedConnection = new SharedConnection(connectionContext, cancellationToken);
+
+                    return sharedConnection;
+                }
+            }
+
+
+            class Context :
+                BasePipeContext,
+                HostContext
+            {
+            }
+
+
+            Task IAgent.Ready => _supervisor.Ready;
+
+            Task IAgent.Completed => _supervisor.Completed;
+
+            CancellationToken IAgent.Stopping => _supervisor.Stopping;
+
+            Task IAgent.Stop(StopContext context)
+            {
+                return _supervisor.Stop(context);
+            }
+
+            void ISupervisor.Add(IAgent agent)
+            {
+                _supervisor.Add(agent);
             }
         }
 
@@ -130,6 +194,22 @@ namespace GreenPipes.Tests
             }
 
             public HostContext HostContext { get; }
+        }
+
+
+        class SharedConnection :
+            BasePipeContext,
+            ConnectionContext
+        {
+            readonly ConnectionContext _context;
+
+            public SharedConnection(ConnectionContext context, CancellationToken cancellationToken)
+                : base(new PayloadCacheScope(context), cancellationToken)
+            {
+                _context = context;
+            }
+
+            public HostContext HostContext => _context.HostContext;
         }
 
 

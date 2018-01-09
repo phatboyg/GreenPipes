@@ -251,11 +251,9 @@ namespace GreenPipes.Tests.Agents
             public PipeContextHandle<SimpleContext> CreateContext(ISupervisor supervisor)
             {
                 var context = new SimpleContextImpl()
-                {
-                    Value = Interlocked.Increment(ref _id).ToString()
-                };
+                    {Value = Interlocked.Increment(ref _id).ToString()};
 
-                var contextHandle = supervisor.AddContext<SimpleContext>(context);
+                PipeContextHandle<SimpleContext> contextHandle = supervisor.AddContext<SimpleContext>(context);
 
                 void SimpleContextOnInvalid(object sender, EventArgs args) => contextHandle.DisposeAsync();
 
@@ -264,16 +262,17 @@ namespace GreenPipes.Tests.Agents
                 return contextHandle;
             }
 
-            public async Task<ActivePipeContextHandle<SimpleContext>> CreateActiveContext(PipeContextHandle<SimpleContext> context,
+            public ActivePipeContextHandle<SimpleContext> CreateActiveContext(ISupervisor supervisor, PipeContextHandle<SimpleContext> context,
                 CancellationToken cancellationToken = default(CancellationToken))
             {
-                var existingContext = await context.Context.ConfigureAwait(false);
+                return supervisor.AddActiveContext(context, CreateActiveContext(context.Context, cancellationToken));
+            }
 
-                var activeSimpleContext = new ActiveSimpleContext(existingContext, cancellationToken);
+            async Task<SimpleContext> CreateActiveContext(Task<SimpleContext> context, CancellationToken cancellationToken)
+            {
+                var existingContext = await context.ConfigureAwait(false);
 
-                ActivePipeContextHandle<SimpleContext> activeContext = new ActivePipeContext<SimpleContext>(context, activeSimpleContext);
-
-                return activeContext;
+                return new ActiveSimpleContext(existingContext, cancellationToken);
             }
         }
     }

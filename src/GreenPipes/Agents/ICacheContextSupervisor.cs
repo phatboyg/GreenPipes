@@ -12,20 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Agents
 {
-    using System.Threading;
-    using System.Threading.Tasks;
-
-
+    /// <summary>
+    /// An agent supervisor which is also a Source for the context type
+    /// </summary>
+    /// <typeparam name="TContext"></typeparam>
     public interface ICacheContextSupervisor<out TContext> :
-        ISupervisor
+        ISupervisor,
+        ISource<TContext>
         where TContext : class, PipeContext
     {
-        /// <summary>
-        /// Send the cached context through the pipe
-        /// </summary>
-        /// <param name="pipe"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task Send(IPipe<TContext> pipe, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

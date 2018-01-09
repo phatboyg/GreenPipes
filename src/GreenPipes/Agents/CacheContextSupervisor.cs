@@ -43,9 +43,9 @@ namespace GreenPipes.Agents
             _contextFactory = contextFactory;
         }
 
-        async Task ICacheContextSupervisor<TContext>.Send(IPipe<TContext> pipe, CancellationToken cancellationToken)
+        async Task ISource<TContext>.Send(IPipe<TContext> pipe, CancellationToken cancellationToken)
         {
-            var activeContext = await CreateActiveContext(cancellationToken).ConfigureAwait(false);
+            var activeContext = CreateActiveContext(cancellationToken);
 
             try
             {
@@ -65,11 +65,17 @@ namespace GreenPipes.Agents
             }
         }
 
-        async Task<IActivePipeContextAgent<TContext>> CreateActiveContext(CancellationToken cancellationToken)
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("source");
+            scope.Add("type", Caption);
+        }
+
+        IActivePipeContextAgent<TContext> CreateActiveContext(CancellationToken cancellationToken)
         {
             PipeContextHandle<TContext> pipeContextHandle = GetContext();
 
-            var activeContext = await _contextFactory.CreateActiveContext(pipeContextHandle, cancellationToken);
+            var activeContext = _contextFactory.CreateActiveContext(this, pipeContextHandle, cancellationToken);
 
             var contextAgent = new ActivePipeContextAgent<TContext>(activeContext);
 
