@@ -74,6 +74,30 @@ namespace GreenPipes.Tests
         }
 
         [Test]
+        public async Task Should_support_an_aggregate_exception()
+        {
+            var count = 0;
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            {
+                x.UseRescue(Pipe.New<TestExceptionContext>(r =>
+                {
+                    r.UseExecute(c => Interlocked.Increment(ref count));
+                }), (cxt, ex) => new TestExceptionContext(cxt, ex));
+
+                x.UseExecute(cxt =>
+                {
+                    throw new AggregateException("Boom!");
+                });
+            });
+
+            var context = new TestContext();
+
+            await pipe.Send(context);
+
+            Assert.That(count, Is.EqualTo(1));
+        }
+
+        [Test]
         public async Task Should_skip_if_filtered_exception()
         {
             var count = 0;

@@ -16,6 +16,7 @@ namespace GreenPipes.Policies.ExceptionFilters
     using System.Linq;
     using System.Reflection;
 
+
     public class IgnoreExceptionFilter :
         IExceptionFilter
     {
@@ -35,16 +36,11 @@ namespace GreenPipes.Policies.ExceptionFilters
             });
         }
 
-        public bool Match(Exception exception)
+        bool IExceptionFilter.Match(Exception exception)
         {
-            var baseException = exception.GetBaseException();
-
             for (var i = 0; i < _exceptionTypes.Length; i++)
             {
                 if (_exceptionTypes[i].GetTypeInfo().IsInstanceOfType(exception))
-                    return false;
-
-                if (_exceptionTypes[i].GetTypeInfo().IsInstanceOfType(baseException))
                     return false;
             }
 

@@ -57,7 +57,7 @@ namespace GreenPipes.Filters
             }
             catch (AggregateException ex)
             {
-                if (!ex.InnerExceptions.Any(x => _exceptionFilter.Match(x)))
+                if(!_exceptionFilter.Match(ex.GetBaseException()))
                     throw;
 
                 var rescueContext = _rescueContextFactory(context, ex);

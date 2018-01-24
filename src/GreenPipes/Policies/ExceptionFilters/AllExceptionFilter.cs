@@ -23,7 +23,7 @@ namespace GreenPipes.Policies.ExceptionFilters
             context.CreateScope("all");
         }
 
-        public bool Match(Exception exception)
+        bool IExceptionFilter.Match(Exception exception)
         {
             return true;
         }

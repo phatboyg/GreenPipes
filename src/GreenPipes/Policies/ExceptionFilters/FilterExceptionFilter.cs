@@ -32,16 +32,15 @@ namespace GreenPipes.Policies.ExceptionFilters
             scope.Set(new
             {
                 ExceptionType = typeof(T).Name
-            });            
+            });
         }
 
-        public bool Match(Exception exception)
+        bool IExceptionFilter.Match(Exception exception)
         {
             var currentException = exception;
             while (currentException != null)
             {
-                var ex = exception as T;
-                if (ex != null)
+                if (exception is T ex)
                     return _filter(ex);
 
                 currentException = currentException.GetBaseException();
