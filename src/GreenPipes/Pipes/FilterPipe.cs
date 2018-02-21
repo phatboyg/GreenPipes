@@ -36,7 +36,7 @@ namespace GreenPipes.Pipes
         }
 
         [DebuggerStepThrough]
-        public Task Send(TContext context)
+        Task IPipe<TContext>.Send(TContext context)
         {
             return _filter.Send(context, _next);
         }

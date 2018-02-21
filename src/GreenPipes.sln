@@ -9,6 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GreenPipes.Tests", "GreenPi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GreenPipes.BenchmarkConsole", "GreenPipes.BenchmarkConsole\GreenPipes.BenchmarkConsole.csproj", "{CF2B281E-6374-4E59-B137-C910B2C5767B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{B9024C64-91EB-4CBF-AFA3-B243500F8891}"
+ProjectSection(SolutionItems) = preProject
+	..\build.fsx = ..\build.fsx
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

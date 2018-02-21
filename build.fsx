@@ -9,8 +9,8 @@ let buildArtifactPath = FullName "./build_artifacts"
 let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./GreenPipes.snk"
 
-let assemblyVersion = "1.2.0.0"
-let baseVersion = "1.2.1"
+let assemblyVersion = "1.3.0.0"
+let baseVersion = "1.3.0"
 
 let envVersion = (environVarOrDefault "APPVEYOR_BUILD_VERSION" (baseVersion + ".0"))
 let buildVersion = (envVersion.Substring(0, envVersion.LastIndexOf('.')))
