@@ -20,14 +20,19 @@ namespace GreenPipes.Pipes
     /// delivery
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public struct PushPipe<T> :
+    public struct InsertPipe<T> :
         IPipe<T>
         where T : class, PipeContext
     {
         readonly IFilter<T> _filter;
         readonly IPipe<T> _next;
 
-        public PushPipe(IFilter<T> filter, IPipe<T> next)
+        /// <summary>
+        /// Create an insert pipe, struct, on the stack, so it can be quickly used and cleaned up
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <param name="next"></param>
+        public InsertPipe(IFilter<T> filter, IPipe<T> next)
         {
             _filter = filter;
             _next = next;

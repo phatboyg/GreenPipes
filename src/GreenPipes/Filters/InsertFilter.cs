@@ -21,14 +21,14 @@ namespace GreenPipes.Filters
     /// A filter that hold a place in the pipe so that future filters can be added at this position.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class PushFilter<T> :
+    public class InsertFilter<T> :
         IFilter<T>,
-        IPushFilter<T>
+        IInsertFilter<T>
         where T : class, PipeContext
     {
         readonly IList<IFilter<T>> _filters;
 
-        public PushFilter()
+        public InsertFilter()
         {
             _filters = new List<IFilter<T>>(1);
         }
@@ -41,7 +41,7 @@ namespace GreenPipes.Filters
             IPipe<T> pipe = next;
             for (int i = _filters.Count - 1; i >= 0; i--)
             {
-                pipe = new PushPipe<T>(_filters[i], pipe);
+                pipe = new InsertPipe<T>(_filters[i], pipe);
             }
 
             return pipe.Send(context);
@@ -55,9 +55,14 @@ namespace GreenPipes.Filters
             }
         }
 
-        public void Add(IFilter<T> filter)
+        void IInsertFilter<T>.Add(IFilter<T> filter)
         {
             _filters.Add(filter);
+        }
+
+        void IInsertFilter<T>.Insert(IFilter<T> filter)
+        {
+            _filters.Insert(0, filter);
         }
     }
 }

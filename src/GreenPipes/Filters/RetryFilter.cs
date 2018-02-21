@@ -54,15 +54,14 @@ namespace GreenPipes.Filters
             {
                 await next.Send(policyContext.Context).ConfigureAwait(false);
             }
+            catch (OperationCanceledException exception) when (exception.CancellationToken == context.CancellationToken)
+            {
+                throw;
+            }
             catch (Exception exception)
             {
                 if (context.CancellationToken.IsCancellationRequested)
-                {
-                    if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == context.CancellationToken)
-                        throw;
-
                     context.CancellationToken.ThrowIfCancellationRequested();
-                }
 
                 if (policyContext.Context.TryGetPayload(out RetryContext<TContext> payloadRetryContext))
                 {
@@ -123,15 +122,14 @@ namespace GreenPipes.Filters
 
                     return;
                 }
+                catch (OperationCanceledException exception) when (exception.CancellationToken == context.CancellationToken)
+                {
+                    throw;
+                }
                 catch (Exception exception)
                 {
                     if (context.CancellationToken.IsCancellationRequested)
-                    {
-                        if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == context.CancellationToken)
-                            throw;
-
                         context.CancellationToken.ThrowIfCancellationRequested();
-                    }
 
                     if (retryContext.Context.TryGetPayload(out RetryContext<TContext> payloadRetryContext))
                     {
