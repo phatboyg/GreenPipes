@@ -106,7 +106,7 @@ namespace GreenPipes.Agents
 
             await Task.WhenAll(context.Agents.Select(x => x.Stop(context))).UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
 
-            await Completed.ConfigureAwait(false);
+            await Completed.UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
         }
 
         void Remove(long id)

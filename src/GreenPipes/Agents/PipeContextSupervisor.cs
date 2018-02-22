@@ -31,7 +31,7 @@ namespace GreenPipes.Agents
     {
         static readonly string Caption = $"Cache<{TypeCache<TContext>.ShortName}>";
 
-        readonly ISupervisor _contextSupervisor;
+        readonly ISupervisor _activeSupervisor;
         readonly IPipeContextFactory<TContext> _contextFactory;
         readonly object _contextLock = new object();
         PipeContextHandle<TContext> _context;
@@ -43,8 +43,8 @@ namespace GreenPipes.Agents
         public PipeContextSupervisor(IPipeContextFactory<TContext> contextFactory)
         {
             _contextFactory = contextFactory;
-            
-            _contextSupervisor = new Supervisor();
+
+            _activeSupervisor = new Supervisor();
         }
 
         async Task IPipeContextSource<TContext>.Send(IPipe<TContext> pipe, CancellationToken cancellationToken)
@@ -85,20 +85,19 @@ namespace GreenPipes.Agents
         {
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
+            // stop the active context agents
+            await _activeSupervisor.Stop(context).ConfigureAwait(false);
+
             await Task.WhenAll(context.Agents.Select(x => x.Stop(context))).UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
 
-            await Completed.ConfigureAwait(false);
+            await Completed.UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
         }
 
         async Task ActiveAndActualAgentsCompleted(StopSupervisorContext context)
         {
-            // first, wait for all the usages to complete
+            await _activeSupervisor.Completed.ConfigureAwait(false);
+
             await Task.WhenAll(context.Agents.Select(x => x.Completed)).ConfigureAwait(false);
-
-            // stop the controlling supervisor for actual contexts
-            await _contextSupervisor.Stop(context).ConfigureAwait(false);
-
-            await _contextSupervisor.Completed.ConfigureAwait(false);
         }
 
         protected bool HasContext
@@ -114,13 +113,7 @@ namespace GreenPipes.Agents
         {
             PipeContextHandle<TContext> pipeContextHandle = GetContext();
 
-            var activeContext = _contextFactory.CreateActiveContext(this, pipeContextHandle, cancellationToken);
-
-            var contextAgent = new ActivePipeContextAgent<TContext>(activeContext);
-
-            Add(contextAgent);
-
-            return contextAgent;
+            return _contextFactory.CreateActiveContext(_activeSupervisor, pipeContextHandle, cancellationToken);
         }
 
         PipeContextHandle<TContext> GetContext()
@@ -130,7 +123,7 @@ namespace GreenPipes.Agents
                 if (_context != null && _context.IsDisposed == false)
                     return _context;
 
-                PipeContextHandle<TContext> context = _context = _contextFactory.CreateContext(_contextSupervisor);
+                PipeContextHandle<TContext> context = _context = _contextFactory.CreateContext(this);
 
                 void ClearContext(Task task)
                 {

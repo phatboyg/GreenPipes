@@ -27,7 +27,7 @@ namespace GreenPipes.Agents
         /// </summary>
         /// <param name="supervisor">The supervisor containing the context</param>
         /// <returns>A handle to the pipe context</returns>
-        PipeContextHandle<TContext> CreateContext(ISupervisor supervisor);
+        IPipeContextAgent<TContext> CreateContext(ISupervisor supervisor);
 
         /// <summary>
         /// Create an active pipe context, which is a reference to the actual context
@@ -36,7 +36,7 @@ namespace GreenPipes.Agents
         /// <param name="context">The actual context</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> use for the active context</param>
         /// <returns>A handle to the active context</returns>
-        ActivePipeContextHandle<TContext> CreateActiveContext(ISupervisor supervisor, PipeContextHandle<TContext> context,
+        IActivePipeContextAgent<TContext> CreateActiveContext(ISupervisor supervisor, PipeContextHandle<TContext> context,
             CancellationToken cancellationToken = default(CancellationToken));
     }
 }

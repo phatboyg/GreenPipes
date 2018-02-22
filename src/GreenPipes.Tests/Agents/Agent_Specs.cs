@@ -252,12 +252,14 @@ namespace GreenPipes.Tests.Agents
         {
             long _id;
 
-            public PipeContextHandle<SimpleContext> CreateContext(ISupervisor supervisor)
+            public IPipeContextAgent<SimpleContext> CreateContext(ISupervisor supervisor)
             {
                 var context = new SimpleContextImpl()
-                    {Value = Interlocked.Increment(ref _id).ToString()};
+                {
+                    Value = Interlocked.Increment(ref _id).ToString()
+                };
 
-                PipeContextHandle<SimpleContext> contextHandle = supervisor.AddContext<SimpleContext>(context);
+                IPipeContextAgent<SimpleContext> contextHandle = supervisor.AddContext<SimpleContext>(context);
 
                 void SimpleContextOnInvalid(object sender, EventArgs args) => contextHandle.DisposeAsync();
 
@@ -266,7 +268,7 @@ namespace GreenPipes.Tests.Agents
                 return contextHandle;
             }
 
-            public ActivePipeContextHandle<SimpleContext> CreateActiveContext(ISupervisor supervisor, PipeContextHandle<SimpleContext> context,
+            public IActivePipeContextAgent<SimpleContext> CreateActiveContext(ISupervisor supervisor, PipeContextHandle<SimpleContext> context,
                 CancellationToken cancellationToken = default(CancellationToken))
             {
                 return supervisor.AddActiveContext(context, CreateActiveContext(context.Context, cancellationToken));

@@ -87,7 +87,7 @@ namespace GreenPipes
 
             return contextAgent;
         }
-        
+
         /// <summary>
         /// Adds a context to the supervisor as an agent, which can be stopped by the supervisor.
         /// </summary>
@@ -96,7 +96,7 @@ namespace GreenPipes
         /// <param name="context">The active context</param>
         /// <typeparam name="T">The context type</typeparam>
         /// <returns>A context handle</returns>
-        public static ActivePipeContextHandle<T> AddActiveContext<T>(this ISupervisor supervisor, PipeContextHandle<T> contextHandle, T context)
+        public static IActivePipeContextAgent<T> AddActiveContext<T>(this ISupervisor supervisor, PipeContextHandle<T> contextHandle, T context)
             where T : class, PipeContext
         {
             if (supervisor == null)
