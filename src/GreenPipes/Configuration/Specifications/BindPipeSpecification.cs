@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,97 +12,76 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Specifications
 {
-    using System;
     using System.Collections.Generic;
     using Builders;
     using Configurators;
+    using Contexts;
     using Filters;
 
 
-    public class BindPipeSpecification<TContext, TTarget> :
+    public class BindPipeSpecification<TContext, TSource> :
         IPipeSpecification<TContext>,
-        IBindConfigurator<TContext, TTarget>
+        IBindConfigurator<TContext, TSource>
         where TContext : class, PipeContext
-        where TTarget : class
+        where TSource : class, PipeContext
     {
         readonly IPipeConfigurator<TContext> _contextPipeConfigurator;
-        readonly IBuildPipeConfigurator<BindContext<TContext, TTarget>> _pipeConfigurator;
-        Func<ITargetFilter<TTarget>> _filterFactory;
+        readonly IBuildPipeConfigurator<BindContext<TContext, TSource>> _pipeConfigurator;
+        readonly IPipeContextSource<TSource, TContext> _source;
 
-        public BindPipeSpecification()
+        public BindPipeSpecification(IPipeContextSource<TSource, TContext> source)
         {
-            _pipeConfigurator = new PipeConfigurator<BindContext<TContext, TTarget>>();
+            _source = source;
+            _pipeConfigurator = new PipeConfigurator<BindContext<TContext, TSource>>();
             _contextPipeConfigurator = new ContextPipeConfigurator(_pipeConfigurator);
         }
 
-        void IBindConfigurator<TContext, TTarget>.SetTargetFactory(ITargetFactory<TTarget> targetFactory)
-        {
-            _filterFactory = () => new FactoryTargetFilter<TTarget>(targetFactory);
-        }
+        IPipeConfigurator<TContext> IBindConfigurator<TContext, TSource>.ContextPipe => _contextPipeConfigurator;
 
-        IPipeConfigurator<TContext> IBindConfigurator<TContext, TTarget>.ContextPipe => _contextPipeConfigurator;
-
-        void IPipeConfigurator<BindContext<TContext, TTarget>>.AddPipeSpecification(IPipeSpecification<BindContext<TContext, TTarget>> specification)
+        void IPipeConfigurator<BindContext<TContext, TSource>>.AddPipeSpecification(IPipeSpecification<BindContext<TContext, TSource>> specification)
         {
             _pipeConfigurator.AddPipeSpecification(specification);
         }
 
         void IPipeSpecification<TContext>.Apply(IPipeBuilder<TContext> builder)
         {
-            IPipe<BindContext<TContext, TTarget>> pipe = _pipeConfigurator.Build();
+            IPipe<BindContext<TContext, TSource>> pipe = _pipeConfigurator.Build();
 
-            ITargetFilter<TTarget> targetFilter = _filterFactory();
-
-            var bindFilter = new BindFilter<TContext, TTarget>(pipe, targetFilter);
+            var bindFilter = new PipeContextSourceBindFilter<TContext, TSource>(pipe, _source);
 
             builder.AddFilter(bindFilter);
         }
 
         IEnumerable<ValidationResult> ISpecification.Validate()
         {
-            if (_filterFactory == null)
-                yield return this.Failure("FilterFactory", "must not be null");
+            if (_source == null)
+                yield return this.Failure("PipeContextSource", "must not be null");
 
             foreach (var result in _pipeConfigurator.Validate())
-            {
                 yield return result;
-            }
         }
 
 
         class ContextPipeConfigurator :
             IPipeConfigurator<TContext>
         {
-            readonly IPipeConfigurator<BindContext<TContext, TTarget>> _configurator;
+            readonly IPipeConfigurator<BindContext<TContext, TSource>> _configurator;
 
-            public ContextPipeConfigurator(IPipeConfigurator<BindContext<TContext, TTarget>> configurator)
+            public ContextPipeConfigurator(IPipeConfigurator<BindContext<TContext, TSource>> configurator)
             {
                 _configurator = configurator;
             }
 
             public void AddPipeSpecification(IPipeSpecification<TContext> specification)
             {
-                _configurator.AddPipeSpecification(new SplitFilterPipeSpecification<BindContext<TContext, TTarget>, TContext>(specification,
-                    (input,context) => context as BindContext<TContext,TTarget>?? new Context(context, input.Target), context => context.Context));
-            }
-
-
-            class Context :
-                BasePipeContext,
-                BindContext<TContext, TTarget>
-            {
-                readonly TContext _context;
-
-                public Context(TContext context, TTarget source)
-                    : base(context)
+                BindContext<TContext, TSource> ContextProvider(BindContext<TContext, TSource> input, TContext context)
                 {
-                    _context = context;
-                    Target = source;
+                    return context as BindContext<TContext, TSource> ?? new BindContextProxy<TContext, TSource>(context, input.SourceContext);
                 }
 
-                TContext BindContext<TContext, TTarget>.Context => _context;
-
-                public TTarget Target { get; }
+                _configurator.AddPipeSpecification(new SplitFilterPipeSpecification<BindContext<TContext, TSource>, TContext>(specification,
+                    ContextProvider,
+                    context => context.Context));
             }
         }
     }

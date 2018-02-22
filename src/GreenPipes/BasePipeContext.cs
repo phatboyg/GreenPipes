@@ -24,7 +24,7 @@ namespace GreenPipes
     /// </summary>
     public abstract class BasePipeContext
     {
-        readonly IPayloadCache _payloadCache;
+        IPayloadCache _payloadCache;
 
         /// <summary>
         /// A new pipe context with an existing payload cache -- includes a new CancellationTokenSource. If 
@@ -34,8 +34,6 @@ namespace GreenPipes
         protected BasePipeContext()
         {
             CancellationToken = CancellationToken.None;
-
-            _payloadCache = new PayloadCache();
         }
 
         /// <summary>
@@ -85,39 +83,71 @@ namespace GreenPipes
         /// <returns></returns>
         public virtual bool HasPayloadType(Type payloadType)
         {
-            return payloadType.GetTypeInfo().IsInstanceOfType(this) || _payloadCache.HasPayloadType(payloadType);
+            return payloadType.GetTypeInfo().IsInstanceOfType(this) || PayloadCache.HasPayloadType(payloadType);
         }
 
         /// <summary>
         /// Attemts 
         /// </summary>
         /// <param name="payload"></param>
-        /// <typeparam name="TPayload"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public virtual bool TryGetPayload<TPayload>(out TPayload payload)
-            where TPayload : class
+        public virtual bool TryGetPayload<T>(out T payload)
+            where T : class
         {
-            payload = this as TPayload;
+            payload = this as T;
             if (payload != null)
                 return true;
 
-            return _payloadCache.TryGetPayload(out payload);
+            return PayloadCache.TryGetPayload(out payload);
         }
 
         /// <summary>
         /// Get or add a payload to the context, using the provided payload factory.
         /// </summary>
         /// <param name="payloadFactory">The payload factory, which is only invoked if the payload is not present.</param>
-        /// <typeparam name="TPayload">The payload type</typeparam>
+        /// <typeparam name="T">The payload type</typeparam>
         /// <returns></returns>
-        public virtual TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
+        public virtual T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
+            where T : class
         {
-            var context = this as TPayload;
+            var context = this as T;
             if (context != null)
                 return context;
 
-            return _payloadCache.GetOrAddPayload(payloadFactory);
+            return PayloadCache.GetOrAddPayload(payloadFactory);
+        }
+
+        /// <summary>
+        /// Either adds a new payload, or updates an existing payload
+        /// </summary>
+        /// <param name="addFactory">The payload factory called if the payload is not present</param>
+        /// <param name="updateFactory">The payload factory called if the payload already exists</param>
+        /// <typeparam name="T">The payload type</typeparam>
+        /// <returns></returns>
+        public virtual T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+            where T : class
+        {
+            // can't modify implicit payload types
+            var context = this as T;
+            if (context != null)
+                return context;
+
+            return PayloadCache.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
+        IPayloadCache PayloadCache
+        {
+            get
+            {
+                if (_payloadCache != null)
+                    return _payloadCache;
+
+                while (Volatile.Read(ref _payloadCache) == null)
+                    Interlocked.CompareExchange(ref _payloadCache, new PayloadCache(), null);
+
+                return _payloadCache;
+            }
         }
     }
 }

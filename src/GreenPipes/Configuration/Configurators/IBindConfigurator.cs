@@ -18,18 +18,27 @@ namespace GreenPipes.Configurators
     public interface IBindConfigurator<TContext>
         where TContext : class, PipeContext
     {
-        void Target<T>(Action<IBindConfigurator<TContext, T>> configureTarget)
-            where T : class;
+        /// <summary>
+        /// Specifies a pipe context source which is used to create the PipeContext bound to the BindContext.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="configureTarget"></param>
+        /// <typeparam name="T"></typeparam>
+        void Source<T>(IPipeContextSource<T, TContext> source, Action<IBindConfigurator<TContext, T>> configureTarget)
+            where T : class, PipeContext;
     }
 
 
-    public interface IBindConfigurator<TContext, TTarget> :
-        IPipeConfigurator<BindContext<TContext, TTarget>>
-        where TTarget : class
+    /// <summary>
+    /// Configures a binding using the specified pipe context source
+    /// </summary>
+    /// <typeparam name="TContext"></typeparam>
+    /// <typeparam name="TSource"></typeparam>
+    public interface IBindConfigurator<TContext, TSource> :
+        IPipeConfigurator<BindContext<TContext, TSource>>
+        where TSource : class, PipeContext
         where TContext : class, PipeContext
     {
-        void SetTargetFactory(ITargetFactory<TTarget> targetFactory);
-
         /// <summary>
         /// Configure a filter on the context pipe, versus the bound pipe
         /// </summary>

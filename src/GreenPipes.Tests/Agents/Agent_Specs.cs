@@ -233,6 +233,11 @@ namespace GreenPipes.Tests.Agents
                 return _context.GetOrAddPayload(payloadFactory);
             }
 
+            T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+            {
+                return _context.AddOrUpdatePayload(addFactory, updateFactory);
+            }
+
             string SimpleContext.Value => _context.Value;
 
             void SimpleContext.Invalidate()

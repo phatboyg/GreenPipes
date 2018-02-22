@@ -40,9 +40,14 @@ namespace GreenPipes.Payloads
             return _context.GetOrAddPayload(payloadFactory);
         }
 
+        T IPayloadCache.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
         IPayloadCache IPayloadCache.CreateScope()
         {
-            throw new NotImplementedException();
+            return new PayloadCacheScope(_context);
         }
     }
 }

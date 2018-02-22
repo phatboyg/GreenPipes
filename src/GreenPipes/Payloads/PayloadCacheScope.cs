@@ -28,29 +28,26 @@ namespace GreenPipes.Payloads
             _payloadCache = new PayloadCache();
         }
 
-        public PayloadCacheScope(IPayloadCache parent)
+        PayloadCacheScope(IPayloadCache parent)
         {
             _parentCache = parent;
 
             _payloadCache = new PayloadCache();
         }
 
-        public bool HasPayloadType(Type payloadType)
+        bool IReadOnlyPayloadCollection.HasPayloadType(Type payloadType)
         {
             return _payloadCache.HasPayloadType(payloadType) || _parentCache.HasPayloadType(payloadType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload)
-            where TPayload : class
+        bool IReadOnlyPayloadCollection.TryGetPayload<T>(out T payload)
         {
             return _payloadCache.TryGetPayload(out payload) || _parentCache.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
+        T IPayloadCache.GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
         {
-            TPayload payload;
-            if (_payloadCache.TryGetPayload(out payload))
+            if (_payloadCache.TryGetPayload(out T payload))
                 return payload;
 
             if (_parentCache.TryGetPayload(out payload))
@@ -59,7 +56,22 @@ namespace GreenPipes.Payloads
             return _payloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        public IPayloadCache CreateScope()
+        T IPayloadCache.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            if (_payloadCache.TryGetPayload(out T existingPayload))
+                return _payloadCache.AddOrUpdatePayload(addFactory, updateFactory);
+
+            if (_parentCache.TryGetPayload(out existingPayload))
+            {
+                T Add() => updateFactory(existingPayload);
+
+                return _payloadCache.AddOrUpdatePayload(Add, updateFactory);
+            }
+
+            return _payloadCache.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
+        IPayloadCache IPayloadCache.CreateScope()
         {
             return new PayloadCacheScope(this);
         }

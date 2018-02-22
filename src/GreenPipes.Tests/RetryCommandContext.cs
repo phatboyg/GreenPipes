@@ -48,6 +48,11 @@ namespace GreenPipes.Tests
             return _context.GetOrAddPayload(payloadFactory);
         }
 
+        public T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory) where T : class
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
         public int RetryAttempt { get; set; }
 
         public RetryCommandContext CreateNext()

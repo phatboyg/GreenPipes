@@ -38,7 +38,7 @@ namespace GreenPipes
     /// </summary>
     /// <typeparam name="TContext">The output context type</typeparam>
     /// <typeparam name="TInput">The input context type</typeparam>
-    public interface ISource<out TContext, in TInput> :
+    public interface IPipeContextSource<out TContext, in TInput> :
         IProbeSite
         where TContext : class, PipeContext
         where TInput : class, PipeContext

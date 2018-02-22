@@ -71,6 +71,47 @@ namespace GreenPipes.Payloads
             }
         }
 
+        T IPayloadCache.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            try
+            {
+                T previousValue = null;
+                IPayloadValue<T> context = null;
+
+                IPayloadCollection currentCollection;
+                do
+                {
+                    if (_collection.TryGetPayload(out T existingValue))
+                    {
+                        if (context == null || previousValue != existingValue)
+                            context = new PayloadValue<T>(updateFactory(existingValue));
+
+                        previousValue = existingValue;
+
+                        currentCollection = Volatile.Read(ref _collection);
+
+                        Interlocked.CompareExchange(ref _collection, currentCollection.Add(context), currentCollection);
+                    }
+                    else
+                    {
+                        if (context == null)
+                            context = new PayloadValue<T>(addFactory());
+
+                        currentCollection = Volatile.Read(ref _collection);
+
+                        Interlocked.CompareExchange(ref _collection, currentCollection.Add(context), currentCollection);
+                    }
+                }
+                while (currentCollection == Volatile.Read(ref _collection));
+
+                return context.Value;
+            }
+            catch (Exception exception)
+            {
+                throw new PayloadFactoryException($"The payload factory faulted: {TypeCache<T>.ShortName}", exception);
+            }
+        }
+
         IPayloadCache IPayloadCache.CreateScope()
         {
             return new PayloadCache(_collection);

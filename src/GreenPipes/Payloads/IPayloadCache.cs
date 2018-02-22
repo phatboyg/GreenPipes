@@ -27,6 +27,16 @@ namespace GreenPipes.Payloads
             where T : class;
 
         /// <summary>
+        /// Either adds a new payload, or updates an existing payload
+        /// </summary>
+        /// <param name="addFactory">The payload factory called if the payload is not present</param>
+        /// <param name="updateFactory">The payload factory called if the payload already exists</param>
+        /// <typeparam name="T">The payload type</typeparam>
+        /// <returns></returns>
+        T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+            where T : class;
+
+        /// <summary>
         /// Returns a scope from the current cache state
         /// </summary>
         /// <returns></returns>

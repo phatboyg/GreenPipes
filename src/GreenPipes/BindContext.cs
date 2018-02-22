@@ -15,12 +15,12 @@ namespace GreenPipes
     /// <summary>
     /// The binding of a value to the context, which is a fancy form of Tuple
     /// </summary>
-    /// <typeparam name="TContext"></typeparam>
-    /// <typeparam name="TTarget"></typeparam>
-    public interface BindContext<out TContext, out TTarget> :
+    /// <typeparam name="TContext">The pipe context type</typeparam>
+    /// <typeparam name="TSource">The source context type</typeparam>
+    public interface BindContext<out TContext, out TSource> :
         PipeContext
         where TContext : class, PipeContext
-        where TTarget : class
+        where TSource : class
     {
         /// <summary>
         /// The original context
@@ -28,8 +28,8 @@ namespace GreenPipes
         TContext Context { get; }
 
         /// <summary>
-        /// The bound target
+        /// The context bound from the source
         /// </summary>
-        TTarget Target { get; }
+        TSource SourceContext { get; }
     }
 }

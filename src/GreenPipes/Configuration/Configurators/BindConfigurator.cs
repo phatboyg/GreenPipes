@@ -27,9 +27,9 @@ namespace GreenPipes.Configurators
             _configurator = configurator;
         }
 
-        void IBindConfigurator<TContext>.Target<T>(Action<IBindConfigurator<TContext, T>> configureTarget)
+        void IBindConfigurator<TContext>.Source<T>(IPipeContextSource<T, TContext> source, Action<IBindConfigurator<TContext, T>> configureTarget)
         {
-            var specification = new BindPipeSpecification<TContext, T>();
+            var specification = new BindPipeSpecification<TContext, T>(source);
 
             configureTarget?.Invoke(specification);
 

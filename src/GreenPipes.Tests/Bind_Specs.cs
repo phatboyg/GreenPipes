@@ -14,6 +14,7 @@ namespace GreenPipes.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes.Internals.Extensions;
     using NUnit.Framework;
 
 
@@ -21,29 +22,38 @@ namespace GreenPipes.Tests
     public class Bind_Specs
     {
         [Test]
-        public async Task Binding_a_pipe_to_a_target()
+        public async Task Should_include_the_bound_context_in_the_pipe()
         {
+            Filter filter = null;
             IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
             {
-                cfg.UseBind(x => x.Target<Thing>(p =>
+                cfg.UseBind(x => x.Source(new ThingFactory(), p =>
                 {
-                    p.SetTargetFactory(new ThingFactory());
-
                     p.ContextPipe.UseExecuteAsync(context => Console.Out.WriteLineAsync($"ContextPipe: {context.Value}"));
-                    p.UseFilter(new Filter());
+                    filter = new Filter();
+                    p.UseFilter(filter);
                 }));
             });
 
             await pipe.Send(new InputContext("Input"));
+
+            await filter.GotTheThing.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
         }
 
 
         class Filter :
             IFilter<BindContext<InputContext, Thing>>
         {
+            readonly TaskCompletionSource<Thing> _completed;
+
+            public Filter()
+            {
+                _completed = new TaskCompletionSource<Thing>();
+            }
+
             public async Task Send(BindContext<InputContext, Thing> context, IPipe<BindContext<InputContext, Thing>> next)
             {
-                await Console.Out.WriteLineAsync($"Hello, World: {context.Context.Value} - {context.Target.Value}");
+                _completed.SetResult(context.SourceContext);
 
                 await next.Send(context);
             }
@@ -51,15 +61,19 @@ namespace GreenPipes.Tests
             public void Probe(ProbeContext context)
             {
             }
+
+            public Task<Thing> GotTheThing => _completed.Task;
         }
 
 
         class ThingFactory :
-            ITargetFactory<Thing>
+            IPipeContextSource<Thing, InputContext>
         {
-            public Task<Thing> CreateSource<T>(T context) where T : class, PipeContext
+            public Task Send(InputContext context, IPipe<Thing> pipe)
             {
-                return Task.FromResult(new Thing {Value = "Rock!"});
+                var thing = new Thing {Value = "Rock!"};
+
+                return pipe.Send(thing);
             }
 
             public void Probe(ProbeContext context)
@@ -68,7 +82,9 @@ namespace GreenPipes.Tests
         }
 
 
-        class Thing
+        class Thing :
+            BasePipeContext,
+            PipeContext
         {
             public string Value { get; set; }
         }

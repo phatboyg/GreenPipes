@@ -16,6 +16,10 @@ namespace GreenPipes.Payloads
     using System.Threading;
 
 
+    /// <summary>
+    /// A payload cache that delegates all calls to the <see cref="PipeContext"/> provided.
+    /// Does not create a scope, all changes are applied directly to the provided context.
+    /// </summary>
     public class PayloadCacheProxy :
         IPayloadCache,
         PipeContext
@@ -33,16 +37,22 @@ namespace GreenPipes.Payloads
             return _context.HasPayloadType(payloadType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload)
-            where TPayload : class
+        public bool TryGetPayload<T>(out T payload)
+            where T : class
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            where TPayload : class
+        public T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
+            where T : class
         {
             return _context.GetOrAddPayload(payloadFactory);
+        }
+
+        public T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+            where T : class
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
         }
 
         public IPayloadCache CreateScope()
