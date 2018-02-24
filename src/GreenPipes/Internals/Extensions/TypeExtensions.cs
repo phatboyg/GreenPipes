@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -34,10 +34,8 @@ namespace GreenPipes.Internals.Extensions
         public static IEnumerable<PropertyInfo> GetAllProperties(this TypeInfo typeInfo)
         {
             if (typeInfo.BaseType != null)
-            {
                 foreach (PropertyInfo prop in GetAllProperties(typeInfo.BaseType))
                     yield return prop;
-            }
 
             List<PropertyInfo> properties = typeInfo.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && !x.IsStatic)
@@ -48,7 +46,7 @@ namespace GreenPipes.Internals.Extensions
             {
                 IEnumerable<PropertyInfo> sourceProperties = properties
                     .Concat(typeInfo.ImplementedInterfaces.SelectMany(x => x.GetTypeInfo().DeclaredProperties));
-                
+
                 foreach (PropertyInfo prop in sourceProperties)
                     yield return prop;
 
@@ -64,10 +62,8 @@ namespace GreenPipes.Internals.Extensions
             TypeInfo info = type.GetTypeInfo();
 
             if (info.BaseType != null)
-            {
                 foreach (PropertyInfo prop in GetAllStaticProperties(info.BaseType))
                     yield return prop;
-            }
 
             IEnumerable<PropertyInfo> props = info.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && x.IsStatic)

@@ -1,4 +1,4 @@
-﻿// Copyright 2012-2016 Chris Patterson
+﻿// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -57,7 +57,7 @@ namespace GreenPipes.Internals.Reflection
         Type CreateTypeFromInterface(ModuleBuilder builder, Type interfaceType)
         {
             var typeName = "GreenPipes.DynamicInternal." +
-                (interfaceType.IsNested && (interfaceType.DeclaringType != null)
+                (interfaceType.IsNested && interfaceType.DeclaringType != null
                     ? $"{interfaceType.DeclaringType.Name}+{TypeCache.GetShortName(interfaceType)}"
                     : TypeCache.GetShortName(interfaceType));
             try

@@ -19,12 +19,6 @@ namespace GreenPipes.Agents
         IAgent
     {
         /// <summary>
-        /// Add an Agent to the Supervisor
-        /// </summary>
-        /// <param name="agent">The agent</param>
-        void Add(IAgent agent);
-
-        /// <summary>
         /// The peak number of agents active at the same time
         /// </summary>
         int PeakActiveCount { get; }
@@ -33,6 +27,12 @@ namespace GreenPipes.Agents
         /// The total number of agents that were added to the supervisor
         /// </summary>
         long TotalCount { get; }
+
+        /// <summary>
+        /// Add an Agent to the Supervisor
+        /// </summary>
+        /// <param name="agent">The agent</param>
+        void Add(IAgent agent);
     }
 
 

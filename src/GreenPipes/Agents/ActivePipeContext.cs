@@ -26,8 +26,8 @@ namespace GreenPipes.Agents
         ActivePipeContextHandle<TContext>
         where TContext : class, PipeContext
     {
-        readonly PipeContextHandle<TContext> _contextHandle;
         readonly Task<TContext> _context;
+        readonly PipeContextHandle<TContext> _contextHandle;
 
         /// <summary>
         /// Creates the active pipe context handle, which must have completed before this instance is created. Otherwise,

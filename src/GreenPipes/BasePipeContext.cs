@@ -1,4 +1,4 @@
-// Copyright 2012-2016 Chris Patterson
+// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,9 @@
 namespace GreenPipes
 {
     using System;
+    using System.Reflection;
     using System.Threading;
     using Payloads;
-    using System.Reflection;
 
 
     /// <summary>
@@ -76,6 +76,20 @@ namespace GreenPipes
         /// </summary>
         public virtual CancellationToken CancellationToken { get; }
 
+        IPayloadCache PayloadCache
+        {
+            get
+            {
+                if (_payloadCache != null)
+                    return _payloadCache;
+
+                while (Volatile.Read(ref _payloadCache) == null)
+                    Interlocked.CompareExchange(ref _payloadCache, new PayloadCache(), null);
+
+                return _payloadCache;
+            }
+        }
+
         /// <summary>
         /// Returns true if the payload type is included with or supported by the context type
         /// </summary>
@@ -134,20 +148,6 @@ namespace GreenPipes
                 return context;
 
             return PayloadCache.AddOrUpdatePayload(addFactory, updateFactory);
-        }
-
-        IPayloadCache PayloadCache
-        {
-            get
-            {
-                if (_payloadCache != null)
-                    return _payloadCache;
-
-                while (Volatile.Read(ref _payloadCache) == null)
-                    Interlocked.CompareExchange(ref _payloadCache, new PayloadCache(), null);
-
-                return _payloadCache;
-            }
         }
     }
 }

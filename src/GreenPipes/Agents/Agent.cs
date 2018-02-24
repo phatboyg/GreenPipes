@@ -29,9 +29,9 @@ namespace GreenPipes.Agents
         readonly TaskCompletionSource<DateTime> _ready;
         readonly Lazy<CancellationTokenSource> _stopped;
         readonly Lazy<CancellationTokenSource> _stopping;
+        bool _isStopped;
 
         bool _isStopping;
-        bool _isStopped;
 
         TaskCompletionSource<DateTime> _setCompleted;
         CancellationTokenSource _setCompletedCancel;
@@ -74,6 +74,10 @@ namespace GreenPipes.Agents
         /// True if the agent is stopped
         /// </summary>
         protected bool IsStopped => _isStopped;
+
+        protected bool IsAlreadyReady => _ready.Task.IsCompleted;
+
+        protected bool IsAlreadyCompleted => _completed.Task.IsCompleted;
 
         /// <inheritdoc />
         public Task Ready => _ready.Task;
@@ -120,10 +124,6 @@ namespace GreenPipes.Agents
         {
             _ready.TrySetResult(DateTime.UtcNow);
         }
-
-        protected bool IsAlreadyReady => _ready.Task.IsCompleted;
-
-        protected bool IsAlreadyCompleted => _completed.Task.IsCompleted;
 
         /// <summary>
         /// Puts the agent in a faulted state where it will never be ready

@@ -47,6 +47,17 @@ namespace GreenPipes.Agents
             _activeSupervisor = new Supervisor();
         }
 
+        protected bool HasContext
+        {
+            get
+            {
+                lock (_contextLock)
+                {
+                    return _context != null && _context.IsDisposed == false;
+                }
+            }
+        }
+
         async Task IPipeContextSource<TContext>.Send(IPipe<TContext> pipe, CancellationToken cancellationToken)
         {
             var activeContext = CreateActiveContext(cancellationToken);
@@ -98,15 +109,6 @@ namespace GreenPipes.Agents
             await _activeSupervisor.Completed.ConfigureAwait(false);
 
             await Task.WhenAll(context.Agents.Select(x => x.Completed)).ConfigureAwait(false);
-        }
-
-        protected bool HasContext
-        {
-            get
-            {
-                lock (_contextLock)
-                    return _context != null && _context.IsDisposed == false;
-            }
         }
 
         IActivePipeContextAgent<TContext> CreateActiveContext(CancellationToken cancellationToken)

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -39,23 +39,6 @@ namespace GreenPipes.Filters
             _pipes = new ConcurrentDictionary<TKey, IPipe<TContext>>();
         }
 
-        public ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe)
-            where T : class, PipeContext
-        {
-            if (pipe == null)
-                throw new ArgumentNullException(nameof(pipe));
-
-            var keyPipe = pipe as IPipe<TContext>;
-            if (keyPipe == null)
-                throw new ArgumentException($"The pipe must match the input type: {TypeCache<TContext>.ShortName}", nameof(pipe));
-
-            var added = _pipes.TryAdd(key, keyPipe);
-            if (!added)
-                throw new DuplicateKeyPipeConfigurationException($"A pipe with the specified key already exists: {key}");
-
-            return new Handle(key, RemovePipe);
-        }
-
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("key");
@@ -77,6 +60,23 @@ namespace GreenPipes.Filters
                 await pipe.Send(context).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
+        }
+
+        public ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe)
+            where T : class, PipeContext
+        {
+            if (pipe == null)
+                throw new ArgumentNullException(nameof(pipe));
+
+            var keyPipe = pipe as IPipe<TContext>;
+            if (keyPipe == null)
+                throw new ArgumentException($"The pipe must match the input type: {TypeCache<TContext>.ShortName}", nameof(pipe));
+
+            var added = _pipes.TryAdd(key, keyPipe);
+            if (!added)
+                throw new DuplicateKeyPipeConfigurationException($"A pipe with the specified key already exists: {key}");
+
+            return new Handle(key, RemovePipe);
         }
 
         void RemovePipe(TKey key)

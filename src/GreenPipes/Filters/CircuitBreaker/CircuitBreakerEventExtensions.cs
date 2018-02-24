@@ -1,4 +1,4 @@
-﻿// Copyright 2012-2016 Chris Patterson
+﻿// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -27,7 +27,7 @@ namespace GreenPipes.Filters.CircuitBreaker
         /// <returns></returns>
         public static Task PublishCircuitBreakerOpened(this IPipe<EventContext> pipe, Exception exception)
         {
-            return pipe.PublishEvent<CircuitBreakerOpened>(new { Exception = exception});
+            return pipe.PublishEvent<CircuitBreakerOpened>(new {Exception = exception});
         }
 
         /// <summary>

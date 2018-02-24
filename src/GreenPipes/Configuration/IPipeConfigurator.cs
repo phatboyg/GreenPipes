@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes
 {
+    using System.ComponentModel;
+
+
     /// <summary>
     /// Configures a pipe with specifications
     /// </summary>
@@ -23,7 +26,7 @@ namespace GreenPipes
         /// Adds a pipe specification to the pipe configurator at the end of the chain
         /// </summary>
         /// <param name="specification">The pipe specification to add</param>
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void AddPipeSpecification(IPipeSpecification<TContext> specification);
     }
 }

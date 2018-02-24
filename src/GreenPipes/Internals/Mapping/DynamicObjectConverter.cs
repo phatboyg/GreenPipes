@@ -1,4 +1,4 @@
-﻿// Copyright 2012-2016 Chris Patterson
+﻿// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,9 +15,10 @@ namespace GreenPipes.Internals.Mapping
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using Extensions;
     using Reflection;
-    using System.Reflection;
+
 
     public class DynamicObjectConverter<T, TImplementation> :
         IObjectConverter

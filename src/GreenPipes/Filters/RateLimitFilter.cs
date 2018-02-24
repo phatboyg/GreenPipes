@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,9 +32,9 @@ namespace GreenPipes.Filters
     {
         readonly TimeSpan _interval;
         readonly SemaphoreSlim _limit;
-        int _rateLimit;
         readonly Timer _timer;
         int _count;
+        int _rateLimit;
 
         public RateLimitFilter(int rateLimit, TimeSpan interval)
         {
@@ -78,10 +78,8 @@ namespace GreenPipes.Filters
             if (rateLimit > previousLimit)
                 _limit.Release(rateLimit - previousLimit);
             else
-            {
                 for (; previousLimit > rateLimit; previousLimit--)
                     await _limit.WaitAsync().ConfigureAwait(false);
-            }
 
             _rateLimit = rateLimit;
         }

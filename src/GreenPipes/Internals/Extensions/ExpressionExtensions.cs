@@ -1,4 +1,16 @@
-﻿namespace GreenPipes.Internals.Extensions
+﻿// Copyright 2012-2018 Chris Patterson
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace GreenPipes.Internals.Extensions
 {
     using System;
     using System.Linq.Expressions;
@@ -62,6 +74,7 @@
         {
             if (expression == null)
                 throw new ArgumentNullException(nameof(expression));
+
             return GetMemberExpression(expression.Body);
         }
 
@@ -69,6 +82,7 @@
         {
             if (expression == null)
                 throw new ArgumentNullException(nameof(expression));
+
             return GetMemberExpression(expression.Body);
         }
 
@@ -92,7 +106,9 @@
                 memberExpression = unaryExpression.Operand as MemberExpression;
             }
             else if (body.NodeType == ExpressionType.MemberAccess)
+            {
                 memberExpression = body as MemberExpression;
+            }
 
             if (memberExpression == null)
                 throw new ArgumentException("Expression is not a member access");

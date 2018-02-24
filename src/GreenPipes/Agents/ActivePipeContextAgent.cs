@@ -39,15 +39,6 @@ namespace GreenPipes.Agents
             context.Context.ContinueWith(SetFaulted, CancellationToken.None, TaskContinuationOptions.NotOnRanToCompletion, TaskScheduler.Default);
         }
 
-        /// <inheritdoc />
-        protected override async Task StopAgent(StopContext context)
-        {
-            if (_contextHandle.Context.Status == TaskStatus.RanToCompletion)
-                await _contextHandle.DisposeAsync(context.CancellationToken).ConfigureAwait(false);
-
-            SetCompleted(TaskUtil.Completed);
-        }
-
         bool PipeContextHandle<TContext>.IsDisposed => _contextHandle.IsDisposed;
 
         Task<TContext> PipeContextHandle<TContext>.Context => _contextHandle.Context;
@@ -60,6 +51,15 @@ namespace GreenPipes.Agents
         Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
         {
             return _contextHandle.DisposeAsync(cancellationToken);
+        }
+
+        /// <inheritdoc />
+        protected override async Task StopAgent(StopContext context)
+        {
+            if (_contextHandle.Context.Status == TaskStatus.RanToCompletion)
+                await _contextHandle.DisposeAsync(context.CancellationToken).ConfigureAwait(false);
+
+            SetCompleted(TaskUtil.Completed);
         }
 
         /// <inheritdoc />

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -71,8 +71,10 @@ namespace GreenPipes.Internals.Extensions
             {
                 var tcs = new TaskCompletionSource<bool>();
                 using (tokenSource.Token.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+                {
                     if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
                         throw new TimeoutException("Timeout waiting for Task completion");
+                }
 
                 await task.ConfigureAwait(false);
             }
@@ -91,8 +93,10 @@ namespace GreenPipes.Internals.Extensions
             {
                 var tcs = new TaskCompletionSource<bool>();
                 using (tokenSource.Token.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+                {
                     if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
                         throw new TimeoutException("Timeout waiting for Task completion");
+                }
 
                 await task.ConfigureAwait(false);
             }

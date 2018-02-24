@@ -1,4 +1,4 @@
-// Copyright 2012-2016 Chris Patterson
+// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -56,7 +56,7 @@ namespace GreenPipes.Policies
         {
             retryContext = new IntervalRetryContext<TContext>(_policy, Context, Exception, _retryCount + 1);
 
-            return (_retryCount < _policy.Intervals.Length) && _policy.IsHandled(exception);
+            return _retryCount < _policy.Intervals.Length && _policy.IsHandled(exception);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -77,9 +77,7 @@ namespace GreenPipes.Filters
                 catch (Exception ex)
                 {
                     if (_observers.Count > 0)
-                    {
                         await _observers.SendFault(pipeContext, ex).ConfigureAwait(false);
-                    }
 
                     throw;
                 }
@@ -132,7 +130,7 @@ namespace GreenPipes.Filters
             _outputFilter = outputFilter;
         }
 
-        public ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe) 
+        public ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe)
             where T : class, PipeContext
         {
             return _outputFilter.ConnectPipe(key, pipe);

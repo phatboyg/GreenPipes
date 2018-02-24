@@ -1,4 +1,4 @@
-// Copyright 2007-2013 Chris Patterson
+// Copyright 2012-2018 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,16 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Partitioning
 {
-    using System;
-
-
     public class Murmur3UnsafeHashGenerator :
         IHashGenerator
     {
         const uint Seed = 0xc58f1a7b;
 
-        const UInt32 C1 = 0xcc9e2d51;
-        const UInt32 C2 = 0x1b873593;
+        const uint C1 = 0xcc9e2d51;
+        const uint C2 = 0x1b873593;
+
+        public unsafe uint Hash(byte[] data)
+        {
+            fixed (byte* input = &data[0])
+            {
+                return Hash(input, (uint)data.Length, Seed);
+            }
+        }
 
         public unsafe uint Hash(string s)
         {
@@ -29,14 +34,6 @@ namespace GreenPipes.Partitioning
             fixed (char* input = &data[0])
             {
                 return Hash((byte*)input, (uint)data.Length * sizeof(char), Seed);
-            }
-        }
-
-        public unsafe uint Hash(byte[] data)
-        {
-            fixed (byte* input = &data[0])
-            {
-                return Hash(input, (uint)data.Length, Seed);
             }
         }
 
@@ -50,15 +47,15 @@ namespace GreenPipes.Partitioning
 
         static unsafe uint Hash(byte* data, uint len, uint seed)
         {
-            UInt32 nblocks = len / 4;
-            UInt32 h1 = seed;
+            uint nblocks = len / 4;
+            uint h1 = seed;
 
             //----------
             // body
 
-            UInt32 k1;
-            var block = (UInt32*)data;
-            for (UInt32 i = nblocks; i > 0; --i, ++block)
+            uint k1;
+            var block = (uint*)data;
+            for (uint i = nblocks; i > 0; --i, ++block)
             {
                 k1 = *block;
 
@@ -105,7 +102,7 @@ namespace GreenPipes.Partitioning
             return h1;
         }
 
-        static UInt32 Rotl32(UInt32 x, int r)
+        static uint Rotl32(uint x, int r)
         {
             return (x << r) | (x >> (32 - r));
         }
