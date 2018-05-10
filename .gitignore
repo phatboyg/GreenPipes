@@ -1,6 +1,8 @@
 build_artifacts/*
 build_output/*
 
+BenchmarkDotNet.Artifacts
+
 .fake/**/*
 
 **/*.suo

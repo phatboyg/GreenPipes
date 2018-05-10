@@ -7,10 +7,9 @@ open Fake.SemVerHelper
 
 let buildArtifactPath = FullName "./build_artifacts"
 let packagesPath = FullName "./src/packages"
-let keyFile = FullName "./GreenPipes.snk"
 
-let assemblyVersion = "2.0.0.0"
-let baseVersion = "2.0.0"
+let assemblyVersion = "2.1.0.0"
+let baseVersion = "2.1.0"
 
 let envVersion = (environVarOrDefault "APPVEYOR_BUILD_VERSION" (baseVersion + ".0"))
 let buildVersion = (envVersion.Substring(0, envVersion.LastIndexOf('.')))

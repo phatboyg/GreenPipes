@@ -13,35 +13,31 @@
 namespace GreenPipes.Policies
 {
     using System;
-    using System.Threading.Tasks;
-    using Util;
+    using System.Threading;
 
 
     public class ExponentialRetryPolicyContext<TContext> :
-        RetryPolicyContext<TContext>
+        BaseRetryPolicyContext<TContext>
         where TContext : class, PipeContext
     {
-        readonly TContext _context;
         readonly ExponentialRetryPolicy _policy;
 
         public ExponentialRetryPolicyContext(ExponentialRetryPolicy policy, TContext context)
+            : base(policy, context)
         {
             _policy = policy;
-            _context = context;
         }
 
-        public TContext Context => _context;
-
-        public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
+        public override bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
-            retryContext = new ExponentialRetryContext<TContext>(_policy, _context, exception, 1);
+            retryContext = new NoRetryContext<TContext>(Context, exception, CancellationToken);
 
-            return _policy.IsHandled(exception);
+            return false;
         }
 
-        public Task RetryFaulted(Exception exception)
+        protected override RetryContext<TContext> CreateRetryContext(Exception exception, CancellationToken cancellationToken)
         {
-            return TaskUtil.Completed;
+            return new ExponentialRetryContext<TContext>(_policy, Context, exception, 0, cancellationToken);
         }
     }
 }

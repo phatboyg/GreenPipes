@@ -26,7 +26,7 @@ namespace GreenPipes
         /// <param name="agent"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static Task Stop(this IAgent agent, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task Stop(this IAgent agent, CancellationToken cancellationToken = default)
         {
             var stopContext = new DefaultStopContext(cancellationToken)
             {
@@ -43,7 +43,7 @@ namespace GreenPipes
         /// <param name="reason">The reason for stopping the agent</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static Task Stop(this IAgent agent, string reason, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task Stop(this IAgent agent, string reason, CancellationToken cancellationToken = default)
         {
             var stopContext = new DefaultStopContext(cancellationToken)
             {

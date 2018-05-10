@@ -5,11 +5,14 @@
     <DebugType>portable</DebugType>
     <AssemblyName>GreenPipes</AssemblyName>
     <PackageId>GreenPipes</PackageId>
+    <LangVersion>7.2</LangVersion>
+    <NoWarn>1591</NoWarn>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>../../GreenPipes.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\GreenPipes.xml</DocumentationFile>
     <Description>GreenPipes, a pipes and filters library for the Task Parallel Library</Description>
-    <Version>1.0.0</Version>
     <PackageProjectUrl>https://github.com/MassTransit/GreenPipes</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/MassTransit/GreenPipes/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/MassTransit/GreenPipes</RepositoryUrl>
@@ -25,10 +28,6 @@
   </ItemGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../GreenPipes.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />

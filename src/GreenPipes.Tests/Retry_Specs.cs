@@ -19,7 +19,6 @@ namespace GreenPipes.Tests
     using Contracts;
     using NUnit.Framework;
     using Policies;
-    using Policies.ExceptionFilters;
     using Util;
 
 
@@ -56,6 +55,11 @@ namespace GreenPipes.Tests
             await observer.PostFault;
 
             Assert.That(observer.PostFaultCount, Is.EqualTo(4));
+            Assert.That(observer.RetryFaultCount, Is.EqualTo(1));
+
+            var retryFault = await observer.RetryFault;
+
+            Assert.That(retryFault.RetryCount, Is.EqualTo(4));
         }
 
         [Test]
@@ -428,19 +432,19 @@ namespace GreenPipes.Tests
             IRetryObserver
         {
             readonly TaskCompletionSource<bool> _postFault;
-            readonly TaskCompletionSource<bool> _retryFault;
+            readonly TaskCompletionSource<RetryContext> _retryFault;
             int _postFaultCount;
             int _retryFaultCount;
 
             public RetryObserver()
             {
-                _retryFault = new TaskCompletionSource<bool>();
+                _retryFault = new TaskCompletionSource<RetryContext>();
                 _postFault = new TaskCompletionSource<bool>();
             }
 
             public int RetryFaultCount => _retryFaultCount;
 
-            public Task RetryFault => _retryFault.Task;
+            public Task<RetryContext> RetryFault => _retryFault.Task;
 
             public int PostFaultCount => _postFaultCount;
 
@@ -469,7 +473,7 @@ namespace GreenPipes.Tests
             {
                 Interlocked.Increment(ref _retryFaultCount);
 
-                _retryFault.TrySetResult(true);
+                _retryFault.TrySetResult(context);
 
                 return TaskUtil.Completed;
             }

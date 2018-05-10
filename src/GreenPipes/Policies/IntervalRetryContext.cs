@@ -13,50 +13,29 @@
 namespace GreenPipes.Policies
 {
     using System;
-    using System.Threading.Tasks;
-    using Util;
+    using System.Threading;
 
 
     public class IntervalRetryContext<TContext> :
-        BaseRetryContext,
+        BaseRetryContext<TContext>,
         RetryContext<TContext>
         where TContext : class, PipeContext
     {
         readonly IntervalRetryPolicy _policy;
-        readonly int _retryCount;
 
-        public IntervalRetryContext(IntervalRetryPolicy policy, TContext context, Exception exception, int retryCount)
-            : base(typeof(TContext), retryCount)
+        public IntervalRetryContext(IntervalRetryPolicy policy, TContext context, Exception exception, int retryCount, CancellationToken cancellationToken)
+            : base(context, exception, retryCount, cancellationToken)
         {
             _policy = policy;
-            _retryCount = retryCount;
-            Context = context;
-            Exception = exception;
         }
 
-        public TContext Context { get; }
+        public override TimeSpan? Delay => _policy.Intervals[RetryCount];
 
-        public Exception Exception { get; }
-
-        public int RetryCount => _retryCount;
-
-        public TimeSpan? Delay => _policy.Intervals[_retryCount - 1];
-
-        public Task PreRetry()
+        bool RetryContext<TContext>.CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
-            return TaskUtil.Completed;
-        }
+            retryContext = new IntervalRetryContext<TContext>(_policy, Context, Exception, RetryCount + 1, CancellationToken);
 
-        public Task RetryFaulted(Exception exception)
-        {
-            return TaskUtil.Completed;
-        }
-
-        public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
-        {
-            retryContext = new IntervalRetryContext<TContext>(_policy, Context, Exception, _retryCount + 1);
-
-            return _retryCount < _policy.Intervals.Length && _policy.IsHandled(exception);
+            return RetryAttempt < _policy.Intervals.Length && _policy.IsHandled(exception);
         }
     }
 }

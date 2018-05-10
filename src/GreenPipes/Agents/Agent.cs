@@ -24,19 +24,18 @@ namespace GreenPipes.Agents
     public class Agent :
         IAgent
     {
-        readonly TaskCompletionSource<DateTime> _completed;
-        readonly object _lock = new object();
-        readonly TaskCompletionSource<DateTime> _ready;
+        readonly TaskCompletionSource<bool> _completed;
+        readonly TaskCompletionSource<bool> _ready;
         readonly Lazy<CancellationTokenSource> _stopped;
         readonly Lazy<CancellationTokenSource> _stopping;
-        bool _isStopped;
 
+        bool _isStopped;
         bool _isStopping;
 
-        TaskCompletionSource<DateTime> _setCompleted;
+        TaskCompletionSource<bool> _setCompleted;
         CancellationTokenSource _setCompletedCancel;
 
-        TaskCompletionSource<DateTime> _setReady;
+        TaskCompletionSource<bool> _setReady;
         CancellationTokenSource _setReadyCancel;
 
         /// <summary>
@@ -44,8 +43,8 @@ namespace GreenPipes.Agents
         /// </summary>
         public Agent()
         {
-            _ready = new TaskCompletionSource<DateTime>();
-            _completed = new TaskCompletionSource<DateTime>();
+            _ready = new TaskCompletionSource<bool>();
+            _completed = new TaskCompletionSource<bool>();
 
             _stopped = new Lazy<CancellationTokenSource>(() =>
             {
@@ -112,7 +111,7 @@ namespace GreenPipes.Agents
         /// <returns></returns>
         protected virtual Task StopAgent(StopContext context)
         {
-            _completed.TrySetResult(DateTime.UtcNow);
+            _completed.TrySetResult(true);
 
             return TaskUtil.Completed;
         }
@@ -122,7 +121,7 @@ namespace GreenPipes.Agents
         /// </summary>
         public virtual void SetReady()
         {
-            _ready.TrySetResult(DateTime.UtcNow);
+            _ready.TrySetResult(true);
         }
 
         /// <summary>
@@ -140,7 +139,7 @@ namespace GreenPipes.Agents
         /// <param name="readyTask"></param>
         protected void SetReady(Task readyTask)
         {
-            lock (_lock)
+            lock (_ready)
             {
                 if (_setReady != null)
                 {
@@ -157,7 +156,7 @@ namespace GreenPipes.Agents
                 if (_ready.Task.IsCompleted)
                     return;
 
-                var setReady = _setReady = new TaskCompletionSource<DateTime>();
+                var setReady = _setReady = new TaskCompletionSource<bool>();
                 setReady.Task.ContinueWith(SetReadyInternal, TaskScheduler.Default);
 
                 var setReadyCancel = _setReadyCancel = new CancellationTokenSource();
@@ -174,7 +173,7 @@ namespace GreenPipes.Agents
                         // ReSharper disable once AssignNullToNotNullAttribute
                         setReady.TrySetException(task.Exception);
                     else
-                        setReady.TrySetResult(DateTime.UtcNow);
+                        setReady.TrySetResult(true);
                 }
 
                 readyTask.ContinueWith(OnCompleted, TaskScheduler.Default);
@@ -187,7 +186,7 @@ namespace GreenPipes.Agents
         /// <param name="completedTask"></param>
         protected void SetCompleted(Task completedTask)
         {
-            lock (_lock)
+            lock (_completed)
             {
                 if (_setCompleted != null)
                 {
@@ -204,7 +203,7 @@ namespace GreenPipes.Agents
                 if (_completed.Task.IsCompleted)
                     return;
 
-                var setCompleted = _setCompleted = new TaskCompletionSource<DateTime>();
+                var setCompleted = _setCompleted = new TaskCompletionSource<bool>();
                 setCompleted.Task.ContinueWith(SetCompletedInternal, TaskScheduler.Default);
 
                 var setCompletedCancel = _setCompletedCancel = new CancellationTokenSource();
@@ -221,7 +220,7 @@ namespace GreenPipes.Agents
                         // ReSharper disable once AssignNullToNotNullAttribute
                         setCompleted.TrySetException(task.Exception);
                     else
-                        setCompleted.TrySetResult(DateTime.UtcNow);
+                        setCompleted.TrySetResult(true);
                 }
 
                 completedTask.ContinueWith(OnCompleted, TaskScheduler.Default);
@@ -234,7 +233,7 @@ namespace GreenPipes.Agents
             return "Agent";
         }
 
-        void SetReadyInternal(Task<DateTime> task)
+        void SetReadyInternal(Task<bool> task)
         {
             if (task.IsCanceled)
                 _ready.TrySetCanceled();
@@ -246,7 +245,7 @@ namespace GreenPipes.Agents
                 _ready.TrySetResult(task.Result);
         }
 
-        void SetCompletedInternal(Task<DateTime> task)
+        void SetCompletedInternal(Task<bool> task)
         {
             if (task.IsCanceled)
                 _completed.TrySetCanceled();
@@ -271,7 +270,7 @@ namespace GreenPipes.Agents
             else
                 _ready.TrySetException(new InvalidOperationException("The context faulted but no exception was present."));
 
-            _completed.TrySetResult(DateTime.UtcNow);
+            _completed.TrySetResult(true);
         }
     }
 }

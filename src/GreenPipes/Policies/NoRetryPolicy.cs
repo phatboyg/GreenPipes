@@ -35,10 +35,10 @@ namespace GreenPipes.Policies
 
         RetryPolicyContext<T> IRetryPolicy.CreatePolicyContext<T>(T context)
         {
-            return new NoRetryPolicyContext<T>(context);
+            return new NoRetryPolicyContext<T>(this, context);
         }
 
-        public bool IsHandled(Exception exception)
+        bool IRetryPolicy.IsHandled(Exception exception)
         {
             return _filter.Match(exception);
         }

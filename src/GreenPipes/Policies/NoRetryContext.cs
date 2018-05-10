@@ -13,40 +13,20 @@
 namespace GreenPipes.Policies
 {
     using System;
-    using System.Threading.Tasks;
-    using Util;
+    using System.Threading;
 
 
     public class NoRetryContext<TContext> :
-        BaseRetryContext,
+        BaseRetryContext<TContext>,
         RetryContext<TContext>
         where TContext : class, PipeContext
     {
-        public NoRetryContext(TContext context, Exception exception)
-            : base(typeof(TContext), 0)
+        public NoRetryContext(TContext context, Exception exception, CancellationToken cancellationToken)
+            : base(context, exception, 0, cancellationToken)
         {
-            Context = context;
-            Exception = exception;
         }
 
-        public TContext Context { get; }
-        public Exception Exception { get; }
-
-        public int RetryCount => 1;
-
-        public TimeSpan? Delay => default(TimeSpan?);
-
-        public Task PreRetry()
-        {
-            return TaskUtil.Completed;
-        }
-
-        public Task RetryFaulted(Exception exception)
-        {
-            return TaskUtil.Completed;
-        }
-
-        public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
+        bool RetryContext<TContext>.CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
             retryContext = this;
 

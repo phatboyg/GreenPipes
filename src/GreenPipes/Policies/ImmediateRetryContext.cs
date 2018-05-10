@@ -13,49 +13,27 @@
 namespace GreenPipes.Policies
 {
     using System;
-    using System.Threading.Tasks;
-    using Util;
+    using System.Threading;
 
 
     public class ImmediateRetryContext<TContext> :
-        BaseRetryContext,
+        BaseRetryContext<TContext>,
         RetryContext<TContext>
         where TContext : class, PipeContext
     {
         readonly ImmediateRetryPolicy _policy;
 
-        public ImmediateRetryContext(ImmediateRetryPolicy policy, TContext context, Exception exception, int retryCount)
-            : base(typeof(TContext), retryCount)
+        public ImmediateRetryContext(ImmediateRetryPolicy policy, TContext context, Exception exception, int retryCount, CancellationToken cancellationToken)
+            : base(context, exception, retryCount, cancellationToken)
         {
             _policy = policy;
-            Context = context;
-            RetryCount = retryCount;
-            Exception = exception;
         }
 
-        public TContext Context { get; }
-
-        public Exception Exception { get; }
-
-        public int RetryCount { get; }
-
-        public TimeSpan? Delay => default(TimeSpan?);
-
-        public Task PreRetry()
+        bool RetryContext<TContext>.CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
-            return TaskUtil.Completed;
-        }
+            retryContext = new ImmediateRetryContext<TContext>(_policy, Context, Exception, RetryCount + 1, CancellationToken);
 
-        public Task RetryFaulted(Exception exception)
-        {
-            return TaskUtil.Completed;
-        }
-
-        public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
-        {
-            retryContext = new ImmediateRetryContext<TContext>(_policy, Context, Exception, RetryCount + 1);
-
-            return RetryCount < _policy.RetryLimit && _policy.IsHandled(exception);
+            return RetryAttempt < _policy.RetryLimit && _policy.IsHandled(exception);
         }
     }
 }

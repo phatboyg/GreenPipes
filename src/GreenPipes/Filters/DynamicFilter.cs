@@ -13,7 +13,6 @@
 namespace GreenPipes.Filters
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
@@ -30,14 +29,18 @@ namespace GreenPipes.Filters
         IDynamicFilter<TInput>
         where TInput : class, PipeContext
     {
+        readonly Dictionary<Type, IOutputPipe> _outputPipes;
         protected readonly IPipeContextConverterFactory<TInput> ConverterFactory;
         protected readonly FilterObservable Observers;
-        protected readonly ConcurrentDictionary<Type, IOutputPipe> OutputPipes;
+        IOutputPipe[] _outputPipeArray;
 
         public DynamicFilter(IPipeContextConverterFactory<TInput> converterFactory)
         {
             ConverterFactory = converterFactory;
-            OutputPipes = new ConcurrentDictionary<Type, IOutputPipe>();
+
+            _outputPipes = new Dictionary<Type, IOutputPipe>();
+            _outputPipeArray = _outputPipes.Values.ToArray();
+
             Observers = new FilterObservable();
         }
 
@@ -64,15 +67,30 @@ namespace GreenPipes.Filters
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            foreach (var pipe in OutputPipes.Values)
-                pipe.Filter.Probe(context);
+            foreach (var pipe in _outputPipes.Values)
+                pipe.Probe(context);
         }
 
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        public Task Send(TInput context, IPipe<TInput> next)
+        public async Task Send(TInput context, IPipe<TInput> next)
         {
-            return Task.WhenAll(OutputPipes.Values.Select(x => x.Filter.Send(context, next)));
+            var outputPipes = _outputPipeArray;
+
+            if (outputPipes.Length == 1)
+            {
+                await outputPipes[0].Send(context).ConfigureAwait(false);
+            }
+            else if (outputPipes.Length > 1)
+            {
+                var outputTasks = new Task[outputPipes.Length];
+                for (int i = 0; i < outputPipes.Length; i++)
+                    outputTasks[i] = outputPipes[i].Send(context);
+
+                await Task.WhenAll(outputTasks).ConfigureAwait(false);
+            }
+
+            await next.Send(context).ConfigureAwait(false);
         }
 
         protected TResult GetPipe<T, TResult>()
@@ -82,10 +100,28 @@ namespace GreenPipes.Filters
             return GetPipe<T>().As<TResult>();
         }
 
-        protected virtual IOutputPipe GetPipe<T>()
+        protected IOutputPipe GetPipe<T>()
             where T : class, PipeContext
         {
-            return OutputPipes.GetOrAdd(typeof(T), x => new OutputPipe<T>(Observers, ConverterFactory.GetConverter<T>()));
+            lock (_outputPipes)
+            {
+                if (_outputPipes.TryGetValue(typeof(T), out var outputPipe))
+                    return outputPipe;
+
+                outputPipe = CreateOutputPipe<T>();
+
+                _outputPipes.Add(typeof(T), outputPipe);
+
+                _outputPipeArray = _outputPipes.Values.ToArray();
+
+                return outputPipe;
+            }
+        }
+
+        protected virtual IOutputPipe CreateOutputPipe<T>()
+            where T : class, PipeContext
+        {
+            return new OutputPipe<T>(Observers, ConverterFactory.GetConverter<T>());
         }
 
         public void AddFilter<T>(IFilter<T> filter)
@@ -96,10 +132,9 @@ namespace GreenPipes.Filters
 
 
         protected interface IOutputPipe :
+            IPipe<TInput>,
             IObserverConnector
         {
-            IFilter<TInput> Filter { get; }
-
             TResult As<TResult>()
                 where TResult : class;
 
@@ -113,6 +148,7 @@ namespace GreenPipes.Filters
             where TOutput : class, PipeContext
         {
             readonly Lazy<IOutputPipeFilter<TInput, TOutput>> _filter;
+            readonly IPipe<TInput> _nextPipe;
             protected readonly IPipeContextConverter<TInput, TOutput> ContextConverter;
             protected readonly FilterObservable Observers;
 
@@ -123,11 +159,11 @@ namespace GreenPipes.Filters
                 Observers = observers;
 
                 PipeFilters = new List<IFilter<TOutput>>();
+
+                _nextPipe = Pipe.Empty<TInput>();
             }
 
             protected IList<IFilter<TOutput>> PipeFilters { get; }
-
-            public IFilter<TInput> Filter => _filter.Value;
 
             TResult IOutputPipe.As<TResult>()
             {
@@ -158,6 +194,16 @@ namespace GreenPipes.Filters
             public ConnectHandle ConnectObserver(IFilterObserver observer)
             {
                 return Observers.Connect(observer);
+            }
+
+            public Task Send(TInput context)
+            {
+                return _filter.Value.Send(context, _nextPipe);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+                _filter.Value.Probe(context);
             }
 
             protected virtual IOutputPipeFilter<TInput, TOutput> CreateFilter()
@@ -196,16 +242,13 @@ namespace GreenPipes.Filters
             return pipeConnector.ConnectPipe(key, pipe);
         }
 
-        protected override IOutputPipe GetPipe<T>()
+        protected override IOutputPipe CreateOutputPipe<T>()
         {
-            return OutputPipes.GetOrAdd(typeof(T), x =>
-            {
-                var dynamicType = typeof(KeyOutputPipe<>).MakeGenericType(typeof(TInput), typeof(TKey), typeof(T));
+            var dynamicType = typeof(KeyOutputPipe<>).MakeGenericType(typeof(TInput), typeof(TKey), typeof(T));
 
-                var pipe = Activator.CreateInstance(dynamicType, Observers, ConverterFactory.GetConverter<T>(), _keyAccessor);
+            var pipe = Activator.CreateInstance(dynamicType, Observers, ConverterFactory.GetConverter<T>(), _keyAccessor);
 
-                return (IOutputPipe)pipe;
-            });
+            return (IOutputPipe)pipe;
         }
 
 

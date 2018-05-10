@@ -84,7 +84,11 @@ namespace GreenPipes.Util
             if (connected.Length == 1)
                 return callback(connected[0]);
 
-            return Task.WhenAll(connected.Select(callback));
+            var outputTasks = new Task[connected.Length];
+            for (int i = 0; i < connected.Length; i++)
+                outputTasks[i] = callback(connected[i]);
+
+            return Task.WhenAll(outputTasks);
         }
 
         public bool All(Func<T, bool> callback)
@@ -101,7 +105,13 @@ namespace GreenPipes.Util
             if (connected.Length == 1)
                 return callback(connected[0]);
 
-            return connected.All(callback);
+            for (int i = 0; i < connected.Length; i++)
+            {
+                if (callback(connected[i]) == false)
+                    return false;
+            }
+
+            return true;
         }
 
         void Disconnect(long id)

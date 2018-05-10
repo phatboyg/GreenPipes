@@ -18,6 +18,6 @@ namespace GreenPipes
 
     public interface IAsyncDisposable
     {
-        Task DisposeAsync(CancellationToken cancellationToken = default(CancellationToken));
+        Task DisposeAsync(CancellationToken cancellationToken = default);
     }
 }

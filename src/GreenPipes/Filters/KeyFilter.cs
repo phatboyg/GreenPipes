@@ -55,8 +55,7 @@ namespace GreenPipes.Filters
         {
             var key = _keyAccessor(context);
 
-            IPipe<TContext> pipe;
-            if (_pipes.TryGetValue(key, out pipe))
+            if (_pipes.TryGetValue(key, out IPipe<TContext> pipe))
                 await pipe.Send(context).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
@@ -81,8 +80,7 @@ namespace GreenPipes.Filters
 
         void RemovePipe(TKey key)
         {
-            IPipe<TContext> pipe;
-            _pipes.TryRemove(key, out pipe);
+            _pipes.TryRemove(key, out IPipe<TContext> _);
         }
 
 

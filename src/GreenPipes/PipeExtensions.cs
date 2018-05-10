@@ -28,8 +28,7 @@ namespace GreenPipes
         public static TPayload GetPayload<TPayload>(this PipeContext context)
             where TPayload : class
         {
-            TPayload payload;
-            if (!context.TryGetPayload(out payload))
+            if (!context.TryGetPayload(out TPayload payload))
                 throw new PayloadNotFoundException($"The payload was not found: {TypeCache<TPayload>.ShortName}");
 
             return payload;

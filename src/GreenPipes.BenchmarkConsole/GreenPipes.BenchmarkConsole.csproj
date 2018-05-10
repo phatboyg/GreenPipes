@@ -1,14 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFrameworks>netcoreapp2.0</TargetFrameworks>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<AssemblyName>GreenPipes.BenchmarkConsole</AssemblyName>
-		<PackageId>GreenPipes.BenchmarkConsole</PackageId>
-		<OutputType>Exe</OutputType>
-	</PropertyGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\GreenPipes\GreenPipes.csproj" />
-	</ItemGroup>
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>GreenPipes.BenchmarkConsole</AssemblyName>
+    <PackageId>GreenPipes.BenchmarkConsole</PackageId>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GreenPipes\GreenPipes.csproj" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.10.14" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+    <PackageReference Include="BenchmarkDotNet.Core" Version="0.10.14" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
     <Reference Include="System" />
     <Reference Include="System.Core" />

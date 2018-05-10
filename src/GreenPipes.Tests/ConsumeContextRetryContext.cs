@@ -35,6 +35,8 @@ namespace GreenPipes.Tests
 
         public CommandContext Context => _context;
 
+        public CancellationToken CancellationToken => _retryContext.CancellationToken;
+
         public Exception Exception => _retryContext.Exception;
 
         public int RetryCount => _retryContext.RetryCount;
@@ -83,6 +85,8 @@ namespace GreenPipes.Tests
         }
 
         public TFilter Context => _context;
+
+        public CancellationToken CancellationToken => _retryContext.CancellationToken;
 
         public Exception Exception => _retryContext.Exception;
 

@@ -49,9 +49,9 @@ namespace GreenPipes
             if (keyProvider == null)
                 throw new ArgumentNullException(nameof(keyProvider));
 
-            PartitionKeyProvider<T> provider = context => keyProvider(context).ToByteArray();
+            byte[] Provider(T context) => keyProvider(context).ToByteArray();
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitionCount);
+            var specification = new PartitionerPipeSpecification<T>(Provider, partitionCount);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -74,9 +74,9 @@ namespace GreenPipes
             if (keyProvider == null)
                 throw new ArgumentNullException(nameof(keyProvider));
 
-            PartitionKeyProvider<T> provider = context => keyProvider(context).ToByteArray();
+            byte[] Provider(T context) => keyProvider(context).ToByteArray();
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitioner);
+            var specification = new PartitionerPipeSpecification<T>(Provider, partitioner);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -100,13 +100,13 @@ namespace GreenPipes
 
             var textEncoding = encoding ?? Encoding.UTF8;
 
-            PartitionKeyProvider<T> provider = context =>
+            byte[] Provider(T context)
             {
                 var key = keyProvider(context) ?? "";
                 return textEncoding.GetBytes(key);
-            };
+            }
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitionCount);
+            var specification = new PartitionerPipeSpecification<T>(Provider, partitionCount);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -133,13 +133,13 @@ namespace GreenPipes
 
             var textEncoding = encoding ?? Encoding.UTF8;
 
-            PartitionKeyProvider<T> provider = context =>
+            byte[] Provider(T context)
             {
                 var key = keyProvider(context) ?? "";
                 return textEncoding.GetBytes(key);
-            };
+            }
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitioner);
+            var specification = new PartitionerPipeSpecification<T>(Provider, partitioner);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -160,13 +160,13 @@ namespace GreenPipes
             if (keyProvider == null)
                 throw new ArgumentNullException(nameof(keyProvider));
 
-            PartitionKeyProvider<T> provider = context =>
+            byte[] Provider(T context)
             {
                 var key = keyProvider(context);
                 return BitConverter.GetBytes(key);
-            };
+            }
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitionCount);
+            var specification = new PartitionerPipeSpecification<T>(Provider, partitionCount);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -189,13 +189,13 @@ namespace GreenPipes
             if (keyProvider == null)
                 throw new ArgumentNullException(nameof(keyProvider));
 
-            PartitionKeyProvider<T> provider = context =>
+            byte[] Provider(T context)
             {
                 var key = keyProvider(context);
                 return BitConverter.GetBytes(key);
-            };
+            }
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitioner);
+            var specification = new PartitionerPipeSpecification<T>(Provider, partitioner);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -216,9 +216,9 @@ namespace GreenPipes
             if (keyProvider == null)
                 throw new ArgumentNullException(nameof(keyProvider));
 
-            PartitionKeyProvider<T> provider = context => keyProvider(context);
+            byte[] Provider(T context) => keyProvider(context);
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitionCount);
+            var specification = new PartitionerPipeSpecification<T>(Provider, partitionCount);
 
             configurator.AddPipeSpecification(specification);
         }
@@ -241,9 +241,9 @@ namespace GreenPipes
             if (keyProvider == null)
                 throw new ArgumentNullException(nameof(keyProvider));
 
-            PartitionKeyProvider<T> provider = context => keyProvider(context);
+            byte[] Provider(T context) => keyProvider(context);
 
-            var specification = new PartitionerPipeSpecification<T>(provider, partitioner);
+            var specification = new PartitionerPipeSpecification<T>(Provider, partitioner);
 
             configurator.AddPipeSpecification(specification);
         }

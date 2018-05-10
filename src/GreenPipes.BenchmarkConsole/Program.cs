@@ -1,79 +1,30 @@
-﻿namespace GreenPipes.BenchmarkConsole
+﻿// Copyright 2012-2018 Chris Patterson
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+namespace GreenPipes.BenchmarkConsole
 {
     using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Threading;
-    using Throughput;
+    using BenchmarkDotNet.Running;
 
 
     class Program
     {
-        static List<string> _remaining;
-
         static void Main(string[] args)
         {
             Console.WriteLine("Green Pipes Benchmark");
             Console.WriteLine();
 
-            var optionSet = new ProgramOptionSet();
-
-            try
-            {
-                _remaining = optionSet.Parse(args);
-
-                if (optionSet.Help)
-                {
-                    ShowHelp(optionSet);
-                    return;
-                }
-
-                optionSet.ShowOptions();
-
-                if (optionSet.Benchmark.HasFlag(ProgramOptionSet.BenchmarkOptions.Latency))
-                {
-                    RunLatencyBenchmark(optionSet);
-                }
-
-                if (Debugger.IsAttached)
-                {
-                    Console.Write("Press any key to continue...");
-                    Console.ReadKey();
-                }
-            }
-            catch (OptionException ex)
-            {
-                Console.Write("gpbench: ");
-                Console.WriteLine(ex.Message);
-                Console.WriteLine("Use 'gpbench --help' for detailed usage information.");
-            }
-        }
-
-        static void RunLatencyBenchmark(ProgramOptionSet optionSet)
-        {
-            var messageLatencyOptionSet = new ThroughputOptionSet();
-
-            messageLatencyOptionSet.Parse(_remaining);
-
-            IThroughputSettings settings = messageLatencyOptionSet;
-
-            var benchmark = new ThroughputBenchmark(settings);
-
-            benchmark.Run(CancellationToken.None);
-        }
-
-        static void ShowHelp(OptionSet p)
-        {
-            Console.WriteLine("Usage: gpbench [OPTIONS]+");
-            Console.WriteLine("Executes the benchmark using the specified options.");
-            Console.WriteLine("If no benchmark is specified, all benchmarks are executed.");
-            Console.WriteLine();
-            Console.WriteLine("Options:");
-            p.WriteOptionDescriptions(Console.Out);
-
-            Console.WriteLine();
-            Console.WriteLine("Benchmark Options:");
-            new ThroughputOptionSet().WriteOptionDescriptions(Console.Out);
+            BenchmarkRunner.Run<SendBenchmark>();
+            BenchmarkRunner.Run<SupervisorBenchmark>();
         }
     }
 }

@@ -45,6 +45,11 @@ namespace GreenPipes.Tests
         {
             return _policyContext.RetryFaulted(exception);
         }
+
+        public void Dispose()
+        {
+            _policyContext?.Dispose();
+        }
     }
 
 
@@ -76,6 +81,11 @@ namespace GreenPipes.Tests
         public Task RetryFaulted(Exception exception)
         {
             return _policyContext.RetryFaulted(exception);
+        }
+
+        public void Dispose()
+        {
+            _policyContext?.Dispose();
         }
     }
 }

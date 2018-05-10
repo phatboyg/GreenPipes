@@ -20,7 +20,8 @@ namespace GreenPipes
     /// An initial context acquired to begin a retry filter
     /// </summary>
     /// <typeparam name="TContext"></typeparam>
-    public interface RetryPolicyContext<TContext>
+    public interface RetryPolicyContext<TContext> :
+        IDisposable
         where TContext : class
     {
         /// <summary>

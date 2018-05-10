@@ -14,7 +14,6 @@ namespace GreenPipes.Agents
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -96,7 +95,10 @@ namespace GreenPipes.Agents
             IAgent[] agents;
             lock (_agents)
             {
-                agents = _agents.Values.Where(x => !x.Completed.IsCompleted).ToArray();
+                if (_agents.Count == 0)
+                    agents = new IAgent[0];
+                else
+                    agents = _agents.Values.Where(x => !x.Completed.IsCompleted).ToArray();
             }
 
             return StopSupervisor(new Context(context, agents));
@@ -104,9 +106,34 @@ namespace GreenPipes.Agents
 
         protected virtual async Task StopSupervisor(StopSupervisorContext context)
         {
-            SetCompleted(Task.WhenAll(context.Agents.Select(x => x.Completed)));
+            if (context.Agents.Length == 0)
+            {
+                SetCompleted(TaskUtil.Completed);
+            }
+            if (context.Agents.Length == 1)
+            {
+                SetCompleted(context.Agents[0].Completed);
 
-            await Task.WhenAll(context.Agents.Select(x => x.Stop(context))).UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+                await context.Agents[0].Stop(context).UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+            }
+            else if (context.Agents.Length > 1)
+            {
+                Task[] completedTasks = new Task[context.Agents.Length];
+                for (int i = 0; i < context.Agents.Length; i++)
+                {
+                    completedTasks[i] = context.Agents[i].Completed;
+                }
+
+                SetCompleted(Task.WhenAll(completedTasks));
+
+                Task[] stopTasks = new Task[context.Agents.Length];
+                for (int i = 0; i < context.Agents.Length; i++)
+                {
+                    stopTasks[i] = context.Agents[i].Stop(context);
+                }
+
+                await Task.WhenAll(stopTasks).UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+            }
 
             await Completed.UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
         }
@@ -117,63 +144,6 @@ namespace GreenPipes.Agents
             {
                 _agents.Remove(id);
             }
-        }
-
-        Task WhenAll(IAgent[] agents, string readyOrCompleted, Func<IAgent, Task> selector)
-        {
-            if (Trace.Listeners.Count == 0)
-                return Task.WhenAll(agents.Select(selector).ToArray());
-
-            async Task WaitForAll()
-            {
-                await Task.Yield();
-
-                List<Task> faultedTasks = new List<Task>();
-                do
-                {
-                    var delayTask = Task.Delay(1000);
-
-                    var readyTask = await Task.WhenAny(agents.Select(selector).Concat(Enumerable.Repeat(delayTask, 1))).ConfigureAwait(false);
-                    if (delayTask == readyTask)
-                    {
-                        Trace.WriteLine($"Waiting: {ToString()}");
-                        Trace.WriteLine(string.Join(Environment.NewLine, agents.Select(agent => $"{agent} - {selector(agent).Status}")));
-                    }
-                    else
-                    {
-                        Trace.WriteLine($"{readyOrCompleted} Updated: {ToString()}");
-                        var completed = from agent in agents
-                            let task = selector(agent)
-                            where task.IsCompleted
-                            select new {agent, task};
-
-                        var completedAgents = completed.ToDictionary(x => x.agent);
-
-                        foreach (var item in completedAgents.Values)
-                            if (item.task.IsCanceled)
-                            {
-                                Trace.WriteLine($"Canceled: {item.agent}");
-                            }
-                            else if (item.task.IsFaulted)
-                            {
-                                Trace.WriteLine($"Faulted: {item.agent}");
-                                faultedTasks.Add(item.task);
-                            }
-                            else
-                            {
-                                Trace.WriteLine($"{readyOrCompleted}: {item.agent}");
-                            }
-
-                        agents = agents.Where(x => !completedAgents.ContainsKey(x)).ToArray();
-                    }
-                }
-                while (agents.Length > 0);
-
-                if (faultedTasks.Count > 0)
-                    await Task.WhenAll(faultedTasks).ConfigureAwait(false);
-            }
-
-            return WaitForAll();
         }
 
         /// <inheritdoc />
