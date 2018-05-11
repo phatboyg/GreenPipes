@@ -14,12 +14,11 @@ namespace GreenPipes.Filters
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
+    using Builders;
     using Internals.Extensions;
     using Observers;
-    using Pipes;
 
 
     /// <summary>
@@ -57,30 +56,33 @@ namespace GreenPipes.Filters
             _outputPipe.Probe(scope);
         }
 
-        [DebuggerNonUserCode]
-        async Task IFilter<TInput>.Send(TInput context, IPipe<TInput> next)
+        Task IFilter<TInput>.Send(TInput context, IPipe<TInput> next)
         {
-            TOutput pipeContext;
-            if (_contextConverter.TryConvert(context, out pipeContext))
+            return _contextConverter.TryConvert(context, out var pipeContext)
+                ? SendToOutput(context, next, pipeContext)
+                : next.Send(context);
+        }
+
+        async Task SendToOutput(TInput context, IPipe<TInput> next, TOutput pipeContext)
+        {
+            if (_observers.Count > 0)
+                await _observers.PreSend(pipeContext).ConfigureAwait(false);
+
+            try
+            {
+                await _outputPipe.Send(pipeContext).ConfigureAwait(false);
+
+                if (_observers.Count > 0)
+                    await _observers.PostSend(pipeContext).ConfigureAwait(false);
+
+                await next.Send(context).ConfigureAwait(false);
+            }
+            catch (Exception ex)
             {
                 if (_observers.Count > 0)
-                    await _observers.PreSend(pipeContext).ConfigureAwait(false);
-                try
-                {
-                    await _outputPipe.Send(pipeContext).ConfigureAwait(false);
+                    await _observers.SendFault(pipeContext, ex).ConfigureAwait(false);
 
-                    if (_observers.Count > 0)
-                        await _observers.PostSend(pipeContext).ConfigureAwait(false);
-
-                    await next.Send(context).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    if (_observers.Count > 0)
-                        await _observers.SendFault(pipeContext, ex).ConfigureAwait(false);
-
-                    throw;
-                }
+                throw;
             }
         }
 
@@ -99,12 +101,7 @@ namespace GreenPipes.Filters
             if (filters.Length == 0)
                 throw new ArgumentException("There must be at least one filter, the output filter, for the output pipe");
 
-            IPipe<TOutput> current = new LastPipe<TOutput>(filters[filters.Length - 1]);
-
-            for (var i = filters.Length - 2; i >= 0; i--)
-                current = new FilterPipe<TOutput>(filters[i], current);
-
-            return current;
+            return filters.ToPipe();
         }
     }
 

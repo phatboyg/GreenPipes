@@ -7,6 +7,8 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.10.14" />
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="2.0.11" />
     <ProjectReference Include="..\GreenPipes\GreenPipes.csproj" />
     <PackageReference Include="BenchmarkDotNet" Version="0.10.14" />
   </ItemGroup>

@@ -23,7 +23,7 @@
                     WarmupCount = 1,
                     LaunchCount = 1,
                     UnrollFactor = 1,
-                    InvocationCount = 1_000_000
+                    InvocationCount = 2_000_000
                 }
             });
         }

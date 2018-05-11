@@ -27,35 +27,32 @@ namespace GreenPipes.Internals.Reflection
             _cache = new ConcurrentDictionary<Type, ConcurrentDictionary<Type, Type>>();
         }
 
-        public Type GetGenericInterface(Type type, Type interfaceType)
+        public Type GetGenericInterface(Type type, TypeInfo interfaceType)
         {
-            if (!interfaceType.GetTypeInfo().IsGenericTypeDefinition)
-                throw new ArgumentException(
-                    "The interface must be a generic interface definition: " + interfaceType.Name,
-                    nameof(interfaceType));
+            if (!interfaceType.IsGenericTypeDefinition)
+                throw new ArgumentException("The interface must be a generic interface definition: " + interfaceType.Name, nameof(interfaceType));
 
             // our contract states that we will not return generic interface definitions without generic type arguments
             if (type == interfaceType)
                 return null;
 
-            if (type.GetTypeInfo().IsGenericType)
-                if (type.GetGenericTypeDefinition() == interfaceType)
-                    return type;
+            var typeInfo = type.GetTypeInfo();
+            if (typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == interfaceType)
+                return type;
 
-            Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
+            Type[] interfaces = typeInfo.ImplementedInterfaces.ToArray();
 
-            return interfaces.Where(t => t.GetTypeInfo().IsGenericType)
-                .FirstOrDefault(t => t.GetGenericTypeDefinition() == interfaceType);
+            return interfaces.Where(t => t.GetTypeInfo().IsGenericType).FirstOrDefault(t => t.GetGenericTypeDefinition() == interfaceType);
         }
 
-        public Type Get(Type type, Type interfaceType)
+        public Type Get(Type type, TypeInfo interfaceType)
         {
             ConcurrentDictionary<Type, Type> typeCache = _cache.GetOrAdd(type, x => new ConcurrentDictionary<Type, Type>());
 
             return typeCache.GetOrAdd(interfaceType, x => GetInterfaceInternal(type, interfaceType));
         }
 
-        Type GetInterfaceInternal(Type type, Type interfaceType)
+        Type GetInterfaceInternal(Type type, TypeInfo interfaceType)
         {
             if (interfaceType.GetTypeInfo().IsGenericTypeDefinition)
                 return GetGenericInterface(type, interfaceType);

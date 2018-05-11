@@ -27,6 +27,11 @@ namespace GreenPipes.Builders
             _filters = new List<IFilter<TContext>>();
         }
 
+        public PipeBuilder(params IFilter<TContext>[] filters)
+        {
+            _filters = new List<IFilter<TContext>>(filters);
+        }
+
         public void AddFilter(IFilter<TContext> filter)
         {
             _filters.Add(filter);

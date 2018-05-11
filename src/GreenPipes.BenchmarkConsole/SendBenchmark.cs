@@ -15,12 +15,15 @@ namespace GreenPipes.BenchmarkConsole
     using System;
     using System.Threading.Tasks;
     using BenchmarkDotNet.Attributes;
+    using BenchmarkDotNet.Diagnostics.Windows.Configs;
     using Contracts;
     using Pipes;
     using Throughput;
 
 
     [Config(typeof(DotNetCoreBenchmarkConfig))]
+    [DotTraceDiagnoser]
+    [InliningDiagnoser]
     public class SendBenchmark
     {
         readonly IPipe<TestContext> _concurrencyPipe;

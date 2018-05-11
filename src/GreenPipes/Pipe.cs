@@ -13,7 +13,9 @@
 namespace GreenPipes
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Builders;
     using Configurators;
     using Pipes;
 
@@ -77,6 +79,38 @@ namespace GreenPipes
             where T : class, PipeContext
         {
             return Cache<T>.EmptyPipe;
+        }
+
+        /// <summary>
+        /// Returns a pipe for the filter
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static IPipe<T> ToPipe<T>(this IFilter<T> filter)
+            where T : class, PipeContext
+        {
+            if (filter == null)
+                throw new ArgumentNullException(nameof(filter));
+
+            return new LastPipe<T>(filter);
+        }
+
+        /// <summary>
+        /// Returns a pipe containing the filters in the array
+        /// </summary>
+        /// <param name="filters"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static IPipe<T> ToPipe<T>(this IFilter<T>[] filters)
+            where T : class, PipeContext
+        {
+            if (filters == null)
+                throw new ArgumentNullException(nameof(filters));
+
+            return new PipeBuilder<T>(filters).Build();
         }
 
 

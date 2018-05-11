@@ -89,9 +89,7 @@ namespace GreenPipes.Filters
         {
             var filter = new KeyFilter<TContext, TKey>(_keyAccessor);
 
-            IPipe<TContext> pipe = Pipe.New<TContext>(x => x.UseFilter(filter));
-
-            ConnectPipe(pipe);
+            ConnectPipe(filter.ToPipe());
 
             return filter;
         }

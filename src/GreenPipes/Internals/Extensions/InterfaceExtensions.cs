@@ -45,7 +45,7 @@ namespace GreenPipes.Internals.Extensions
                 throw new ArgumentException("The interface type must be an interface: " + interfaceType.Name);
 
             if (interfaceTypeInfo.IsGenericTypeDefinition)
-                return _cache.GetGenericInterface(type, interfaceType) != null;
+                return _cache.GetGenericInterface(type, interfaceTypeInfo) != null;
 
             return interfaceTypeInfo.IsAssignableFrom(type.GetTypeInfo());
         }
@@ -66,7 +66,7 @@ namespace GreenPipes.Internals.Extensions
             if (!interfaceTypeInfo.IsInterface)
                 throw new ArgumentException("The interface type must be an interface: " + interfaceType.Name);
 
-            return _cache.Get(type, interfaceType);
+            return _cache.Get(type, interfaceTypeInfo);
         }
 
         public static bool ClosesType(this Type type, Type openType)
@@ -120,9 +120,6 @@ namespace GreenPipes.Internals.Extensions
 
             if (openType.GetTypeInfo().IsInterface)
             {
-                if (!openType.IsOpenGeneric())
-                    throw new ArgumentException("The interface type must be an open generic interface: " + openType.Name);
-
                 Type interfaceType = type.GetInterface(openType);
                 if (interfaceType == null)
                     throw new ArgumentException("The interface type is not implemented by: " + type.Name);
