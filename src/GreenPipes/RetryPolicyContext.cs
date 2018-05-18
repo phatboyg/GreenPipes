@@ -43,5 +43,10 @@ namespace GreenPipes
         /// <param name="exception"></param>
         /// <returns></returns>
         Task RetryFaulted(Exception exception);
+
+        /// <summary>
+        /// Cancel any pending or subsequent retries
+        /// </summary>
+        void Cancel();
     }
 }

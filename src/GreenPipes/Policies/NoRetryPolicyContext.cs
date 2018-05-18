@@ -20,8 +20,8 @@ namespace GreenPipes.Policies
         BaseRetryPolicyContext<TContext>
         where TContext : class, PipeContext
     {
-        public NoRetryPolicyContext(IRetryPolicy retryPolicy, TContext context)
-            : base(retryPolicy, context)
+        public NoRetryPolicyContext(IRetryPolicy policy, TContext context)
+            : base(policy, context)
         {
         }
 

@@ -51,6 +51,11 @@ namespace GreenPipes.Policies
             return TaskUtil.Completed;
         }
 
+        public void Cancel()
+        {
+            _cancellationTokenSource.Cancel();
+        }
+
         void IDisposable.Dispose()
         {
             _registration.Dispose();

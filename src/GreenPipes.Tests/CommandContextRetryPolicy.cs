@@ -15,7 +15,6 @@ namespace GreenPipes.Tests
     using System;
     using System.Linq;
     using Contracts;
-    using Filters;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
 

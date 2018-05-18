@@ -28,13 +28,6 @@ namespace GreenPipes.Policies
             _policy = policy;
         }
 
-        public override bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
-        {
-            retryContext = new NoRetryContext<TContext>(Context, exception, CancellationToken);
-
-            return false;
-        }
-
         protected override RetryContext<TContext> CreateRetryContext(Exception exception, CancellationToken cancellationToken)
         {
             return new ExponentialRetryContext<TContext>(_policy, Context, exception, 0, cancellationToken);
