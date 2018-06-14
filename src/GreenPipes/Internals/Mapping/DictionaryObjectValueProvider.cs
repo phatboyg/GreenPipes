@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Internals.Mapping
 {
+    using System;
     using System.Collections.Generic;
 
 
@@ -34,8 +35,8 @@ namespace GreenPipes.Internals.Mapping
                 if (value is IDictionary<string, object>)
                     value = new DictionaryObjectValueProvider((IDictionary<string, object>)value);
 
-                if (value is object[])
-                    value = new ObjectArrayValueProvider((object[])value);
+                if (value is Array)
+                    value = new ObjectArrayValueProvider((Array)value);
             }
 
             return found;
