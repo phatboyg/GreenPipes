@@ -12,15 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Internals.Mapping
 {
+    using System;
     using System.Collections.Generic;
 
 
     public class ObjectArrayValueProvider :
         IArrayValueProvider
     {
-        readonly object[] _values;
+        readonly Array _values;
 
-        public ObjectArrayValueProvider(object[] values)
+        public ObjectArrayValueProvider(Array values)
         {
             _values = values;
         }
@@ -33,11 +34,11 @@ namespace GreenPipes.Internals.Mapping
                 return false;
             }
 
-            value = _values[index];
+            value = _values.GetValue(index);
             if (value is IDictionary<string, object>)
                 value = new DictionaryObjectValueProvider((IDictionary<string, object>)value);
-            else if (value is object[])
-                value = new ObjectArrayValueProvider((object[])value);
+            else if (value is Array)
+                value = new ObjectArrayValueProvider((Array)value);
 
             return true;
         }
