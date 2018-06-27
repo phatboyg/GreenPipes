@@ -13,6 +13,7 @@
 namespace GreenPipes.BenchmarkConsole.Throughput
 {
     using System.Threading.Tasks;
+    using Mapping;
 
 
     public class BenchmarkFilter :
@@ -21,6 +22,50 @@ namespace GreenPipes.BenchmarkConsole.Throughput
         public Task Send(TestContext context, IPipe<TestContext> next)
         {
             return next.Send(context);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+        }
+    }
+
+
+    public class BenchmarkResultPipe :
+        IResultPipe<TestContext, TestResult>
+    {
+        public Task<TestResult> Send(TestContext context)
+        {
+            return Task.FromResult(default(TestResult));
+        }
+
+        public void Probe(ProbeContext context)
+        {
+        }
+    }
+
+
+    public class BenchmarkAwaitFilter :
+        IFilter<TestContext>
+    {
+        public async Task Send(TestContext context, IPipe<TestContext> next)
+        {
+            await next.Send(context);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+        }
+    }
+
+
+    public class BenchmarkAwaitResultFilter :
+        IResultFilter<TestContext, TestResult>
+    {
+        public async Task<TestResult> Send(TestContext context, IResultPipe<TestContext, TestResult> next)
+        {
+            var result = await next.Send(context).ConfigureAwait(false);
+
+            return result;
         }
 
         public void Probe(ProbeContext context)

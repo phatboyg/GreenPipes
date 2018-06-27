@@ -25,8 +25,8 @@ namespace GreenPipes.Tests.Internals
         [Test]
         public void Should_handle_two_builders()
         {
-            var builder1 = new DynamicImplementationBuilder();
-            var builder2 = new DynamicImplementationBuilder();
+            var builder1 = DynamicImplementationBuilder.Shared;
+            var builder2 = DynamicImplementationBuilder.Shared;
 
             var type1 = builder1.GetImplementationType(typeof(Message));
             var type2 = builder1.GetImplementationType(typeof(Message));
@@ -55,7 +55,7 @@ namespace GreenPipes.Tests.Internals
         }
 
 
-        T ToObject<T>(DynamicImplementationBuilder builder, object values)
+        T ToObject<T>(IImplementationBuilder builder, object values)
         {
             var factory = new DynamicObjectConverterCache(builder);
 

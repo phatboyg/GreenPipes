@@ -10,4 +10,10 @@ namespace GreenPipes.BenchmarkConsole.Throughput
 
         int Attempts { get; set; }
     }
+
+
+    public interface TestResult
+    {
+        
+    }
 }

@@ -92,7 +92,7 @@ namespace GreenPipes.Tests.Internals.Mapping
             };
 
 
-            IObjectConverterCache converterCache = new DynamicObjectConverterCache(new DynamicImplementationBuilder());
+            IObjectConverterCache converterCache = new DynamicObjectConverterCache(DynamicImplementationBuilder.Shared);
 
             _values = (Values)converterCache.GetConverter(typeof(Values)).GetObject(_dictionary);
         }

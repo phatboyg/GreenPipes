@@ -45,14 +45,15 @@ namespace GreenPipes.Internals.Extensions
 
         static class Cached
         {
-            internal static readonly IImplementationBuilder Builder = new DynamicImplementationBuilder();
+            internal static readonly IImplementationBuilder Builder = DynamicImplementationBuilder.Shared;
             internal static readonly ConcurrentDictionary<Type, CachedType> Instance = new ConcurrentDictionary<Type, CachedType>();
         }
 
 
         interface CachedType
         {
-            string ShortName { get; }
+            string ShortName { get; } 
+            Type ImplementationType { get; }
         }
 
 
@@ -60,6 +61,7 @@ namespace GreenPipes.Internals.Extensions
             CachedType
         {
             public string ShortName => TypeCache<T>.ShortName;
+            public Type ImplementationType => TypeCache<T>.ImplementationType;
         }
     }
 
@@ -68,7 +70,7 @@ namespace GreenPipes.Internals.Extensions
         ITypeCache<T>
     {
         readonly Lazy<IObjectConverter> _converter;
-        readonly Lazy<IDictionaryConverter> _mapper;
+        readonly Lazy<Type> _implementationType;
         readonly Lazy<ReadOnlyPropertyCache<T>> _readPropertyCache;
         readonly string _shortName;
         readonly Lazy<ReadWritePropertyCache<T>> _writePropertyCache;
@@ -79,15 +81,17 @@ namespace GreenPipes.Internals.Extensions
             _readPropertyCache = new Lazy<ReadOnlyPropertyCache<T>>(() => new ReadOnlyPropertyCache<T>());
             _writePropertyCache = new Lazy<ReadWritePropertyCache<T>>(() => new ReadWritePropertyCache<T>());
 
-            _mapper = new Lazy<IDictionaryConverter>(() => TypeCache.DictionaryConverterCache.GetConverter(typeof(T)));
             _converter = new Lazy<IObjectConverter>(() => TypeCache.ObjectConverterCache.GetConverter(typeof(T)));
+            _implementationType = new Lazy<Type>(() => DynamicImplementationBuilder.Shared.GetImplementationType(typeof(T)));
         }
 
+        public static Type ImplementationType => Cached.Metadata.Value.ImplementationType;
         public static IReadOnlyPropertyCache<T> ReadOnlyPropertyCache => Cached.Metadata.Value.ReadOnlyPropertyCache;
         public static IReadWritePropertyCache<T> ReadWritePropertyCache => Cached.Metadata.Value.ReadWritePropertyCache;
 
         public static string ShortName => Cached.Metadata.Value.ShortName;
 
+        Type ITypeCache<T>.ImplementationType => _implementationType.Value;
         IReadOnlyPropertyCache<T> ITypeCache<T>.ReadOnlyPropertyCache => _readPropertyCache.Value;
         IReadWritePropertyCache<T> ITypeCache<T>.ReadWritePropertyCache => _writePropertyCache.Value;
 

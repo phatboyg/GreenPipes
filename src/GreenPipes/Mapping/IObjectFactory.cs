@@ -10,20 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Internals.Extensions
+namespace GreenPipes.Mapping
 {
-    using System;
-    using Reflection;
-
-
-    public interface ITypeCache<T>
+    /// <summary>
+    /// Creates an object of the specified type
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IObjectFactory<out T>
+        where T : class
     {
-        string ShortName { get; }
-        Type ImplementationType { get; }
-
-        IReadOnlyPropertyCache<T> ReadOnlyPropertyCache { get; }
-        IReadWritePropertyCache<T> ReadWritePropertyCache { get; }
-
-        T InitializeFromObject(object values);
+        FactoryContext<T> Create(FactoryContext context);
     }
 }

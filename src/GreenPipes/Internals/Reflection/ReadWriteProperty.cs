@@ -18,46 +18,6 @@ namespace GreenPipes.Internals.Reflection
     using Extensions;
 
 
-    public class ReadWriteProperty :
-        ReadOnlyProperty
-    {
-        public readonly Action<object, object> SetProperty;
-
-        public ReadWriteProperty(PropertyInfo property)
-            : base(property)
-        {
-            SetProperty = GetSetMethod(Property);
-        }
-
-        public void Set(object instance, object value)
-        {
-            SetProperty(instance, value);
-        }
-
-        static Action<object, object> GetSetMethod(PropertyInfo property)
-        {
-            if (property.DeclaringType == null)
-                throw new ArgumentException("DeclaringType is null", nameof(property));
-
-            var instance = Expression.Parameter(typeof(object), "instance");
-            var value = Expression.Parameter(typeof(object), "value");
-
-            // value as T is slightly faster than (T)value, so if it's not a value type, use that
-            var instanceCast = property.DeclaringType.GetTypeInfo().IsValueType
-                ? Expression.Convert(instance, property.DeclaringType)
-                : Expression.TypeAs(instance, property.DeclaringType);
-
-            var valueCast = property.PropertyType.GetTypeInfo().IsValueType
-                ? Expression.Convert(value, property.PropertyType)
-                : Expression.TypeAs(value, property.PropertyType);
-
-            var call = Expression.Call(instanceCast, property.SetMethod, valueCast);
-
-            return Expression.Lambda<Action<object, object>>(call, instance, value).Compile();
-        }
-    }
-
-
     public class ReadWriteProperty<T> :
         ReadOnlyProperty<T>
     {

@@ -91,7 +91,7 @@
         [Test]
         public void Should_round_trip_successfully()
         {
-            var factory = new DynamicObjectConverterCache(new DynamicImplementationBuilder());
+            var factory = new DynamicObjectConverterCache(DynamicImplementationBuilder.Shared);
 
             var converter = factory.GetConverter(typeof(Values));
 

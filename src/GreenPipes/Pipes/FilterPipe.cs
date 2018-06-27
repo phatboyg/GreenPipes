@@ -14,6 +14,7 @@ namespace GreenPipes.Pipes
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Mapping;
 
 
     public class FilterPipe<TContext> :
@@ -39,6 +40,33 @@ namespace GreenPipes.Pipes
         Task IPipe<TContext>.Send(TContext context)
         {
             return _filter.Send(context, _next);
+        }
+    }
+
+
+    public class FilterResultPipe<TContext, TResult> :
+        IResultPipe<TContext, TResult>
+        where TContext : class, PipeContext
+    {
+        readonly IResultFilter<TContext, TResult> _filter;
+        readonly IResultPipe<TContext, TResult> _next;
+
+        public FilterResultPipe(IResultFilter<TContext, TResult> filter, IResultPipe<TContext, TResult> next)
+        {
+            _filter = filter;
+            _next = next;
+        }
+
+        [DebuggerStepThrough]
+        Task<TResult> IResultPipe<TContext, TResult>.Send(TContext context)
+        {
+            return _filter.Send(context, _next);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            _filter.Probe(context);
+            _next.Probe(context);
         }
     }
 }

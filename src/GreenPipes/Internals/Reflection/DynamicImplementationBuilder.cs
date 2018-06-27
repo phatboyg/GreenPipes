@@ -14,9 +14,9 @@ namespace GreenPipes.Internals.Reflection
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.Reflection;
     using System.Reflection.Emit;
+    using System.Threading;
     using Extensions;
 
 
@@ -34,16 +34,18 @@ namespace GreenPipes.Internals.Reflection
         readonly string _proxyNamespaceSuffix = "GreenPipes.DynamicInternal" + Guid.NewGuid().ToString("N");
         readonly ConcurrentDictionary<Type, Lazy<Type>> _proxyTypes;
 
-        public DynamicImplementationBuilder()
+        DynamicImplementationBuilder()
         {
             _moduleBuilders = new ConcurrentDictionary<string, ModuleBuilder>();
 
             _proxyTypes = new ConcurrentDictionary<Type, Lazy<Type>>();
         }
 
+        public static IImplementationBuilder Shared => Cached.Builder;
+
         public Type GetImplementationType(Type interfaceType)
         {
-            return _proxyTypes.GetOrAdd(interfaceType, x => new Lazy<Type>(() => CreateImplementation(x))).Value;
+            return _proxyTypes.GetOrAdd(interfaceType, x => new Lazy<Type>(() => CreateImplementation(x), LazyThreadSafetyMode.ExecutionAndPublication)).Value;
         }
 
         Type CreateImplementation(Type interfaceType)
@@ -56,20 +58,19 @@ namespace GreenPipes.Internals.Reflection
 
         Type CreateTypeFromInterface(ModuleBuilder builder, Type interfaceType)
         {
-            var typeName = "GreenPipes.DynamicInternal." +
-                (interfaceType.IsNested && interfaceType.DeclaringType != null
+            var typeName = "GreenPipes.DynamicInternal."
+                + (interfaceType.IsNested && interfaceType.DeclaringType != null
                     ? $"{interfaceType.DeclaringType.Name}+{TypeCache.GetShortName(interfaceType)}"
                     : TypeCache.GetShortName(interfaceType));
             try
             {
                 var typeBuilder = builder.DefineType(typeName,
-                    TypeAttributes.Serializable | TypeAttributes.Class |
-                        TypeAttributes.Public | TypeAttributes.Sealed,
+                    TypeAttributes.Serializable | TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed,
                     typeof(object), new[] {interfaceType});
 
                 typeBuilder.DefineDefaultConstructor(MethodAttributes.Public);
 
-                IEnumerable<PropertyInfo> properties = interfaceType.GetAllProperties();
+                var properties = interfaceType.GetAllProperties();
                 foreach (var property in properties)
                 {
                     var fieldBuilder = typeBuilder.DefineField("field_" + property.Name, property.PropertyType,
@@ -89,7 +90,7 @@ namespace GreenPipes.Internals.Reflection
             }
             catch (Exception ex)
             {
-                string message = $"Exception creating proxy ({typeName}) for {TypeCache.GetShortName(interfaceType)}";
+                var message = $"Exception creating proxy ({typeName}) for {TypeCache.GetShortName(interfaceType)}";
 
                 throw new InvalidOperationException(message, ex);
             }
@@ -148,6 +149,12 @@ namespace GreenPipes.Internals.Reflection
             });
 
             return callback(builder);
+        }
+
+
+        static class Cached
+        {
+            internal static readonly IImplementationBuilder Builder = new DynamicImplementationBuilder();
         }
     }
 }
