@@ -17,20 +17,20 @@ namespace GreenPipes.Configurators
 
     public interface IExceptionConfigurator
     {
-        void Handle(params Type[] exceptionTypes);
+        IExceptionConfigurator Handle(params Type[] exceptionTypes);
 
-        void Handle<T>()
+        IExceptionConfigurator Handle<T>()
             where T : Exception;
 
-        void Handle<T>(Func<T, bool> filter)
+        IExceptionConfigurator Handle<T>(Func<T, bool> filter)
             where T : Exception;
 
-        void Ignore(params Type[] exceptionTypes);
+        IExceptionConfigurator Ignore(params Type[] exceptionTypes);
 
-        void Ignore<T>()
+        IExceptionConfigurator Ignore<T>()
             where T : Exception;
 
-        void Ignore<T>(Func<T, bool> filter)
+        IExceptionConfigurator Ignore<T>(Func<T, bool> filter)
             where T : Exception;
     }
 }
