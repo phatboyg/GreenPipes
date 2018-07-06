@@ -30,34 +30,46 @@ namespace GreenPipes.Specifications
 
         protected IExceptionFilter Filter { get; }
 
-        void IExceptionConfigurator.Handle(params Type[] exceptionTypes)
+        IExceptionConfigurator IExceptionConfigurator.Handle(params Type[] exceptionTypes)
         {
             _exceptionFilter.Includes += exception => Match(exception, exceptionTypes);
+
+            return this;
         }
 
-        void IExceptionConfigurator.Handle<T>()
+        IExceptionConfigurator IExceptionConfigurator.Handle<T>()
         {
             _exceptionFilter.Includes += exception => Match(exception, typeof(T));
+
+            return this;
         }
 
-        void IExceptionConfigurator.Handle<T>(Func<T, bool> filter)
+        IExceptionConfigurator IExceptionConfigurator.Handle<T>(Func<T, bool> filter)
         {
             _exceptionFilter.Includes += exception => Match(exception, filter);
+
+            return this;
         }
 
-        void IExceptionConfigurator.Ignore(params Type[] exceptionTypes)
+        IExceptionConfigurator IExceptionConfigurator.Ignore(params Type[] exceptionTypes)
         {
             _exceptionFilter.Excludes += exception => Match(exception, exceptionTypes);
+
+            return this;
         }
 
-        void IExceptionConfigurator.Ignore<T>()
+        IExceptionConfigurator IExceptionConfigurator.Ignore<T>()
         {
             _exceptionFilter.Excludes += exception => Match(exception, typeof(T));
+
+            return this;
         }
 
-        void IExceptionConfigurator.Ignore<T>(Func<T, bool> filter)
+        IExceptionConfigurator IExceptionConfigurator.Ignore<T>(Func<T, bool> filter)
         {
             _exceptionFilter.Excludes += exception => Match(exception, filter);
+
+            return this;
         }
 
         static bool Match(Exception exception, params Type[] exceptionTypes)
