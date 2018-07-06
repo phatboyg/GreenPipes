@@ -32,11 +32,11 @@ namespace GreenPipes.Internals.Mapping
 
             if (found)
             {
-                if (value is IDictionary<string, object>)
-                    value = new DictionaryObjectValueProvider((IDictionary<string, object>)value);
+                if (value is IDictionary<string, object> dict)
+                    value = new DictionaryObjectValueProvider(dict);
 
-                if (value is Array)
-                    value = new ObjectArrayValueProvider((Array)value);
+                if (value is Array arr)
+                    value = new ObjectArrayValueProvider(arr);
             }
 
             return found;

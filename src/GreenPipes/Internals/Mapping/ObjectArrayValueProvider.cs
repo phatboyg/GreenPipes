@@ -35,10 +35,10 @@ namespace GreenPipes.Internals.Mapping
             }
 
             value = _values.GetValue(index);
-            if (value is IDictionary<string, object>)
-                value = new DictionaryObjectValueProvider((IDictionary<string, object>)value);
-            else if (value is Array)
-                value = new ObjectArrayValueProvider((Array)value);
+            if (value is IDictionary<string, object> dict)
+                value = new DictionaryObjectValueProvider(dict);
+            else if (value is Array arr)
+                value = new ObjectArrayValueProvider(arr);
 
             return true;
         }
