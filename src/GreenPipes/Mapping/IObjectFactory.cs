@@ -19,6 +19,6 @@ namespace GreenPipes.Mapping
     public interface IObjectFactory<out T>
         where T : class
     {
-        FactoryContext<T> Create(FactoryContext context);
+        InitializerContext<T> Create(PipeContext context);
     }
 }

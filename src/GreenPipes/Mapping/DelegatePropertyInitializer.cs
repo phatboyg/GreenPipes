@@ -13,7 +13,6 @@
 namespace GreenPipes.Mapping
 {
     using System.Threading.Tasks;
-    using Internals.Reflection;
 
 
     /// <summary>
@@ -22,17 +21,14 @@ namespace GreenPipes.Mapping
     /// <typeparam name="T">The object type</typeparam>
     /// <typeparam name="TProperty">The property type</typeparam>
     public class DelegatePropertyInitializer<T, TProperty> :
-        IFilter<PropertyInitializerContext<T, TProperty>>
+        IPropertyInitializerFilter<T, TProperty>
         where T : class
     {
         readonly PropertyValueProvider<T, TProperty> _provider;
-        readonly IWriteProperty<T, TProperty> _writeProperty;
 
-        public DelegatePropertyInitializer(string propertyName, PropertyValueProvider<T, TProperty> provider)
+        public DelegatePropertyInitializer(PropertyValueProvider<T, TProperty> provider)
         {
             _provider = provider;
-
-            _writeProperty = WritePropertyCache<T>.GetProperty<TProperty>(propertyName);
         }
 
         public async Task Send(PropertyInitializerContext<T, TProperty> context, IPipe<PropertyInitializerContext<T, TProperty>> next)

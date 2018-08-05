@@ -13,11 +13,11 @@
 namespace GreenPipes.Mapping
 {
     public class DynamicFactoryContext<T> :
-        BaseFactoryContext,
-        FactoryContext<T>
+        BasePipeContext,
+        InitializerContext<T>
         where T : class
     {
-        public DynamicFactoryContext(FactoryContext context, T value)
+        public DynamicFactoryContext(PipeContext context, T value)
             : base(context)
         {
             Object = value;

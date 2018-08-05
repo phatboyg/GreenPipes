@@ -12,26 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Mapping
 {
-    public class DynamicObjectFactory<T, TImplementation> :
+    /// <summary>
+    /// Factory for the dynamic type created to implement the interface.
+    /// </summary>
+    /// <typeparam name="T">The interface type</typeparam>
+    /// <typeparam name="TImplementation">The implementation type, which is dynamically created</typeparam>
+    public class DefaultConstructorObjectFactory<T, TImplementation> :
         IObjectFactory<T>
         where T : class
         where TImplementation : T, new()
     {
-        readonly IObjectInitializer<T>[] _initializers;
+        readonly IFactoryInitializer<T>[] _initializers;
 
-        public DynamicObjectFactory(params IObjectInitializer<T>[] initializers)
+        public DefaultConstructorObjectFactory(params IFactoryInitializer<T>[] initializers)
         {
-            _initializers = initializers ?? new IObjectInitializer<T>[0];
+            _initializers = initializers ?? new IFactoryInitializer<T>[0];
         }
 
-        public FactoryContext<T> Create(FactoryContext context)
+        public InitializerContext<T> Create(PipeContext context)
         {
             var value = new TImplementation();
 
-            for (int i = 0; i < _initializers.Length; i++)
-                _initializers[i].Initialize(context, value);
+            var factoryContext = new DynamicFactoryContext<T>(context, value);
 
-            return new DynamicFactoryContext<T>(context, value);
+            for (int i = 0; i < _initializers.Length; i++)
+                _initializers[i].Initialize(factoryContext);
+
+            return factoryContext;
         }
     }
 }

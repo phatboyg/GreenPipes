@@ -17,14 +17,14 @@ namespace GreenPipes.Mapping
     using Internals.Reflection;
 
 
-    public readonly struct ObjectPropertyInitializerContext<T, TProperty> :
-        PropertyInitializerContext<T, TProperty>
-        where T : class
+    public readonly struct ObjectPropertyInitializerContext<TObject, TProperty> :
+        PropertyInitializerContext<TObject, TProperty>
+        where TObject : class
     {
-        readonly InitalizerContext<T> _context;
-        readonly IWriteProperty<T, TProperty> _writeProperty;
+        readonly InitializerContext<TObject> _context;
+        readonly IWriteProperty<TObject, TProperty> _writeProperty;
 
-        public ObjectPropertyInitializerContext(InitalizerContext<T> context, IWriteProperty<T, TProperty> writeProperty)
+        public ObjectPropertyInitializerContext(InitializerContext<TObject> context, IWriteProperty<TObject, TProperty> writeProperty)
         {
             _context = context;
             _writeProperty = writeProperty;
@@ -37,22 +37,22 @@ namespace GreenPipes.Mapping
             return _context.HasPayloadType(payloadType);
         }
 
-        bool PipeContext.TryGetPayload<T1>(out T1 payload)
+        bool PipeContext.TryGetPayload<T>(out T payload)
         {
             return _context.TryGetPayload(out payload);
         }
 
-        T1 PipeContext.GetOrAddPayload<T1>(PayloadFactory<T1> payloadFactory)
+        T PipeContext.GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
         }
 
-        T1 PipeContext.AddOrUpdatePayload<T1>(PayloadFactory<T1> addFactory, UpdatePayloadFactory<T1> updateFactory)
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
         {
             return _context.AddOrUpdatePayload(addFactory, updateFactory);
         }
 
-        T FactoryContext<T>.Object => _context.Object;
+        TObject InitializerContext<TObject>.Object => _context.Object;
 
         public TProperty PropertyValue
         {

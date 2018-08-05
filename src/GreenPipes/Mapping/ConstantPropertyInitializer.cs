@@ -12,18 +12,35 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Mapping
 {
+    using System.Threading.Tasks;
+    using Util;
+
+
     /// <summary>
-    /// Context passed to a property initializer pipe, which should set the propertyValue, or ultimately die.
+    /// Initialize an object property to a constant value
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <typeparam name="TProperty"></typeparam>
-    public interface PropertyInitializerContext<out T, in TProperty> :
-        InitializerContext<T>
+    public class ConstantPropertyInitializer<T, TProperty> :
+        IPropertyInitializerFilter<T, TProperty>
         where T : class
     {
-        /// <summary>
-        /// Sets the property value on the object to the specified value
-        /// </summary>
-        TProperty PropertyValue { set; }
+        readonly TProperty _propertyValue;
+
+        public ConstantPropertyInitializer(TProperty propertyValue)
+        {
+            _propertyValue = propertyValue;
+        }
+
+        public Task Send(PropertyInitializerContext<T, TProperty> context, IPipe<PropertyInitializerContext<T, TProperty>> next)
+        {
+            context.PropertyValue = _propertyValue;
+
+            return TaskUtil.Completed;
+        }
+
+        public void Probe(ProbeContext context)
+        {
+        }
     }
 }

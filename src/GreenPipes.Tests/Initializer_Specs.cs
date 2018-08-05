@@ -30,11 +30,11 @@ namespace GreenPipes.Tests
         [Test]
         public void Should_return_the_interface_object()
         {
-            var factory = new DynamicObjectFactory<Empty, SoEmpty>();
+            var factory = new DefaultConstructorObjectFactory<Empty, SoEmpty>();
 
-            var factoryContext = new BaseFactoryContext();
+            var factoryContext = new InputContext(null);
 
-            FactoryContext<Empty> context = factory.Create(factoryContext);
+            InitializerContext<Empty> context = factory.Create(factoryContext);
 
             Assert.That(context.Object, Is.Not.Null);
             Assert.That(context.Object, Is.InstanceOf<SoEmpty>());

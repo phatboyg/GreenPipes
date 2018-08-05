@@ -10,34 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.BenchmarkConsole.Throughput
+namespace GreenPipes.Contexts
 {
-    using System.Threading.Tasks;
+    using System.Threading;
 
 
-    public class BenchmarkFilter :
-        IFilter<TestContext>
+    class InternalPipeContext :
+        BasePipeContext,
+        PipeContext
     {
-        public Task Send(TestContext context, IPipe<TestContext> next)
-        {
-            return next.Send(context);
-        }
-
-        public void Probe(ProbeContext context)
+        public InternalPipeContext()
         {
         }
-    }
 
-
-    public class BenchmarkAwaitFilter :
-        IFilter<TestContext>
-    {
-        public async Task Send(TestContext context, IPipe<TestContext> next)
-        {
-            await next.Send(context);
-        }
-
-        public void Probe(ProbeContext context)
+        public InternalPipeContext(CancellationToken cancellationToken)
+            : base(cancellationToken)
         {
         }
     }

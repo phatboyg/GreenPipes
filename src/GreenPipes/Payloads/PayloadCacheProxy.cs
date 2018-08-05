@@ -13,7 +13,6 @@
 namespace GreenPipes.Payloads
 {
     using System;
-    using System.Threading;
 
 
     /// <summary>
@@ -21,15 +20,13 @@ namespace GreenPipes.Payloads
     /// Does not create a scope, all changes are applied directly to the provided context.
     /// </summary>
     public class PayloadCacheProxy :
-        IPayloadCache,
-        PipeContext
+        IPayloadCache
     {
         readonly PipeContext _context;
 
         public PayloadCacheProxy(PipeContext context)
         {
             _context = context;
-            CancellationToken = context.CancellationToken;
         }
 
         public bool HasPayloadType(Type payloadType)
@@ -59,7 +56,5 @@ namespace GreenPipes.Payloads
         {
             return new PayloadCacheScope(_context);
         }
-
-        public CancellationToken CancellationToken { get; }
     }
 }

@@ -14,7 +14,15 @@ namespace GreenPipes.Mapping
 {
     public static class FactoryContextExtensions
     {
-        public static void Deconstruct<T>(this FactoryContext<T> factoryContext, out T value, out FactoryContext context)
+        /// <summary>
+        /// Allows the tuple structure of the factory context to be deconstructed into the object, purely syntax sugar, probably not the
+        /// smartest thing to do
+        /// </summary>
+        /// <param name="factoryContext"></param>
+        /// <param name="value"></param>
+        /// <param name="context"></param>
+        /// <typeparam name="T"></typeparam>
+        public static void Deconstruct<T>(this InitializerContext<T> factoryContext, out T value, out InitializerContext<T> context)
             where T : class
         {
             value = factoryContext.Object;

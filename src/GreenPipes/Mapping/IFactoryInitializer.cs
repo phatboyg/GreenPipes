@@ -12,16 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Mapping
 {
-    public interface FactoryContext<out T> :
-        FactoryContext
+    /// <summary>
+    /// Initializes an object property during factory/creation. Does not support async, for that a property initializer must be used.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IFactoryInitializer<in T>
         where T : class
     {
-        T Object { get; }
-    }
-
-
-    public interface FactoryContext :
-        PipeContext
-    {
+        /// <summary>
+        /// Apply the initializer to the newly created object
+        /// </summary>
+        /// <param name="context"></param>
+        void Initialize(InitializerContext<T> context);
     }
 }

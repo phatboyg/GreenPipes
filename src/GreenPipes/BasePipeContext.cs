@@ -37,6 +37,16 @@ namespace GreenPipes
         }
 
         /// <summary>
+        /// A new pipe context with an existing payload cache -- includes a new CancellationTokenSource. If
+        /// cancellation is not supported, use the above constructor with CancellationToken.None to avoid
+        /// creating a token source.
+        /// </summary>
+        protected BasePipeContext(CancellationToken cancellationToken)
+        {
+            CancellationToken = cancellationToken;
+        }
+
+        /// <summary>
         /// A new pipe context with an existing payload cache -- includes a new CancellationTokenSource. If 
         /// cancellation is not supported, use the above constructor with CancellationToken.None to avoid
         /// creating a token source.
@@ -68,6 +78,17 @@ namespace GreenPipes
         /// <param name="context"></param>
         protected BasePipeContext(PipeContext context)
             : this(new PayloadCacheProxy(context), context.CancellationToken)
+        {
+        }
+
+        /// <summary>
+        /// A new pipe context based off an existing pipe context, which delegates the payloadCache
+        /// to the existing pipe context.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="cancellationToken"></param>
+        protected BasePipeContext(PipeContext context, CancellationToken cancellationToken)
+            : this(new PayloadCacheProxy(context), cancellationToken)
         {
         }
 
@@ -125,8 +146,7 @@ namespace GreenPipes
         public virtual T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
             where T : class
         {
-            var context = this as T;
-            if (context != null)
+            if (this is T context)
                 return context;
 
             return PayloadCache.GetOrAddPayload(payloadFactory);
@@ -142,9 +162,7 @@ namespace GreenPipes
         public virtual T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
             where T : class
         {
-            // can't modify implicit payload types
-            var context = this as T;
-            if (context != null)
+            if (this is T context)
                 return context;
 
             return PayloadCache.AddOrUpdatePayload(addFactory, updateFactory);

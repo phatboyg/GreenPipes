@@ -12,13 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Mapping
 {
-    using System.Threading.Tasks;
-
-
-    public interface IResultFilter<TContext, TResult> :
-        IProbeSite
-        where TContext : PipeContext
+    public interface InitializerContext<out T> :
+        PipeContext
+        where T : class
     {
-        Task<TResult> Send(TContext context, IResultPipe<TContext, TResult> next);
+        T Object { get; }
     }
 }
