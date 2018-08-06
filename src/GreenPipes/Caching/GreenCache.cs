@@ -60,18 +60,16 @@ namespace GreenPipes.Caching
         {
             lock (_indices)
             {
-                if (_indices.TryGetValue(name, out ICacheIndex<TValue> cacheIndex))
-                {
-                    if (cacheIndex is IIndex<TKey, TValue> index)
-                        return index;
+                if (!_indices.TryGetValue(name, out ICacheIndex<TValue> cacheIndex))
+                    throw new ArgumentException($"An index named {name} was not found", nameof(name));
 
-                    throw new ArgumentException(
-                        $"The index named {name} key type {TypeCache.GetShortName(cacheIndex.KeyType)} did not match the specified key type {TypeCache<TKey>.ShortName}",
-                        nameof(TKey));
-                }
+                if (cacheIndex is IIndex<TKey, TValue> index)
+                    return index;
+
+                throw new ArgumentException(
+                    $"The index named {name} key type {TypeCache.GetShortName(cacheIndex.KeyType)} did not match the specified key type {TypeCache<TKey>.ShortName}",
+                    nameof(TKey));
             }
-
-            throw new ArgumentException($"An index named {name} was not found", nameof(name));
         }
 
         public void Add(TValue value)

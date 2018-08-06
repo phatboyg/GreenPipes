@@ -50,13 +50,13 @@ namespace GreenPipes.Caching.Internals
             _minAge = settings.MinAge;
             _maxAge = TimeSpan.FromMilliseconds(maxAgeInMilliseconds);
 
-            _validityCheckInterval = TimeSpan.FromMilliseconds(maxAgeInMilliseconds / 240.0);
+            _validityCheckInterval = TimeSpan.FromMilliseconds(maxAgeInMilliseconds / settings.TimeSlots);
             _cacheResetTime = _nowProvider().Add(TimeSpan.FromMilliseconds(MaxAgeUpperLimit));
 
             _bucketSize = Math.Max(settings.Capacity / settings.BucketCount, 1);
 
             // enough buckets for all of the content within the time slices, plus a few spares
-            _bucketCount = 240 * settings.BucketCount + 5;
+            _bucketCount = settings.TimeSlots * settings.BucketCount + 5;
 
             _buckets = new BucketCollection<TValue>(this, _bucketCount);
 
@@ -156,7 +156,7 @@ namespace GreenPipes.Caching.Internals
             return _observers.Connect(observer);
         }
 
-        bool IsCleanupRequired(DateTime now) => (_currentBucket.Count > _bucketSize || now > _nextValidityCheck) && _cleanupScheduled == false;
+        bool IsCleanupRequired(DateTime now) => _cleanupScheduled == false && (_currentBucket.Count > _bucketSize || now > _nextValidityCheck);
 
         async Task AddNode(INodeValueFactory<TValue> nodeValueFactory)
         {
@@ -253,28 +253,28 @@ namespace GreenPipes.Caching.Internals
 
         void CheckCacheStatus()
         {
-            if (Monitor.TryEnter(_lock))
+            if (!Monitor.TryEnter(_lock))
+                return;
+
+            try
             {
-                try
+                var now = _nowProvider();
+
+                if (!IsCleanupRequired(now))
+                    return;
+
+                if (CurrentBucketIndex > 1000000000 || now >= _cacheResetTime)
+                    Clear();
+                else
                 {
-                    var now = _nowProvider();
+                    Volatile.Write(ref _cleanupScheduled, true);
 
-                    if (!IsCleanupRequired(now))
-                        return;
-
-                    if (CurrentBucketIndex > 1000000000 || now >= _cacheResetTime)
-                        Clear();
-                    else
-                    {
-                        Volatile.Write(ref _cleanupScheduled, true);
-
-                        Task.Run(() => Cleanup(now));
-                    }
+                    Task.Run(() => Cleanup(now));
                 }
-                finally
-                {
-                    Monitor.Exit(_lock);
-                }
+            }
+            finally
+            {
+                Monitor.Exit(_lock);
             }
         }
 

@@ -96,12 +96,12 @@ namespace GreenPipes.Caching.Internals
         public void Used(IBucketNode<TValue> node)
         {
             // a stopped bucket is no longer the current bucket, so give the node back to the manager
-            if (_stopTime.HasValue)
-            {
-                _tracker.Rebucket(node);
+            if (!_stopTime.HasValue)
+                return;
 
-                Interlocked.Decrement(ref _count);
-            }
+            _tracker.Rebucket(node);
+
+            Interlocked.Decrement(ref _count);
         }
     }
 }
