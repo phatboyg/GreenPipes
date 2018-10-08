@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using GreenPipes.Caching;
-    using GreenPipes.Caching.Internals;
     using NUnit.Framework;
     using TestValueObjects;
 

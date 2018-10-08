@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using GreenPipes.Caching;
-    using GreenPipes.Caching.Internals;
     using NUnit.Framework;
 
 
@@ -30,6 +29,9 @@
 
     namespace TestValueObjects
     {
+        using System.Threading;
+
+
         public class SimpleValue
         {
             public string Id { get; set; }
@@ -38,7 +40,8 @@
 
 
         public class SmartValue :
-            INotifyValueUsed
+            INotifyValueUsed,
+            IAsyncDisposable
         {
             readonly string _id;
             readonly string _value;
@@ -61,6 +64,22 @@
 
                     return _value;
                 }
+            }
+
+            public async Task DisposeAsync(CancellationToken cancellationToken)
+            {
+                await Task.Yield();
+            }
+        }
+
+
+        public static class SmartValueFactory
+        {
+            public static async Task<SmartValue> Healthy(string id)
+            {
+                await Task.Delay(10).ConfigureAwait(false);
+
+                return new SmartValue(id, $"The key is {id}");
             }
         }
 

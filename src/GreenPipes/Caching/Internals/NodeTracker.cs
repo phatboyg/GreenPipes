@@ -222,9 +222,10 @@ namespace GreenPipes.Caching.Internals
         {
             var lockTaken = false;
 
-            Monitor.Enter(_lock, ref lockTaken);
             try
             {
+                Monitor.Enter(_lock, ref lockTaken);
+
                 var now = _nowProvider();
 
                 if (_currentBucket != null)
@@ -253,10 +254,7 @@ namespace GreenPipes.Caching.Internals
 
         void CheckCacheStatus()
         {
-            if (!Monitor.TryEnter(_lock))
-                return;
-
-            try
+            lock (_lock)
             {
                 var now = _nowProvider();
 
@@ -272,69 +270,67 @@ namespace GreenPipes.Caching.Internals
                     Task.Run(() => Cleanup(now));
                 }
             }
-            finally
-            {
-                Monitor.Exit(_lock);
-            }
         }
 
-        async Task Cleanup(DateTime now)
+        void Cleanup(DateTime now)
         {
-            if (Monitor.TryEnter(_lock))
+            bool lockTaken = false;
+            try
             {
-                try
+                Monitor.Enter(_lock, ref lockTaken);
+
+                var itemsAboveCapacity = Statistics.Count - Statistics.Capacity;
+                Bucket<TValue> bucket = _buckets[OldestBucketIndex];
+
+                var expiration = now - _maxAge;
+                var aged = now - _minAge;
+                while (AreLowOnBuckets
+                    || bucket.HasExpired(expiration)
+                    || itemsAboveCapacity > 0 && bucket.IsOldEnough(aged))
                 {
-                    var itemsAboveCapacity = Statistics.Count - Statistics.Capacity;
-                    Bucket<TValue> bucket = _buckets[OldestBucketIndex];
+                    IBucketNode<TValue> node = bucket.Head;
 
-                    var expiration = now - _maxAge;
-                    var aged = now - _minAge;
-                    while (AreLowOnBuckets
-                        || bucket.HasExpired(expiration)
-                        || itemsAboveCapacity > 0 && bucket.IsOldEnough(aged))
+                    bucket.Clear();
+
+                    while (node != null)
                     {
-                        IBucketNode<TValue> node = bucket.Head;
+                        IBucketNode<TValue> next = node.Pop();
 
-                        bucket.Clear();
-
-                        while (node != null)
+                        if (node.IsValid && node.Bucket != null)
                         {
-                            IBucketNode<TValue> next = node.Pop();
-
-                            if (node.IsValid && node.Bucket != null)
+                            // if the node is in its original bucket, it's ripe for the pickin
+                            if (node.Bucket == bucket)
                             {
-                                // if the node is in its original bucket, it's ripe for the pickin
-                                if (node.Bucket == bucket)
-                                {
-                                    --itemsAboveCapacity;
+                                --itemsAboveCapacity;
 
-                                    await EvictNode(node).ConfigureAwait(false);
-                                }
-                                else
-                                {
-                                    // push it onto the bucket that now contains it
-                                    node.Bucket.Push(node);
-                                }
+                                // so if we don't await this, can't be too bad can it?
+                                EvictNode(node);
                             }
-
-                            node = next;
+                            else
+                            {
+                                // push it onto the bucket that now contains it
+                                node.Bucket.Push(node);
+                            }
                         }
 
-                        bucket = _buckets[++OldestBucketIndex];
-
-                        if (IsCurrentBucketOldest)
-                            break;
+                        node = next;
                     }
 
-                    OpenBucket(++CurrentBucketIndex);
-                }
-                finally
-                {
-                    Monitor.Exit(_lock);
-                }
-            }
+                    bucket = _buckets[++OldestBucketIndex];
 
-            _cleanupScheduled = false;
+                    if (IsCurrentBucketOldest)
+                        break;
+                }
+
+                OpenBucket(++CurrentBucketIndex);
+            }
+            finally
+            {
+                if (lockTaken)
+                    Monitor.Exit(_lock);
+
+                _cleanupScheduled = false;
+            }
         }
 
         async Task EvictNode(IBucketNode<TValue> node)

@@ -71,6 +71,63 @@
             Assert.That(cache.Statistics.Count, Is.EqualTo(100));
         }
 
+        [Test]
+        public async Task Should_fill_up_the_buckets_over_time_and_remove_old_entries()
+        {
+            var settings = new TestCacheSettings(100, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(300));
+
+            var cache = new GreenCache<SimpleValue>(settings);
+
+            var index = cache.AddIndex("id", x => x.Id);
+
+            var observer = new NodeAddedCountObserver(200);
+            cache.Connect(observer);
+
+            var removed = new NodeRemovedCountObserver<SimpleValue>(100);
+            cache.Connect(removed);
+
+            for (int i = 0; i < 200; i++)
+            {
+                SimpleValue simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
+
+                settings.CurrentTime += TimeSpan.FromSeconds(1);
+            }
+
+            await observer.Completed;
+            await removed.Completed;
+
+            Assert.That(cache.Statistics.Count, Is.EqualTo(100));
+        }
+
+        [Test]
+        public async Task Should_fill_up_the_buckets_with_smart_values_over_time_and_remove_old_entries()
+        {
+            var settings = new TestCacheSettings(100, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(300));
+
+            var cache = new GreenCache<SmartValue>(settings);
+
+            var index = cache.AddIndex("id", x => x.Id);
+
+            var observer = new SmartAddedCountObserver(200);
+            cache.Connect(observer);
+
+            var removed = new NodeRemovedCountObserver<SmartValue>(100);
+            cache.Connect(removed);
+
+
+            for (int i = 0; i < 200; i++)
+            {
+                SmartValue simpleValue = await index.Get($"key{i}", SmartValueFactory.Healthy);
+
+                settings.CurrentTime += TimeSpan.FromSeconds(1);
+            }
+
+            await observer.Completed;
+            await removed.Completed;
+
+            Assert.That(cache.Statistics.Count, Is.EqualTo(100));
+        }
+
 
         class NodeAddedCountObserver :
             ICacheValueObserver<SimpleValue>
@@ -102,9 +159,40 @@
             public Task<bool> Completed => _source.Task;
         }
 
+        class SmartAddedCountObserver :
+            ICacheValueObserver<SmartValue>
+        {
+            readonly TaskCompletionSource<bool> _source;
+            int _count;
+            readonly int _expected;
 
-        class NodeRemovedCountObserver :
-            ICacheValueObserver<SimpleValue>
+            public SmartAddedCountObserver(int expected)
+            {
+                _expected = expected;
+                _source = new TaskCompletionSource<bool>();
+            }
+
+            public void ValueAdded(INode<SmartValue> node, SmartValue value)
+            {
+                if (Interlocked.Increment(ref _count) == _expected)
+                    _source.TrySetResult(true);
+            }
+
+            public void ValueRemoved(INode<SmartValue> node, SmartValue value)
+            {
+            }
+
+            public void CacheCleared()
+            {
+            }
+
+            public Task<bool> Completed => _source.Task;
+        }
+
+
+        class NodeRemovedCountObserver<T> :
+            ICacheValueObserver<T>
+            where T : class
         {
             readonly TaskCompletionSource<bool> _source;
             int _count;
@@ -116,11 +204,11 @@
                 _source = new TaskCompletionSource<bool>();
             }
 
-            public void ValueAdded(INode<SimpleValue> node, SimpleValue value)
+            public void ValueAdded(INode<T> node, T value)
             {
             }
 
-            public void ValueRemoved(INode<SimpleValue> node, SimpleValue value)
+            public void ValueRemoved(INode<T> node, T value)
             {
                 if (Interlocked.Increment(ref _count) == _expected)
                     _source.TrySetResult(true);
@@ -138,7 +226,7 @@
         public async Task Should_fill_up_a_bunch_of_buckets()
         {
             var addedObserver = new NodeAddedCountObserver(100);
-            var removedObserver = new NodeRemovedCountObserver(40);
+            var removedObserver = new NodeRemovedCountObserver<SimpleValue>(40);
 
             var settings = new TestCacheSettings(100, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60));
 
@@ -179,7 +267,7 @@
             var addedObserver = new NodeAddedCountObserver(200);
             cache.Connect(addedObserver);
 
-            var removedObserver = new NodeRemovedCountObserver(99);
+            var removedObserver = new NodeRemovedCountObserver<SimpleValue>(99);
             cache.Connect(removedObserver);
 
             for (int i = 0; i < 200; i++)
