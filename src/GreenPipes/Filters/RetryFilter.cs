@@ -46,69 +46,72 @@ namespace GreenPipes.Filters
         [DebuggerStepThrough]
         async Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
-            RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context);
-
-            await _observers.PostCreate(policyContext).ConfigureAwait(false);
-
-            try
+            using (RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context))
             {
-                await next.Send(policyContext.Context).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException exception)
-                when (exception.CancellationToken == policyContext.Context.CancellationToken || exception.CancellationToken == context.CancellationToken)
-            {
-                throw;
-            }
-            catch (Exception exception)
-            {
-                if (policyContext.Context.CancellationToken.IsCancellationRequested)
-                    policyContext.Context.CancellationToken.ThrowIfCancellationRequested();
 
-                if (policyContext.Context.TryGetPayload(out RetryContext<TContext> payloadRetryContext))
+                await _observers.PostCreate(policyContext).ConfigureAwait(false);
+
+                try
                 {
-                    if (_retryPolicy.IsHandled(exception))
-                    {
-                        await policyContext.RetryFaulted(exception).ConfigureAwait(false);
-
-                        await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
-                    }
-
-                    context.GetOrAddPayload(() => payloadRetryContext);
-
+                    await next.Send(policyContext.Context).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException exception)
+                    when (exception.CancellationToken == policyContext.Context.CancellationToken ||
+                          exception.CancellationToken == context.CancellationToken)
+                {
                     throw;
                 }
-
-                if (policyContext.Context.TryGetPayload(out RetryContext genericRetryContext))
+                catch (Exception exception)
                 {
-                    if (_retryPolicy.IsHandled(exception))
-                    {
-                        await policyContext.RetryFaulted(exception).ConfigureAwait(false);
+                    if (policyContext.Context.CancellationToken.IsCancellationRequested)
+                        policyContext.Context.CancellationToken.ThrowIfCancellationRequested();
 
-                        await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
+                    if (policyContext.Context.TryGetPayload(out RetryContext<TContext> payloadRetryContext))
+                    {
+                        if (_retryPolicy.IsHandled(exception))
+                        {
+                            await policyContext.RetryFaulted(exception).ConfigureAwait(false);
+
+                            await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
+                        }
+
+                        context.GetOrAddPayload(() => payloadRetryContext);
+
+                        throw;
                     }
 
-                    context.GetOrAddPayload(() => genericRetryContext);
-
-                    throw;
-                }
-
-                if (!policyContext.CanRetry(exception, out RetryContext<TContext> retryContext))
-                {
-                    if (_retryPolicy.IsHandled(exception))
+                    if (policyContext.Context.TryGetPayload(out RetryContext genericRetryContext))
                     {
-                        await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+                        if (_retryPolicy.IsHandled(exception))
+                        {
+                            await policyContext.RetryFaulted(exception).ConfigureAwait(false);
 
-                        await _observers.RetryFault(retryContext).ConfigureAwait(false);
+                            await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
+                        }
 
-                        context.GetOrAddPayload(() => retryContext);
+                        context.GetOrAddPayload(() => genericRetryContext);
+
+                        throw;
                     }
 
-                    throw;
+                    if (!policyContext.CanRetry(exception, out RetryContext<TContext> retryContext))
+                    {
+                        if (_retryPolicy.IsHandled(exception))
+                        {
+                            await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+
+                            await _observers.RetryFault(retryContext).ConfigureAwait(false);
+
+                            context.GetOrAddPayload(() => retryContext);
+                        }
+
+                        throw;
+                    }
+
+                    await _observers.PostFault(retryContext).ConfigureAwait(false);
+
+                    await Attempt(context, retryContext, next).ConfigureAwait(false);
                 }
-
-                await _observers.PostFault(retryContext).ConfigureAwait(false);
-
-                await Attempt(context, retryContext, next).ConfigureAwait(false);
             }
         }
 

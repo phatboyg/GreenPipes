@@ -420,6 +420,27 @@ namespace GreenPipes.Tests
             Assert.That(count, Is.EqualTo(1));
         }
 
+        [Test]
+        public void Should_clean_memory_after_retry()
+        {
+            int disposed = 0;
+
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            {
+                x.UseRetry(r => r.SetRetryPolicy(filter => new TestRetryPolicy(1, () => disposed++)));
+                x.UseExecute(payload =>
+                {
+                    throw new IntentionalTestException("Kaboom!");
+                });
+            });
+
+            var context = new TestContext();
+
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
+
+            Assert.That(disposed, Is.EqualTo(1));
+        }
+
 
         class TestContext :
             BasePipeContext,
@@ -476,6 +497,104 @@ namespace GreenPipes.Tests
                 _retryFault.TrySetResult(context);
 
                 return TaskUtil.Completed;
+            }
+        }
+
+        class TestRetryPolicy :
+            IRetryPolicy
+        {
+            readonly int _retryLimit;
+            readonly Action _onRetryContextDisposed;
+
+            public TestRetryPolicy(int retryLimit, Action onRetryContextDisposed)
+            {
+                _retryLimit = retryLimit;
+                _onRetryContextDisposed = onRetryContextDisposed;
+            }
+
+            public int RetryLimit => _retryLimit;
+
+            void IProbeSite.Probe(ProbeContext context)
+            {
+                context.Set(new
+                {
+                    Policy = "test-retry",
+                    Limit = _retryLimit
+                });
+            }
+
+            RetryPolicyContext<T> IRetryPolicy.CreatePolicyContext<T>(T context)
+            {
+                return new TestRetryPolicyContext<T>(this, context, _onRetryContextDisposed);
+            }
+
+            public bool IsHandled(Exception exception)
+            {
+                return true;
+            }
+        }
+
+        class TestRetryPolicyContext<TContext> : RetryPolicyContext<TContext>
+            where TContext : class, PipeContext
+        {
+            readonly CancellationTokenSource _cancellationTokenSource;
+            readonly TestRetryPolicy _policy;
+            readonly Action _onRetryContextDisposed;
+            
+
+            public TestRetryPolicyContext(TestRetryPolicy policy, TContext context, Action onRetryContextDisposed)
+            {
+                _policy = policy;
+                Context = context;
+                _onRetryContextDisposed = onRetryContextDisposed;
+                _cancellationTokenSource = new CancellationTokenSource();
+            }
+
+            public TContext Context { get; }
+
+            public bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
+            {
+                retryContext = new TestRetryContext<TContext>(_policy, Context, exception, 0, CancellationToken);
+
+                return _policy.IsHandled(exception);
+            }
+
+            CancellationToken CancellationToken => _cancellationTokenSource.Token;
+
+            Task RetryPolicyContext<TContext>.RetryFaulted(Exception exception)
+            {
+                return TaskUtil.Completed;
+            }
+
+            public void Cancel()
+            {
+                // do nothing
+            }
+
+            void IDisposable.Dispose()
+            {
+                _onRetryContextDisposed();
+            }
+        }
+
+        class TestRetryContext<TContext> :
+            BaseRetryContext<TContext>,
+            RetryContext<TContext>
+            where TContext : class, PipeContext
+        {
+            readonly TestRetryPolicy _policy;
+
+            public TestRetryContext(TestRetryPolicy policy, TContext context, Exception exception, int retryCount, CancellationToken cancellationToken)
+                : base(context, exception, retryCount, cancellationToken)
+            {
+                _policy = policy;
+            }
+
+            bool RetryContext<TContext>.CanRetry(Exception exception, out RetryContext<TContext> retryContext)
+            {
+                retryContext = new TestRetryContext<TContext>(_policy, Context, Exception, RetryCount + 1, CancellationToken);
+
+                return RetryAttempt < _policy.RetryLimit;
             }
         }
     }
