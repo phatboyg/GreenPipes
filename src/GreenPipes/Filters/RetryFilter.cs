@@ -48,7 +48,6 @@ namespace GreenPipes.Filters
         {
             using (RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context))
             {
-
                 await _observers.PostCreate(policyContext).ConfigureAwait(false);
 
                 try
@@ -56,8 +55,7 @@ namespace GreenPipes.Filters
                     await next.Send(policyContext.Context).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException exception)
-                    when (exception.CancellationToken == policyContext.Context.CancellationToken ||
-                          exception.CancellationToken == context.CancellationToken)
+                    when (exception.CancellationToken == policyContext.Context.CancellationToken || exception.CancellationToken == context.CancellationToken)
                 {
                     throw;
                 }

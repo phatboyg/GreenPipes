@@ -9,7 +9,7 @@ let buildArtifactPath = FullName "./build_artifacts"
 let packagesPath = FullName "./src/packages"
 
 let assemblyVersion = "2.1.0.0"
-let baseVersion = "2.1.3"
+let baseVersion = "2.1.4"
 
 let envVersion = (environVarOrDefault "APPVEYOR_BUILD_VERSION" (baseVersion + ".0"))
 let buildVersion = (envVersion.Substring(0, envVersion.LastIndexOf('.')))
