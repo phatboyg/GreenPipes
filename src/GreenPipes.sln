@@ -7,12 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GreenPipes", "GreenPipes\Gr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GreenPipes.Tests", "GreenPipes.Tests\GreenPipes.Tests.csproj", "{85D91EB7-3628-4FEF-AC89-D72EC1CCA9DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GreenPipes.BenchmarkConsole", "GreenPipes.BenchmarkConsole\GreenPipes.BenchmarkConsole.csproj", "{CF2B281E-6374-4E59-B137-C910B2C5767B}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{B9024C64-91EB-4CBF-AFA3-B243500F8891}"
-ProjectSection(SolutionItems) = preProject
-	..\build.fsx = ..\build.fsx
-EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GreenPipes.BenchmarkConsole", "GreenPipes.BenchmarkConsole\GreenPipes.BenchmarkConsole.csproj", "{CF2B281E-6374-4E59-B137-C910B2C5767B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,5 +30,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0E134839-75B6-45EE-A772-8BA15A50CDC2}
 	EndGlobalSection
 EndGlobal

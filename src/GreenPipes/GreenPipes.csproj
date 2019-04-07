@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -10,24 +11,27 @@
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>../../GreenPipes.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  
   <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\GreenPipes.xml</DocumentationFile>
-    <Description>GreenPipes, a pipes and filters library for the Task Parallel Library</Description>
-    <PackageProjectUrl>https://github.com/MassTransit/GreenPipes</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/MassTransit/GreenPipes/blob/master/LICENSE</PackageLicenseUrl>
-    <RepositoryUrl>https://github.com/MassTransit/GreenPipes</RepositoryUrl>
-    <PackageTags>MassTransit</PackageTags>
-    <Authors>Chris Patterson</Authors>
+    <PackageTags>MassTransit;GreenPipes</PackageTags>
+    <Description>$(Description)</Description>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+  </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
+
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
+  
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.6.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
   </ItemGroup>
 </Project>

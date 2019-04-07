@@ -87,13 +87,10 @@ namespace GreenPipes.Tests
         [Test]
         public async Task InvalidSetup()
         {
-            bool protectedBusinessAction = false;
-
             var authPipe = Pipe.New<RequestContextImpl>(cfg =>
             {
                 cfg.UseExecute(cxt =>
                 {
-                    protectedBusinessAction = true;
                 });
             });
 

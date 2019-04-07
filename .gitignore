@@ -47,3 +47,10 @@ _book
 .vscode/
 *.lock.json
 src/.idea
+
+# Cake
+tools/**
+!tools/packages.config
+
+# Artifacts
+artifacts/**

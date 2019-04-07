@@ -304,9 +304,9 @@ namespace GreenPipes.Caching.Internals
                                 --itemsAboveCapacity;
 
                                 // so if we don't await this, can't be too bad can it?
-#pragma warning disable 4014
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                                 EvictNode(node);
-#pragma warning restore 4014
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             }
                             else
                             {
