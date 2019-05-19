@@ -14,6 +14,7 @@ namespace GreenPipes
 {
     using System;
     using System.IO;
+    using System.Threading.Tasks;
     using Filters.Log;
     using Specifications;
 
@@ -31,6 +32,17 @@ namespace GreenPipes
                 throw new ArgumentNullException(nameof(formatter));
 
             var pipeBuilderConfigurator = new LogPipeSpecification<T>(textWriter, formatter);
+
+            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+        }
+
+        public static void UseLogExt<T>(this IPipeConfigurator<T> configurator, Func<T, Task> logStart, Func<T, Task> logCompleted, Func<T, Exception, Task> logError)
+            where T : class, PipeContext
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var pipeBuilderConfigurator = new LogExtPipeSpecification<T>(logStart, logCompleted, logError);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }
