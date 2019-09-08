@@ -15,6 +15,7 @@ namespace GreenPipes.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Internals.Extensions;
 
 
     public class AsyncDelegateFilter<TContext> :
@@ -35,11 +36,20 @@ namespace GreenPipes.Filters
 
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        public async Task Send(TContext context, IPipe<TContext> next)
+        public Task Send(TContext context, IPipe<TContext> next)
         {
-            await _callback(context).ConfigureAwait(false);
+            var callbackTask = _callback(context);
+            if (callbackTask.IsCompletedSuccessfully())
+                return next.Send(context);
 
-            await next.Send(context).ConfigureAwait(false);
+            async Task SendAsync()
+            {
+                await callbackTask.ConfigureAwait(false);
+
+                await next.Send(context).ConfigureAwait(false);
+            }
+
+            return SendAsync();
         }
     }
 }

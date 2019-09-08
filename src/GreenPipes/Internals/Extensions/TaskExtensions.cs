@@ -13,93 +13,162 @@
 namespace GreenPipes.Internals.Extensions
 {
     using System;
+    using System.Diagnostics;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
 
 
     public static class TaskExtensions
     {
-        /// <summary>
-        /// Returns a Task that is either the completed task or an OperationCancelledException waiting for the Task
-        /// </summary>
-        /// <param name="task"></param>
-        /// <param name="cancellationToken"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        /// <exception cref="OperationCanceledException"></exception>
-        public static async Task<T> UntilCompletedOrCanceled<T>(this Task<T> task, CancellationToken cancellationToken)
+        public static Task TrySetResultOnThreadPool<T>(this TaskCompletionSource<T> source, T result)
         {
-            var tcs = new TaskCompletionSource<bool>();
-            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
-            {
-                if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
-                    throw new OperationCanceledException(cancellationToken);
-            }
+            void SetResult() => source.TrySetResult(result);
 
-            return await task.ConfigureAwait(false);
+            return Task.Run(SetResult);
         }
 
-        /// <summary>
-        /// Returns a Task that is either the completed task or an OperationCancelledException waiting for the Task
-        /// </summary>
-        /// <param name="task"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        /// <exception cref="OperationCanceledException"></exception>
-        public static async Task UntilCompletedOrCanceled(this Task task, CancellationToken cancellationToken)
+        public static Task TrySetExceptionOnThreadPool<T>(this TaskCompletionSource<T> source, Exception exception)
         {
-            var tcs = new TaskCompletionSource<bool>();
-            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
-            {
-                if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
-                    throw new OperationCanceledException(cancellationToken);
-            }
+            void SetException() => source.TrySetException(exception);
 
-            await task.ConfigureAwait(false);
+            return Task.Run(SetException);
         }
 
-        /// <summary>
-        /// Returns a Task that is either the completed task or a TimeoutException
-        /// </summary>
-        /// <param name="task"></param>
-        /// <param name="milliseconds"></param>
-        /// <returns></returns>
-        /// <exception cref="TimeoutException"></exception>
-        public static async Task UntilCompletedOrTimeout(this Task task, int milliseconds)
+        public static Task TrySetCanceledOnThreadPool<T>(this TaskCompletionSource<T> source)
         {
-            using (var tokenSource = new CancellationTokenSource(milliseconds))
+            void SetCanceled() => source.TrySetCanceled();
+
+            return Task.Run(SetCanceled);
+        }
+
+        public static Task OrCanceled(this Task task, CancellationToken cancellationToken)
+        {
+            if (!cancellationToken.CanBeCanceled)
+                return task;
+
+            async Task WaitAsync()
             {
-                var tcs = new TaskCompletionSource<bool>();
-                using (tokenSource.Token.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+                var source = new TaskCompletionSource<bool>();
+                using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), source))
                 {
-                    if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
-                        throw new TimeoutException("Timeout waiting for Task completion");
+                    var completed = await Task.WhenAny(task, source.Task).ConfigureAwait(false);
+                    if (completed != task)
+                        throw new OperationCanceledException(cancellationToken);
                 }
-
-                await task.ConfigureAwait(false);
             }
+
+            return WaitAsync();
+        }
+
+        public static Task<T> OrCanceled<T>(this Task<T> task, CancellationToken cancellationToken)
+        {
+            if (!cancellationToken.CanBeCanceled)
+                return task;
+
+            async Task<T> WaitAsync()
+            {
+                var source = new TaskCompletionSource<bool>();
+                using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), source))
+                {
+                    var completed = await Task.WhenAny(task, source.Task).ConfigureAwait(false);
+                    if (completed != task)
+                        throw new OperationCanceledException(cancellationToken);
+
+                    return task.GetAwaiter().GetResult();
+                }
+            }
+
+            return WaitAsync();
+        }
+
+        static readonly TimeSpan DefaultTimeout = new TimeSpan(0, 0, 0, 5, 0);
+
+        public static Task OrTimeout(this Task task, int d = 0, int h = 0, int m = 0, int s = 0, int ms = 0, CancellationToken cancellationToken = default,
+            [CallerMemberName] string memberName = null, [CallerFilePath] string filePath = null, [CallerLineNumber] int? lineNumber = null)
+        {
+            var timeout = new TimeSpan(d, h, m, s, ms);
+            if (timeout == TimeSpan.Zero)
+                timeout = DefaultTimeout;
+
+            return OrTimeoutInternal(task, timeout, cancellationToken, memberName, filePath, lineNumber);
+        }
+
+        public static Task OrTimeout(this Task task, TimeSpan timeout, CancellationToken cancellationToken = default,
+            [CallerMemberName] string memberName = null, [CallerFilePath] string filePath = null, [CallerLineNumber] int? lineNumber = null)
+        {
+            return OrTimeoutInternal(task, timeout, cancellationToken, memberName, filePath, lineNumber);
+        }
+
+        static Task OrTimeoutInternal(this Task task, TimeSpan timeout, CancellationToken cancellationToken, string memberName, string filePath,
+            int? lineNumber)
+        {
+            if (task.IsCompleted)
+                return task;
+
+            async Task WaitAsync()
+            {
+                var completed = await Task.WhenAny(task, Task.Delay(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : timeout, cancellationToken))
+                    .ConfigureAwait(false);
+                if (completed != task)
+                    throw new TimeoutException(FormatTimeoutMessage(memberName, filePath, lineNumber));
+            }
+
+            return WaitAsync();
+        }
+
+        public static Task<T> OrTimeout<T>(this Task<T> task, int d = 0, int h = 0, int m = 0, int s = 0, int ms = 0,
+            CancellationToken cancellationToken = default,
+            [CallerMemberName] string memberName = null, [CallerFilePath] string filePath = null,
+            [CallerLineNumber] int? lineNumber = null)
+        {
+            var timeout = new TimeSpan(d, h, m, s, ms);
+            if (timeout == TimeSpan.Zero)
+                timeout = DefaultTimeout;
+
+            return OrTimeoutInternal(task, timeout, cancellationToken, memberName, filePath, lineNumber);
+        }
+
+        public static Task<T> OrTimeout<T>(this Task<T> task, TimeSpan timeout, CancellationToken cancellationToken = default,
+            [CallerMemberName] string memberName = null, [CallerFilePath] string filePath = null, [CallerLineNumber] int? lineNumber = null)
+        {
+            return OrTimeoutInternal(task, timeout, cancellationToken, memberName, filePath, lineNumber);
+        }
+
+        static Task<T> OrTimeoutInternal<T>(this Task<T> task, TimeSpan timeout, CancellationToken cancellationToken, string memberName, string filePath,
+            int? lineNumber)
+        {
+            if (task.IsCompleted)
+                return task;
+
+            async Task<T> WaitAsync()
+            {
+                var completed = await Task.WhenAny(task, Task.Delay(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : timeout, cancellationToken))
+                    .ConfigureAwait(false);
+                if (completed != task)
+                    throw new TimeoutException(FormatTimeoutMessage(memberName, filePath, lineNumber));
+
+                return task.GetAwaiter().GetResult();
+            }
+
+            return WaitAsync();
+        }
+
+        static string FormatTimeoutMessage(string memberName, string filePath, int? lineNumber)
+        {
+            return !string.IsNullOrEmpty(memberName)
+                ? $"Operation in {memberName} timed out at {filePath}:{lineNumber}"
+                : "Operation timed out";
         }
 
         /// <summary>
-        /// Returns a Task that is either the completed task or a TimeoutException
+        /// Returns true if a Task was ran to completion (without being cancelled or faulted)
         /// </summary>
         /// <param name="task"></param>
-        /// <param name="timeout"></param>
         /// <returns></returns>
-        /// <exception cref="TimeoutException"></exception>
-        public static async Task UntilCompletedOrTimeout(this Task task, TimeSpan timeout)
+        public static bool IsCompletedSuccessfully(this Task task)
         {
-            using (var tokenSource = new CancellationTokenSource(timeout))
-            {
-                var tcs = new TaskCompletionSource<bool>();
-                using (tokenSource.Token.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
-                {
-                    if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
-                        throw new TimeoutException("Timeout waiting for Task completion");
-                }
-
-                await task.ConfigureAwait(false);
-            }
+            return task.Status == TaskStatus.RanToCompletion;
         }
     }
 }

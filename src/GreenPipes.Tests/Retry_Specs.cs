@@ -181,10 +181,16 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Should_retry_and_then_succeed_without_repeating_forever()
         {
+            var observer = new RetryObserver();
+
             var count = 0;
             IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
             {
-                x.UseRetry(r => r.Immediate(1));
+                x.UseRetry(r =>
+                {
+                    r.Immediate(1);
+                    r.ConnectRetryObserver(observer);
+                });
                 x.UseExecute(payload =>
                 {
                     var current = Interlocked.Increment(ref count);
@@ -199,6 +205,9 @@ namespace GreenPipes.Tests
             await pipe.Send(context);
 
             Assert.That(count, Is.EqualTo(2));
+
+            Assert.That(observer.PostFault.IsCompleted);
+            Assert.That(observer.RetryComplete.IsCompleted);
         }
 
         [Test]
@@ -393,7 +402,7 @@ namespace GreenPipes.Tests
 
             Assert.That(count, Is.EqualTo(1));
         }
-        
+
         [Test]
         public void Should_support_overloading_downstream_with_dispatch_either_that_thang()
         {
@@ -454,18 +463,21 @@ namespace GreenPipes.Tests
         {
             readonly TaskCompletionSource<bool> _postFault;
             readonly TaskCompletionSource<RetryContext> _retryFault;
+            readonly TaskCompletionSource<RetryContext> _retryComplete;
             int _postFaultCount;
             int _retryFaultCount;
 
             public RetryObserver()
             {
                 _retryFault = new TaskCompletionSource<RetryContext>();
+                _retryComplete = new TaskCompletionSource<RetryContext>();
                 _postFault = new TaskCompletionSource<bool>();
             }
 
             public int RetryFaultCount => _retryFaultCount;
 
             public Task<RetryContext> RetryFault => _retryFault.Task;
+            public Task<RetryContext> RetryComplete => _retryComplete.Task;
 
             public int PostFaultCount => _postFaultCount;
 
@@ -498,7 +510,15 @@ namespace GreenPipes.Tests
 
                 return TaskUtil.Completed;
             }
+
+            Task IRetryObserver.RetryComplete<T>(RetryContext<T> context)
+            {
+                _retryComplete.TrySetResult(context);
+
+                return TaskUtil.Completed;
+            }
         }
+
 
         class TestRetryPolicy :
             IRetryPolicy
@@ -534,13 +554,13 @@ namespace GreenPipes.Tests
             }
         }
 
+
         class TestRetryPolicyContext<TContext> : RetryPolicyContext<TContext>
             where TContext : class, PipeContext
         {
             readonly CancellationTokenSource _cancellationTokenSource;
             readonly TestRetryPolicy _policy;
             readonly Action _onRetryContextDisposed;
-            
 
             public TestRetryPolicyContext(TestRetryPolicy policy, TContext context, Action onRetryContextDisposed)
             {
@@ -576,6 +596,7 @@ namespace GreenPipes.Tests
                 _onRetryContextDisposed();
             }
         }
+
 
         class TestRetryContext<TContext> :
             BaseRetryContext<TContext>,

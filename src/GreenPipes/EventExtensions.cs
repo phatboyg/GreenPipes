@@ -15,22 +15,19 @@ namespace GreenPipes
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using Internals.Extensions;
 
 
     public static class EventExtensions
     {
-        public static Task PublishEvent<T>(this IPipe<EventContext> pipe, object values)
+        public static Task PublishEvent<T>(this IPipe<EventContext> pipe, T message)
             where T : class
         {
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
 
-            var command = TypeCache<T>.InitializeFromObject(values);
-
-            var context = new Event<T>(command);
+            var context = new Event<T>(message);
 
             return pipe.Send(context);
         }

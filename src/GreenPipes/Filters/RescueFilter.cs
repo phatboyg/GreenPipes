@@ -21,7 +21,7 @@ namespace GreenPipes.Filters
     /// Rescue catches an exception, and if the exception matches the exception filter,
     /// passes control to the rescue pipe.
     /// </summary>
-    /// <typeparam name="TContext">The cotext type</typeparam>
+    /// <typeparam name="TContext">The context type</typeparam>
     /// <typeparam name="TRescueContext"></typeparam>
     public class RescueFilter<TContext, TRescueContext> :
         IFilter<TContext>

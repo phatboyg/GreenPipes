@@ -17,6 +17,7 @@ namespace GreenPipes.Util
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals.Extensions;
 
 
     /// <summary>
@@ -85,8 +86,16 @@ namespace GreenPipes.Util
                 return callback(connected[0]);
 
             var outputTasks = new Task[connected.Length];
-            for (int i = 0; i < connected.Length; i++)
+            int i;
+            for (i = 0; i < connected.Length; i++)
                 outputTasks[i] = callback(connected[i]);
+
+            for (i = 0; i < outputTasks.Length; i++)
+                if (!outputTasks[i].IsCompletedSuccessfully())
+                    break;
+
+            if (i == outputTasks.Length)
+                return TaskUtil.Completed;
 
             return Task.WhenAll(outputTasks);
         }

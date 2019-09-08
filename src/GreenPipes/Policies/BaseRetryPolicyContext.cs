@@ -22,7 +22,7 @@ namespace GreenPipes.Policies
         RetryPolicyContext<TContext>
         where TContext : class, PipeContext
     {
-        readonly CancellationTokenSource _cancellationTokenSource;
+        CancellationTokenSource _cancellationTokenSource;
         readonly IRetryPolicy _policy;
         CancellationTokenRegistration _registration;
 
@@ -30,18 +30,15 @@ namespace GreenPipes.Policies
         {
             _policy = policy;
             Context = context;
-
-            _cancellationTokenSource = new CancellationTokenSource();
-            _registration = context.CancellationToken.Register(_cancellationTokenSource.Cancel);
         }
 
-        protected CancellationToken CancellationToken => _cancellationTokenSource.Token;
+        protected CancellationToken CancellationToken => _cancellationTokenSource?.Token ?? CreateCancellationToken();
 
         public TContext Context { get; }
 
         public virtual bool CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
-            retryContext = CreateRetryContext(exception, _cancellationTokenSource.Token);
+            retryContext = CreateRetryContext(exception, CancellationToken);
 
             return _policy.IsHandled(exception) && !_cancellationTokenSource.IsCancellationRequested;
         }
@@ -53,7 +50,7 @@ namespace GreenPipes.Policies
 
         public void Cancel()
         {
-            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource?.Cancel();
         }
 
         void IDisposable.Dispose()
@@ -62,5 +59,14 @@ namespace GreenPipes.Policies
         }
 
         protected abstract RetryContext<TContext> CreateRetryContext(Exception exception, CancellationToken cancellationToken);
+
+        CancellationToken CreateCancellationToken()
+        {
+            _cancellationTokenSource = new CancellationTokenSource();
+            if (Context.CancellationToken.CanBeCanceled)
+                _registration = Context.CancellationToken.Register(_cancellationTokenSource.Cancel);
+
+            return _cancellationTokenSource.Token;
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace GreenPipes.Pipes
     /// delivery
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public struct InsertPipe<T> :
+    public readonly struct InsertPipe<T> :
         IPipe<T>
         where T : class, PipeContext
     {

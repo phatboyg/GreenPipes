@@ -10,12 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace GreenPipes.Payloads
+namespace GreenPipes.BenchmarkConsole
 {
     using System;
     using System.Threading;
     using Collections;
     using Internals.Extensions;
+    using Payloads;
 
 
     public class PayloadCache :
@@ -33,12 +34,12 @@ namespace GreenPipes.Payloads
             _collection = new EmptyPayloadCollection(collection);
         }
 
-        bool IReadOnlyPayloadCollection.HasPayloadType(Type payloadType)
+        bool IPayloadCache.HasPayloadType(Type payloadType)
         {
             return _collection.HasPayloadType(payloadType);
         }
 
-        bool IReadOnlyPayloadCollection.TryGetPayload<T>(out T payload)
+        bool IPayloadCache.TryGetPayload<T>(out T payload)
         {
             return _collection.TryGetPayload(out payload);
         }
@@ -110,11 +111,6 @@ namespace GreenPipes.Payloads
             {
                 throw new PayloadFactoryException($"The payload factory faulted: {TypeCache<T>.ShortName}", exception);
             }
-        }
-
-        IPayloadCache IPayloadCache.CreateScope()
-        {
-            return new PayloadCache(_collection);
         }
     }
 }

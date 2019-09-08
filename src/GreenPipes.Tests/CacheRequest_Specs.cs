@@ -105,11 +105,6 @@ namespace GreenPipes.Tests
                     {
                         h.UseRateLimit(10);
                         h.UseConcurrencyLimit(2);
-                        h.UseProfile(50, profile =>
-                        {
-                            _totalCalls++;
-                            Console.Out.WriteLine($"Called: {profile.Context.Request.ItemNumber}, Elapsed: {profile.Elapsed.TotalMilliseconds}ms");
-                        });
                         h.UseFilter(new CheckInventoryFilter());
                     });
                 });

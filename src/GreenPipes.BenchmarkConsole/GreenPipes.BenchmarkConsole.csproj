@@ -1,22 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.2</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>GreenPipes.BenchmarkConsole</AssemblyName>
     <PackageId>GreenPipes.BenchmarkConsole</PackageId>
     <OutputType>Exe</OutputType>
+    <IsPackable>False</IsPackable>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.10.14" />
-    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="2.0.11" />
     <ProjectReference Include="..\GreenPipes\GreenPipes.csproj" />
-    <PackageReference Include="BenchmarkDotNet" Version="0.10.14" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
-    <PackageReference Include="BenchmarkDotNet.Core" Version="0.10.14" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.11.5" />
   </ItemGroup>
 </Project>

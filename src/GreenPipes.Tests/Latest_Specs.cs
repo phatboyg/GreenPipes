@@ -24,9 +24,9 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Should_keep_track_of_only_the_last_value()
         {
-            ILatestFilter<InputContext<A>> latestFilter = null;
+            ILatestFilter<IInputContext<A>> latestFilter = null;
 
-            IPipe<InputContext<A>> pipe = Pipe.New<InputContext<A>>(x =>
+            IPipe<IInputContext<A>> pipe = Pipe.New<IInputContext<A>>(x =>
             {
                 x.UseLatest(l => l.Created = filter => latestFilter = filter);
                 x.UseExecute(payload =>
@@ -36,14 +36,16 @@ namespace GreenPipes.Tests
 
             Assert.That(latestFilter, Is.Not.Null);
 
+            var inputContext = new InputContext(new object());
+
             var limit = 100;
             for (int i = 0; i <= limit; i++)
             {
-                var context = new InputContext<A>(new A {Index = i});
+                var context = new InputContext<A>(inputContext, new A {Index = i});
                 await pipe.Send(context);
             }
 
-            InputContext<A> latest = await latestFilter.Latest;
+            IInputContext<A> latest = await latestFilter.Latest;
 
             Assert.That(latest.Value.Index, Is.EqualTo(limit));
         }

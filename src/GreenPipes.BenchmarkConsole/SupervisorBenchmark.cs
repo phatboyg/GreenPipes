@@ -5,7 +5,8 @@
     using BenchmarkDotNet.Attributes;
 
 
-    [Config(typeof(AgentBenchmarkConfig))]
+    [CoreJob]
+    [MemoryDiagnoser, GcServer(true), GcForce]
     public class SupervisorBenchmark
     {
         [Benchmark]

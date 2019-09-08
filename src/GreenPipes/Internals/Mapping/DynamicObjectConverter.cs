@@ -103,7 +103,6 @@ namespace GreenPipes.Internals.Mapping
                     throw new InvalidOperationException("A dictionary with a reference type key is not supported: " + property.Property.Name);
                 }
 
-
                 if (valueType.ClosesType(typeof(IList<>)) || valueType.ClosesType(typeof(IEnumerable<>)))
                 {
                     Type[] genericArguments = valueType.GetClosingArguments(typeof(IEnumerable<>)).ToArray();

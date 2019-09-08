@@ -15,7 +15,6 @@ namespace GreenPipes
     using System.Threading;
     using System.Threading.Tasks;
     using Agents;
-    using Payloads;
 
 
     public static class ContextAgentExtensions
@@ -59,7 +58,7 @@ namespace GreenPipes
             StopContext
         {
             public DefaultStopContext(CancellationToken cancellationToken)
-                : base(new PayloadCache(), cancellationToken)
+                : base(cancellationToken)
             {
             }
 

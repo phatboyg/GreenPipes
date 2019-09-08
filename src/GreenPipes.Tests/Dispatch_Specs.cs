@@ -25,13 +25,13 @@ namespace GreenPipes.Tests
         [Test]
         public async Task Dispatching_a_pipe_by_type()
         {
-            IPipe<InputContext> pipe = Pipe.New<InputContext>(cfg =>
+            IPipe<IInputContext> pipe = Pipe.New<IInputContext>(cfg =>
             {
                 // this needs to be moved from Factory() to some type of management glue that
                 // includes the factory, and hooks to connect/add/review
                 cfg.UseDispatch(new InputConverterFactory(), d =>
                 {
-                    d.Pipe<InputContext<string>>(p =>
+                    d.Pipe<IInputContext<string>>(p =>
                     {
                         p.UseExecute(cxt => Console.WriteLine(cxt.Value));
                     });
@@ -43,9 +43,17 @@ namespace GreenPipes.Tests
     }
 
 
+    public interface IInputContext :
+        PipeContext
+    {
+        bool TryGetContext<T>(out T result)
+            where T : class;
+    }
+
+
     public class InputContext :
         BasePipeContext,
-        PipeContext
+        IInputContext
     {
         public InputContext(object value)
         {
@@ -59,7 +67,7 @@ namespace GreenPipes.Tests
         {
             if (typeof(T).IsAssignableFrom(typeof(InputContext<string>)))
             {
-                result = new InputContext<string>(Value.ToString()) as T;
+                result = new InputContext<string>(this, Value.ToString()) as T;
 
                 return result != null;
             }
@@ -70,36 +78,54 @@ namespace GreenPipes.Tests
     }
 
 
-    public class InputContext<T> :
-        BasePipeContext,
-        PipeContext
+    public interface IInputContext<out T> :
+        IInputContext
         where T : class
     {
-        public InputContext(T value)
+        T Value { get; }
+    }
+
+
+    public class InputContext<T> :
+        ProxyPipeContext,
+        IInputContext<T>
+        where T : class
+    {
+        readonly IInputContext _inputContext;
+
+        public InputContext(IInputContext inputContext, T value)
+            : base(inputContext)
         {
+            _inputContext = inputContext;
             Value = value;
         }
 
         public T Value { get; }
+
+        public bool TryGetContext<T1>(out T1 result)
+            where T1 : class
+        {
+            return _inputContext.TryGetContext(out result);
+        }
     }
 
 
     class InputConverterFactory :
-        IPipeContextConverterFactory<InputContext>
+        IPipeContextConverterFactory<IInputContext>
     {
-        IPipeContextConverter<InputContext, TOutput> IPipeContextConverterFactory<InputContext>.GetConverter<TOutput>()
+        IPipeContextConverter<IInputContext, TOutput> IPipeContextConverterFactory<IInputContext>.GetConverter<TOutput>()
         {
-            var innerType = typeof(TOutput).GetClosingArguments(typeof(InputContext<>)).Single();
+            var innerType = typeof(TOutput).GetClosingArguments(typeof(IInputContext<>)).Single();
 
-            return (IPipeContextConverter<InputContext, TOutput>)Activator.CreateInstance(typeof(Converter<>).MakeGenericType(innerType));
+            return (IPipeContextConverter<IInputContext, TOutput>)Activator.CreateInstance(typeof(Converter<>).MakeGenericType(innerType));
         }
 
 
         class Converter<T> :
-            IPipeContextConverter<InputContext, InputContext<T>>
+            IPipeContextConverter<IInputContext, IInputContext<T>>
             where T : class
         {
-            bool IPipeContextConverter<InputContext, InputContext<T>>.TryConvert(InputContext inputContext, out InputContext<T> output)
+            bool IPipeContextConverter<IInputContext, IInputContext<T>>.TryConvert(IInputContext inputContext, out IInputContext<T> output)
             {
                 return inputContext.TryGetContext(out output);
             }

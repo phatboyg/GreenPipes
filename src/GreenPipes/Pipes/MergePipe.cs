@@ -16,7 +16,7 @@ namespace GreenPipes.Pipes
     using Internals.Extensions;
 
 
-    public class MergePipe<TInput, TSplit> :
+    public readonly struct MergePipe<TInput, TSplit> :
         IPipe<TSplit>
         where TSplit : class, PipeContext
         where TInput : class, PipeContext
@@ -43,7 +43,7 @@ namespace GreenPipes.Pipes
             _next.Probe(scope);
         }
 
-        public Task Send(TSplit context)
+        Task IPipe<TSplit>.Send(TSplit context)
         {
             var inputContext = _contextProvider(_input, context);
 

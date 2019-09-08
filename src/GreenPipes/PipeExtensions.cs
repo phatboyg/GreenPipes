@@ -43,13 +43,20 @@ namespace GreenPipes
         /// <param name="setupMethod">The setup method, called once regardless of the thread count</param>
         /// <param name="payloadFactory">The factory method for the payload context, optional if an interface is specified</param>
         /// <returns></returns>
-        public static async Task OneTimeSetup<T>(this PipeContext context, Func<T, Task> setupMethod, PayloadFactory<T> payloadFactory = null)
+        public static async Task OneTimeSetup<T>(this PipeContext context, Func<T, Task> setupMethod, PayloadFactory<T> payloadFactory)
             where T : class
         {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+            if (setupMethod == null)
+                throw new ArgumentNullException(nameof(setupMethod));
+            if (payloadFactory == null)
+                throw new ArgumentNullException(nameof(payloadFactory));
+
             OneTime<T> newContext = null;
             var existingContext = context.GetOrAddPayload<OneTimeSetupContext<T>>(() =>
             {
-                var payload = payloadFactory != null ? payloadFactory() : TypeCache<T>.InitializeFromObject(new {});
+                var payload = payloadFactory();
 
                 newContext = new OneTime<T>(payload);
 

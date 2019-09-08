@@ -37,7 +37,7 @@ namespace GreenPipes.Tests
 
             await pipe.Send(new InputContext("Input"));
 
-            await filter.GotTheThing.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await filter.GotTheThing.OrTimeout(s: 5);
         }
 
 
@@ -53,7 +53,7 @@ namespace GreenPipes.Tests
 
             public async Task Send(BindContext<InputContext, Thing> context, IPipe<BindContext<InputContext, Thing>> next)
             {
-                _completed.SetResult(context.SourceContext);
+                _completed.SetResult(context.Right);
 
                 await next.Send(context);
             }

@@ -79,8 +79,7 @@ namespace GreenPipes.Specifications
         static bool Match<T>(Exception exception, Func<T, bool> filter)
             where T : Exception
         {
-            var exceptionOfT = exception as T;
-            if (exceptionOfT != null)
+            if (exception is T exceptionOfT)
                 return filter(exceptionOfT);
 
             var baseException = exception.GetBaseException();

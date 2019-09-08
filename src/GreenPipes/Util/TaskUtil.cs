@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Util
 {
+    using System;
     using System.Threading.Tasks;
 
 
@@ -21,12 +22,41 @@ namespace GreenPipes.Util
         public static Task<bool> False => Cached.FalseTask;
         public static Task<bool> True => Cached.TrueTask;
 
+        public static Task<T> Default<T>() => Cached<T>.DefaultValueTask;
+
+        public static Task<T> Faulted<T>(Exception exception)
+        {
+            var source = new TaskCompletionSource<T>();
+            source.SetException(exception);
+
+            return source.Task;
+        }
+
+        public static Task<T> Cancelled<T>()
+        {
+            return Cached<T>.CanceledTask;
+        }
+
 
         static class Cached
         {
             public static readonly Task CompletedTask = Task.FromResult(true);
             public static readonly Task<bool> TrueTask = Task.FromResult(true);
             public static readonly Task<bool> FalseTask = Task.FromResult(false);
+        }
+
+
+        static class Cached<T>
+        {
+            public static readonly Task<T> DefaultValueTask = Task.FromResult<T>(default);
+            public static readonly Task<T> CanceledTask = GetCanceledTask();
+
+            static Task<T> GetCanceledTask()
+            {
+                var source = new TaskCompletionSource<T>();
+                source.SetCanceled();
+                return source.Task;
+            }
         }
     }
 }

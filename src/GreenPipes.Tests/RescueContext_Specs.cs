@@ -18,7 +18,6 @@ namespace GreenPipes.Tests
         using System.Threading;
         using System.Threading.Tasks;
         using NUnit.Framework;
-        using Payloads;
 
 
         [TestFixture]
@@ -73,7 +72,7 @@ namespace GreenPipes.Tests
 
 
         class SomeRescueContextImpl :
-            BasePipeContext,
+            ProxyPipeContext,
             SomeRescueContext
         {
             public SomeRescueContextImpl(SomeContext context, Exception exception)

@@ -12,12 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Payloads
 {
+    using System;
+
+
     /// <summary>
     /// The context properties
     /// </summary>
-    public interface IPayloadCache :
-        IReadOnlyPayloadCollection
+    public interface IPayloadCache
     {
+        /// <summary>
+        /// Checks if the property exists in the cache
+        /// </summary>
+        /// <param name="payloadType">The property type</param>
+        /// <returns>True if the property exists in the cache, otherwise false</returns>
+        bool HasPayloadType(Type payloadType);
+
+        /// <summary>
+        /// Returns the value of the property if it exists in the cache
+        /// </summary>
+        /// <typeparam name="TPayload">The property type</typeparam>
+        /// <param name="payload">The property value</param>
+        /// <returns>True if the value was returned, otherwise false</returns>
+        bool TryGetPayload<TPayload>(out TPayload payload)
+            where TPayload : class;
+
         /// <summary>
         /// Return an existing or create a new property
         /// </summary>
@@ -35,11 +53,5 @@ namespace GreenPipes.Payloads
         /// <returns></returns>
         T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
             where T : class;
-
-        /// <summary>
-        /// Returns a scope from the current cache state
-        /// </summary>
-        /// <returns></returns>
-        IPayloadCache CreateScope();
     }
 }

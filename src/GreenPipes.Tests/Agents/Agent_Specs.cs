@@ -30,11 +30,11 @@ namespace GreenPipes.Tests.Agents
 
             supervisor.SetReady();
 
-            await supervisor.Ready.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await supervisor.Ready.OrTimeout(s:5);
 
             await supervisor.Stop();
 
-            await supervisor.Completed.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await supervisor.Completed.OrTimeout(s: 5);
         }
 
         [Test]
@@ -51,15 +51,15 @@ namespace GreenPipes.Tests.Agents
 
             Console.WriteLine("Waiting for Ready...");
 
-            await supervisor.Ready.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await supervisor.Ready.OrTimeout(s: 5);
 
             Console.WriteLine("Stopping");
 
-            await supervisor.Stop().UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await supervisor.Stop().OrTimeout(s: 5);
 
             Console.WriteLine("Waiting for Completed...");
 
-            await supervisor.Completed.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await supervisor.Completed.OrTimeout(s: 5);
         }
 
         [Test]
@@ -73,16 +73,16 @@ namespace GreenPipes.Tests.Agents
 
             supervisor.SetReady();
 
-            Assert.That(async () => await supervisor.Ready.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5)),
+            Assert.That(async () => await supervisor.Ready.OrTimeout(s: 5),
                 Throws.TypeOf<AggregateException>());
 
             Console.WriteLine("Stopping");
 
-            await supervisor.Stop().UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await supervisor.Stop().OrTimeout(s: 5);
 
             Console.WriteLine("Waiting for Completed...");
 
-            await supervisor.Completed.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await supervisor.Completed.OrTimeout(s: 5);
         }
 
         [Test]
@@ -102,7 +102,7 @@ namespace GreenPipes.Tests.Agents
 
             Console.WriteLine("Waiting for Ready...");
 
-            await supervisor.Ready.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await supervisor.Ready.OrTimeout(s: 5);
 
             Console.WriteLine("Stopping");
 
@@ -110,7 +110,7 @@ namespace GreenPipes.Tests.Agents
 
             Console.WriteLine("Waiting for Completed...");
 
-            await supervisor.Completed.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await supervisor.Completed.OrTimeout(s: 5);
         }
     }
 
@@ -143,7 +143,7 @@ namespace GreenPipes.Tests.Agents
 
             await supervisor.Stop();
 
-            await supervisor.Completed.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await supervisor.Completed.OrTimeout(s: 5);
         }
 
         [Test]
@@ -171,7 +171,7 @@ namespace GreenPipes.Tests.Agents
 
             await supervisor.Stop();
 
-            await supervisor.Completed.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+            await supervisor.Completed.OrTimeout(s: 5);
         }
 
 

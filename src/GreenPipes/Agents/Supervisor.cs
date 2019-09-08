@@ -58,8 +58,7 @@ namespace GreenPipes.Agents
                 if (currentActiveCount > _peakActiveCount)
                     _peakActiveCount = currentActiveCount;
 
-                if (!IsAlreadyReady)
-                    SetReady(Task.WhenAll(_agents.Values.Select(x => x.Ready).ToArray()));
+                SetReady();
             }
 
             void RemoveAgent(Task task)
@@ -82,10 +81,9 @@ namespace GreenPipes.Agents
             if (!IsAlreadyReady)
                 lock (_agents)
                 {
-                    if (_agents.Count == 0)
-                        SetReady(TaskUtil.Completed);
-                    else
-                        SetReady(Task.WhenAll(_agents.Values.Select(x => x.Ready).ToArray()));
+                    SetReady(_agents.Count == 0
+                        ? TaskUtil.Completed
+                        : Task.WhenAll(_agents.Values.Select(x => x.Ready).ToArray()));
                 }
         }
 
@@ -95,10 +93,9 @@ namespace GreenPipes.Agents
             IAgent[] agents;
             lock (_agents)
             {
-                if (_agents.Count == 0)
-                    agents = new IAgent[0];
-                else
-                    agents = _agents.Values.Where(x => !x.Completed.IsCompleted).ToArray();
+                agents = _agents.Count == 0
+                    ? new IAgent[0]
+                    : _agents.Values.Where(x => !x.Completed.IsCompletedSuccessfully()).ToArray();
             }
 
             return StopSupervisor(new Context(context, agents));
@@ -110,11 +107,12 @@ namespace GreenPipes.Agents
             {
                 SetCompleted(TaskUtil.Completed);
             }
+
             if (context.Agents.Length == 1)
             {
                 SetCompleted(context.Agents[0].Completed);
 
-                await context.Agents[0].Stop(context).UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+                await context.Agents[0].Stop(context).OrCanceled(context.CancellationToken).ConfigureAwait(false);
             }
             else if (context.Agents.Length > 1)
             {
@@ -132,10 +130,10 @@ namespace GreenPipes.Agents
                     stopTasks[i] = context.Agents[i].Stop(context);
                 }
 
-                await Task.WhenAll(stopTasks).UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+                await Task.WhenAll(stopTasks).OrCanceled(context.CancellationToken).ConfigureAwait(false);
             }
 
-            await Completed.UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+            await Completed.OrCanceled(context.CancellationToken).ConfigureAwait(false);
         }
 
         void Remove(long id)
@@ -154,37 +152,17 @@ namespace GreenPipes.Agents
 
 
         class Context :
+            ProxyPipeContext,
             StopSupervisorContext
         {
             readonly StopContext _context;
 
             public Context(StopContext context, IAgent[] agents)
+                : base(context)
             {
                 _context = context;
                 Agents = agents;
             }
-
-            bool PipeContext.HasPayloadType(Type payloadType)
-            {
-                return _context.HasPayloadType(payloadType);
-            }
-
-            bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
-            {
-                return _context.TryGetPayload(out payload);
-            }
-
-            TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-            {
-                return _context.GetOrAddPayload(payloadFactory);
-            }
-
-            T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
-            {
-                return _context.AddOrUpdatePayload(addFactory, updateFactory);
-            }
-
-            CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
 
             string StopContext.Reason => _context.Reason;
 

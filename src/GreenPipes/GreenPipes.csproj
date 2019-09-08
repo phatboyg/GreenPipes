@@ -5,7 +5,7 @@
     <DebugType>portable</DebugType>
     <AssemblyName>GreenPipes</AssemblyName>
     <PackageId>GreenPipes</PackageId>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <NoWarn>1591</NoWarn>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>../../GreenPipes.snk</AssemblyOriginatorKeyFile>

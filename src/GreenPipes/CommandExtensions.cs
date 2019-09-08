@@ -15,20 +15,17 @@ namespace GreenPipes
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using Internals.Extensions;
 
 
     public static class CommandExtensions
     {
-        public static Task SendCommand<T>(this IPipe<CommandContext> pipe, object values)
+        public static Task SendCommand<T>(this IPipe<CommandContext> pipe, T command)
             where T : class
         {
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            var command = TypeCache<T>.InitializeFromObject(values);
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
 
             var context = new Command<T>(command);
 

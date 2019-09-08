@@ -34,11 +34,10 @@ namespace GreenPipes.Contexts
 
         T ResultContext.GetResult<T>()
         {
-            var result = Result as T;
-            if (result == null)
-                throw new ArgumentException("The result is not assignable to the specified type: " + TypeCache<T>.ShortName);
+            if (Result is T result)
+                return result;
 
-            return result;
+            throw new ArgumentException("The result is not assignable to the specified type: " + TypeCache<T>.ShortName);
         }
 
         bool ResultContext.TryGetResult<T>(out T result)

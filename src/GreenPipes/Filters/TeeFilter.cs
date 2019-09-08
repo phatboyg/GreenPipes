@@ -15,6 +15,7 @@ namespace GreenPipes.Filters
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Internals.Extensions;
     using Util;
 
 
@@ -45,11 +46,20 @@ namespace GreenPipes.Filters
         }
 
         [DebuggerNonUserCode]
-        public async Task Send(TContext context, IPipe<TContext> next)
+        public Task Send(TContext context, IPipe<TContext> next)
         {
-            await _connections.ForEachAsync(pipe => pipe.Send(context)).ConfigureAwait(false);
+            var connectionsTask = _connections.ForEachAsync(pipe => pipe.Send(context));
+            if (connectionsTask.IsCompletedSuccessfully())
+                return next.Send(context);
 
-            await next.Send(context).ConfigureAwait(false);
+            async Task SendAsync()
+            {
+                await connectionsTask.ConfigureAwait(false);
+
+                await next.Send(context).ConfigureAwait(false);
+            }
+
+            return SendAsync();
         }
 
         public ConnectHandle ConnectPipe(IPipe<TContext> pipe)

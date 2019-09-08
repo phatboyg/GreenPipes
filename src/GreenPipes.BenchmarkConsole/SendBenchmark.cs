@@ -15,15 +15,13 @@ namespace GreenPipes.BenchmarkConsole
     using System;
     using System.Threading.Tasks;
     using BenchmarkDotNet.Attributes;
-    using BenchmarkDotNet.Diagnostics.Windows.Configs;
     using Contracts;
     using Pipes;
     using Throughput;
 
 
-    [Config(typeof(DotNetCoreBenchmarkConfig))]
-    [DotTraceDiagnoser]
-    [InliningDiagnoser]
+    [CoreJob]
+    [MemoryDiagnoser, GcServer(true), GcForce]
     public class SendBenchmark
     {
         readonly IPipe<TestContext> _concurrencyPipe;
@@ -102,8 +100,10 @@ namespace GreenPipes.BenchmarkConsole
         [Benchmark]
         public async Task DispatchPipe()
         {
-            await _dispatchPipe.SetConcurrencyLimit(32);
+            await _dispatchPipe.SendCommand<SetConcurrencyLimit>(_command);
         }
+
+        readonly SetConcurrencyLimit _command = new Command(32);
 
         public async Task FaultPipe()
         {
@@ -114,6 +114,18 @@ namespace GreenPipes.BenchmarkConsole
             catch
             {
             }
+        }
+
+
+        class Command :
+            SetConcurrencyLimit
+        {
+            public Command(int concurrencyLimit)
+            {
+                ConcurrencyLimit = concurrencyLimit;
+            }
+
+            public int ConcurrencyLimit { get; }
         }
     }
 }

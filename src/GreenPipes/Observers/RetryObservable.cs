@@ -44,6 +44,12 @@ namespace GreenPipes.Observers
             return ForEachAsync(x => x.RetryFault(context));
         }
 
+        public Task RetryComplete<T>(RetryContext<T> context)
+            where T : class, PipeContext
+        {
+            return ForEachAsync(x => x.RetryComplete(context));
+        }
+
         public Task RetryFault(RetryContext context)
         {
             return ForEachAsync(x => RetryFaultObserverCache.RetryFault(x, context, context.ContextType));

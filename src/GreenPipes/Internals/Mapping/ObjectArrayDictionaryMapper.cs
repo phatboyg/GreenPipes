@@ -32,8 +32,7 @@ namespace GreenPipes.Internals.Mapping
         {
             var value = _property.Get(obj);
 
-            var values = value as TElement[];
-            if (values == null)
+            if (!(value is TElement[] values))
                 return;
 
             var elements = new IDictionary<string, object>[values.Length];

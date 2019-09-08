@@ -48,5 +48,14 @@ namespace GreenPipes
         /// <returns></returns>
         Task RetryFault<T>(RetryContext<T> context)
             where T : class, PipeContext;
+
+        /// <summary>
+        /// Called when the retry filter retried at least once, and the context completed successfully.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Task RetryComplete<T>(RetryContext<T> context)
+            where T : class, PipeContext;
     }
 }

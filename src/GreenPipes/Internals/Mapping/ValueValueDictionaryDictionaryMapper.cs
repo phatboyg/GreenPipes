@@ -31,8 +31,7 @@ namespace GreenPipes.Internals.Mapping
         {
             var value = _property.Get(obj);
 
-            var values = value as IDictionary<TKey, TValue>;
-            if (values == null)
+            if (!(value is IDictionary<TKey, TValue> values))
                 return;
 
             object[] elementArray = values.Select(element => new object[] {element.Key, element.Value})

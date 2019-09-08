@@ -15,7 +15,7 @@ namespace GreenPipes.Introspection
     using System;
     using System.Diagnostics;
     using System.Reflection;
-    using System.Runtime.InteropServices;
+
 
     [Serializable]
     public class GreenPipesHostInfo :
@@ -36,15 +36,10 @@ namespace GreenPipes.Introspection
             ProcessName = currentProcess.ProcessName;
 
             var entryAssembly = System.Reflection.Assembly.GetEntryAssembly();
-#if NETCORE            
-            FrameworkVersion = Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.RuntimeFramework.Version.ToString();
-            OperatingSystemVersion = RuntimeInformation.OSDescription;
-#else
-            // Coming to CoreCLR soon. https://github.com/dotnet/corefx/issues/11212
+
             entryAssembly = entryAssembly ?? System.Reflection.Assembly.GetCallingAssembly();
             FrameworkVersion = Environment.Version.ToString();
             OperatingSystemVersion = Environment.OSVersion.ToString();
-#endif
 
             var assemblyName = entryAssembly.GetName();
             Assembly = assemblyName.Name;

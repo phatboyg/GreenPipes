@@ -16,20 +16,20 @@ namespace GreenPipes.Configurators
     using Specifications;
 
 
-    public class BindConfigurator<TContext> :
-        IBindConfigurator<TContext>
-        where TContext : class, PipeContext
+    public class BindConfigurator<TLeft> :
+        IBindConfigurator<TLeft>
+        where TLeft : class, PipeContext
     {
-        readonly IPipeConfigurator<TContext> _configurator;
+        readonly IPipeConfigurator<TLeft> _configurator;
 
-        public BindConfigurator(IPipeConfigurator<TContext> configurator)
+        public BindConfigurator(IPipeConfigurator<TLeft> configurator)
         {
             _configurator = configurator;
         }
 
-        void IBindConfigurator<TContext>.Source<T>(IPipeContextSource<T, TContext> source, Action<IBindConfigurator<TContext, T>> configureTarget)
+        void IBindConfigurator<TLeft>.Source<T>(IPipeContextSource<T, TLeft> source, Action<IBindConfigurator<TLeft, T>> configureTarget)
         {
-            var specification = new BindPipeSpecification<TContext, T>(source);
+            var specification = new BindPipeSpecification<TLeft, T>(source);
 
             configureTarget?.Invoke(specification);
 

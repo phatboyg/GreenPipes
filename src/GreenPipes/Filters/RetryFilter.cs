@@ -46,70 +46,77 @@ namespace GreenPipes.Filters
         [DebuggerStepThrough]
         async Task IFilter<TContext>.Send(TContext context, IPipe<TContext> next)
         {
-            using (RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context))
+            RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context);
+            try
             {
-                await _observers.PostCreate(policyContext).ConfigureAwait(false);
+                if (_observers.Count > 0)
+                    await _observers.PostCreate(policyContext).ConfigureAwait(false);
 
-                try
+                await next.Send(policyContext.Context).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException exception)
+                when (exception.CancellationToken == policyContext.Context.CancellationToken || exception.CancellationToken == context.CancellationToken)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                if (policyContext.Context.CancellationToken.IsCancellationRequested)
+                    policyContext.Context.CancellationToken.ThrowIfCancellationRequested();
+
+                if (policyContext.Context.TryGetPayload(out RetryContext<TContext> payloadRetryContext))
                 {
-                    await next.Send(policyContext.Context).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException exception)
-                    when (exception.CancellationToken == policyContext.Context.CancellationToken || exception.CancellationToken == context.CancellationToken)
-                {
+                    if (_retryPolicy.IsHandled(exception))
+                    {
+                        await policyContext.RetryFaulted(exception).ConfigureAwait(false);
+
+                        if (_observers.Count > 0)
+                            await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
+                    }
+
+                    context.GetOrAddPayload(() => payloadRetryContext);
+
                     throw;
                 }
-                catch (Exception exception)
+
+                if (policyContext.Context.TryGetPayload(out RetryContext genericRetryContext))
                 {
-                    if (policyContext.Context.CancellationToken.IsCancellationRequested)
-                        policyContext.Context.CancellationToken.ThrowIfCancellationRequested();
-
-                    if (policyContext.Context.TryGetPayload(out RetryContext<TContext> payloadRetryContext))
+                    if (_retryPolicy.IsHandled(exception))
                     {
-                        if (_retryPolicy.IsHandled(exception))
-                        {
-                            await policyContext.RetryFaulted(exception).ConfigureAwait(false);
+                        await policyContext.RetryFaulted(exception).ConfigureAwait(false);
 
-                            await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
-                        }
-
-                        context.GetOrAddPayload(() => payloadRetryContext);
-
-                        throw;
-                    }
-
-                    if (policyContext.Context.TryGetPayload(out RetryContext genericRetryContext))
-                    {
-                        if (_retryPolicy.IsHandled(exception))
-                        {
-                            await policyContext.RetryFaulted(exception).ConfigureAwait(false);
-
+                        if (_observers.Count > 0)
                             await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
-                        }
-
-                        context.GetOrAddPayload(() => genericRetryContext);
-
-                        throw;
                     }
 
-                    if (!policyContext.CanRetry(exception, out RetryContext<TContext> retryContext))
-                    {
-                        if (_retryPolicy.IsHandled(exception))
-                        {
-                            await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+                    context.GetOrAddPayload(() => genericRetryContext);
 
+                    throw;
+                }
+
+                if (!policyContext.CanRetry(exception, out RetryContext<TContext> retryContext))
+                {
+                    if (_retryPolicy.IsHandled(exception))
+                    {
+                        await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+
+                        if (_observers.Count > 0)
                             await _observers.RetryFault(retryContext).ConfigureAwait(false);
 
-                            context.GetOrAddPayload(() => retryContext);
-                        }
-
-                        throw;
+                        context.GetOrAddPayload(() => retryContext);
                     }
 
+                    throw;
+                }
+
+                if (_observers.Count > 0)
                     await _observers.PostFault(retryContext).ConfigureAwait(false);
 
-                    await Attempt(context, retryContext, next).ConfigureAwait(false);
-                }
+                await Attempt(context, retryContext, next).ConfigureAwait(false);
+            }
+            finally
+            {
+                policyContext.Dispose();
             }
         }
 
@@ -124,11 +131,15 @@ namespace GreenPipes.Filters
 
                 await retryContext.PreRetry().ConfigureAwait(false);
 
-                await _observers.PreRetry(retryContext).ConfigureAwait(false);
+                if (_observers.Count > 0)
+                    await _observers.PreRetry(retryContext).ConfigureAwait(false);
 
                 try
                 {
                     await next.Send(retryContext.Context).ConfigureAwait(false);
+
+                    if (_observers.Count > 0)
+                        await _observers.RetryComplete(retryContext).ConfigureAwait(false);
 
                     return;
                 }
@@ -148,7 +159,8 @@ namespace GreenPipes.Filters
                         {
                             await retryContext.RetryFaulted(exception).ConfigureAwait(false);
 
-                            await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
+                            if (_observers.Count > 0)
+                                await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
                         }
 
                         context.GetOrAddPayload(() => payloadRetryContext);
@@ -162,7 +174,8 @@ namespace GreenPipes.Filters
                         {
                             await retryContext.RetryFaulted(exception).ConfigureAwait(false);
 
-                            await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
+                            if (_observers.Count > 0)
+                                await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
                         }
 
                         context.GetOrAddPayload(() => genericRetryContext);
@@ -176,7 +189,8 @@ namespace GreenPipes.Filters
                         {
                             await nextRetryContext.RetryFaulted(exception).ConfigureAwait(false);
 
-                            await _observers.RetryFault(nextRetryContext).ConfigureAwait(false);
+                            if (_observers.Count > 0)
+                                await _observers.RetryFault(nextRetryContext).ConfigureAwait(false);
 
                             context.GetOrAddPayload(() => nextRetryContext);
                         }
@@ -184,7 +198,8 @@ namespace GreenPipes.Filters
                         throw;
                     }
 
-                    await _observers.PostFault(nextRetryContext).ConfigureAwait(false);
+                    if (_observers.Count > 0)
+                        await _observers.PostFault(nextRetryContext).ConfigureAwait(false);
 
                     retryContext = nextRetryContext;
                 }

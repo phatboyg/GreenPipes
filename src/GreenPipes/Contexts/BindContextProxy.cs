@@ -1,16 +1,4 @@
-﻿// Copyright 2012-2018 Chris Patterson
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace GreenPipes.Contexts
+﻿namespace GreenPipes.Contexts
 {
     using System;
     using System.Reflection;
@@ -20,59 +8,58 @@ namespace GreenPipes.Contexts
     /// <summary>
     /// The BindContext
     /// </summary>
-    /// <typeparam name="TContext"></typeparam>
-    /// <typeparam name="TSource"></typeparam>
-    public class BindContextProxy<TContext, TSource> :
-        BindContext<TContext, TSource>
-        where TContext : class, PipeContext
-        where TSource : class
+    /// <typeparam name="TLeft"></typeparam>
+    /// <typeparam name="TRight"></typeparam>
+    public class BindContextProxy<TLeft, TRight> :
+        BindContext<TLeft, TRight>
+        where TLeft : class, PipeContext
+        where TRight : class
     {
-        readonly TContext _context;
-        readonly TSource _sourceContext;
+        readonly TLeft _left;
+        readonly TRight _right;
 
-        public BindContextProxy(TContext context, TSource source)
+        public BindContextProxy(TLeft left, TRight source)
         {
-            _context = context;
-            _sourceContext = source;
+            _left = left;
+            _right = source;
         }
 
-        TContext BindContext<TContext, TSource>.Context => _context;
+        TLeft BindContext<TLeft, TRight>.Left => _left;
 
-        TSource BindContext<TContext, TSource>.SourceContext => _sourceContext;
+        TRight BindContext<TLeft, TRight>.Right => _right;
 
-        CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
+        CancellationToken PipeContext.CancellationToken => _left.CancellationToken;
 
         bool PipeContext.HasPayloadType(Type payloadType)
         {
-            return payloadType.GetTypeInfo().IsInstanceOfType(_sourceContext) || _context.HasPayloadType(payloadType);
+            return payloadType.GetTypeInfo().IsInstanceOfType(_right) || _left.HasPayloadType(payloadType);
         }
 
         bool PipeContext.TryGetPayload<T>(out T payload)
         {
-            payload = _sourceContext as T;
-            if (payload != null)
+            if (_right is T context)
+            {
+                payload = context;
                 return true;
+            }
 
-            return _context.TryGetPayload(out payload);
+            return _left.TryGetPayload(out payload);
         }
 
         T PipeContext.GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
         {
-            var context = _sourceContext as T;
-            if (context != null)
+            if (_right is T context)
                 return context;
 
-            return _context.GetOrAddPayload(payloadFactory);
+            return _left.GetOrAddPayload(payloadFactory);
         }
 
         T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
         {
-            // can't modify implicit payload types
-            var context = _sourceContext as T;
-            if (context != null)
+            if (_right is T context)
                 return context;
 
-            return _context.AddOrUpdatePayload(addFactory, updateFactory);
+            return _left.AddOrUpdatePayload(addFactory, updateFactory);
         }
     }
 }

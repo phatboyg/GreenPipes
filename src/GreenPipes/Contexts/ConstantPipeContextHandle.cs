@@ -31,7 +31,7 @@ namespace GreenPipes.Contexts
             Context = Task.FromResult(context);
         }
 
-        async Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken = default(CancellationToken))
+        async Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
         {
             if (_disposed)
                 return;

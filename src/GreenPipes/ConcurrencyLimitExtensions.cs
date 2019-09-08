@@ -26,7 +26,19 @@ namespace GreenPipes
         /// <returns></returns>
         public static Task SetConcurrencyLimit(this IPipe<CommandContext> pipe, int concurrencyLimit)
         {
-            return pipe.SendCommand<SetConcurrencyLimit>(new {ConcurrencyLimit = concurrencyLimit});
+            return pipe.SendCommand<SetConcurrencyLimit>(new Limit(concurrencyLimit));
+        }
+
+
+        class Limit :
+            SetConcurrencyLimit
+        {
+            public Limit(int concurrencyLimit)
+            {
+                ConcurrencyLimit = concurrencyLimit;
+            }
+
+            public int ConcurrencyLimit { get; }
         }
     }
 }

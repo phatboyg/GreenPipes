@@ -17,6 +17,7 @@ namespace GreenPipes.Filters
     using System.Threading;
     using System.Threading.Tasks;
     using Contracts;
+    using Internals.Extensions;
 
 
     /// <summary>
@@ -59,13 +60,26 @@ namespace GreenPipes.Filters
         }
 
         [DebuggerNonUserCode]
-        public async Task Send(TContext context, IPipe<TContext> next)
+        public Task Send(TContext context, IPipe<TContext> next)
         {
-            await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+            var waitAsync = _limit.WaitAsync(context.CancellationToken);
+            if (waitAsync.IsCompletedSuccessfully())
+            {
+                Interlocked.Increment(ref _count);
 
-            Interlocked.Increment(ref _count);
+                return next.Send(context);
+            }
 
-            await next.Send(context).ConfigureAwait(false);
+            async Task SendAsync()
+            {
+                await waitAsync.ConfigureAwait(false);
+
+                Interlocked.Increment(ref _count);
+
+                await next.Send(context).ConfigureAwait(false);
+            }
+
+            return SendAsync();
         }
 
         public async Task Send(CommandContext<SetRateLimit> context)

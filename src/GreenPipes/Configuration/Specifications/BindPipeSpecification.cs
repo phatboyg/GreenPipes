@@ -19,35 +19,35 @@ namespace GreenPipes.Specifications
     using Filters;
 
 
-    public class BindPipeSpecification<TContext, TSource> :
-        IPipeSpecification<TContext>,
-        IBindConfigurator<TContext, TSource>
-        where TContext : class, PipeContext
-        where TSource : class, PipeContext
+    public class BindPipeSpecification<TLeft, TRight> :
+        IPipeSpecification<TLeft>,
+        IBindConfigurator<TLeft, TRight>
+        where TLeft : class, PipeContext
+        where TRight : class, PipeContext
     {
-        readonly IPipeConfigurator<TContext> _contextPipeConfigurator;
-        readonly IBuildPipeConfigurator<BindContext<TContext, TSource>> _pipeConfigurator;
-        readonly IPipeContextSource<TSource, TContext> _source;
+        readonly IPipeConfigurator<TLeft> _contextPipeConfigurator;
+        readonly IBuildPipeConfigurator<BindContext<TLeft, TRight>> _pipeConfigurator;
+        readonly IPipeContextSource<TRight, TLeft> _source;
 
-        public BindPipeSpecification(IPipeContextSource<TSource, TContext> source)
+        public BindPipeSpecification(IPipeContextSource<TRight, TLeft> source)
         {
             _source = source;
-            _pipeConfigurator = new PipeConfigurator<BindContext<TContext, TSource>>();
+            _pipeConfigurator = new PipeConfigurator<BindContext<TLeft, TRight>>();
             _contextPipeConfigurator = new ContextPipeConfigurator(_pipeConfigurator);
         }
 
-        IPipeConfigurator<TContext> IBindConfigurator<TContext, TSource>.ContextPipe => _contextPipeConfigurator;
+        IPipeConfigurator<TLeft> IBindConfigurator<TLeft, TRight>.ContextPipe => _contextPipeConfigurator;
 
-        void IPipeConfigurator<BindContext<TContext, TSource>>.AddPipeSpecification(IPipeSpecification<BindContext<TContext, TSource>> specification)
+        void IPipeConfigurator<BindContext<TLeft, TRight>>.AddPipeSpecification(IPipeSpecification<BindContext<TLeft, TRight>> specification)
         {
             _pipeConfigurator.AddPipeSpecification(specification);
         }
 
-        void IPipeSpecification<TContext>.Apply(IPipeBuilder<TContext> builder)
+        void IPipeSpecification<TLeft>.Apply(IPipeBuilder<TLeft> builder)
         {
-            IPipe<BindContext<TContext, TSource>> pipe = _pipeConfigurator.Build();
+            IPipe<BindContext<TLeft, TRight>> pipe = _pipeConfigurator.Build();
 
-            var bindFilter = new PipeContextSourceBindFilter<TContext, TSource>(pipe, _source);
+            var bindFilter = new PipeContextSourceBindFilter<TLeft, TRight>(pipe, _source);
 
             builder.AddFilter(bindFilter);
         }
@@ -63,25 +63,25 @@ namespace GreenPipes.Specifications
 
 
         class ContextPipeConfigurator :
-            IPipeConfigurator<TContext>
+            IPipeConfigurator<TLeft>
         {
-            readonly IPipeConfigurator<BindContext<TContext, TSource>> _configurator;
+            readonly IPipeConfigurator<BindContext<TLeft, TRight>> _configurator;
 
-            public ContextPipeConfigurator(IPipeConfigurator<BindContext<TContext, TSource>> configurator)
+            public ContextPipeConfigurator(IPipeConfigurator<BindContext<TLeft, TRight>> configurator)
             {
                 _configurator = configurator;
             }
 
-            public void AddPipeSpecification(IPipeSpecification<TContext> specification)
+            public void AddPipeSpecification(IPipeSpecification<TLeft> specification)
             {
-                BindContext<TContext, TSource> ContextProvider(BindContext<TContext, TSource> input, TContext context)
+                BindContext<TLeft, TRight> ContextProvider(BindContext<TLeft, TRight> input, TLeft context)
                 {
-                    return context as BindContext<TContext, TSource> ?? new BindContextProxy<TContext, TSource>(context, input.SourceContext);
+                    return context as BindContext<TLeft, TRight> ?? new BindContextProxy<TLeft, TRight>(context, input.Right);
                 }
 
-                _configurator.AddPipeSpecification(new SplitFilterPipeSpecification<BindContext<TContext, TSource>, TContext>(specification,
+                _configurator.AddPipeSpecification(new SplitFilterPipeSpecification<BindContext<TLeft, TRight>, TLeft>(specification,
                     ContextProvider,
-                    context => context.Context));
+                    context => context.Left));
             }
         }
     }

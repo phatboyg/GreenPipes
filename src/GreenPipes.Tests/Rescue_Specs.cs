@@ -21,25 +21,27 @@ namespace GreenPipes.Tests
     [TestFixture]
     public class Using_the_rescue_filter
     {
-        class TestContext :
-            BasePipeContext,
+        interface ITestContext :
             PipeContext
         {
-            public TestContext()
-            {
-            }
 
-            public TestContext(TestContext testContext)
-                : base(testContext)
+        }
+
+        class TestContext :
+            BasePipeContext,
+            ITestContext
+        {
+            public TestContext()
             {
             }
         }
 
 
         class TestExceptionContext :
-            TestContext
+            ProxyPipeContext,
+            ITestContext
         {
-            public TestExceptionContext(TestContext context, Exception exception)
+            public TestExceptionContext(ITestContext context, Exception exception)
                 : base(context)
             {
                 Exception = exception;
@@ -53,7 +55,7 @@ namespace GreenPipes.Tests
         public async Task Should_invoke_the_rescue_pipe()
         {
             var count = 0;
-            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            IPipe<ITestContext> pipe = Pipe.New<ITestContext>(x =>
             {
                 x.UseRescue(Pipe.New<TestExceptionContext>(r =>
                 {
@@ -77,7 +79,7 @@ namespace GreenPipes.Tests
         public async Task Should_support_an_aggregate_exception()
         {
             var count = 0;
-            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            IPipe<ITestContext> pipe = Pipe.New<ITestContext>(x =>
             {
                 x.UseRescue(Pipe.New<TestExceptionContext>(r =>
                 {
@@ -101,7 +103,7 @@ namespace GreenPipes.Tests
         public async Task Should_skip_if_filtered_exception()
         {
             var count = 0;
-            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            IPipe<ITestContext> pipe = Pipe.New<ITestContext>(x =>
             {
                 x.UseRescue(Pipe.New<TestExceptionContext>(r =>
                 {

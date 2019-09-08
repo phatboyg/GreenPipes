@@ -20,8 +20,7 @@ namespace GreenPipes.Agents
 
 
     /// <summary>
-    /// Maintains a cached context, which is created upon first use, and recreated whenever a fault is propogated to the
-    /// usage.
+    /// Maintains a cached context, which is created upon first use, and recreated whenever a fault is propagated to the usage.
     /// </summary>
     /// <typeparam name="TContext"></typeparam>
     public class PipeContextSupervisor<TContext> :
@@ -99,9 +98,9 @@ namespace GreenPipes.Agents
             // stop the active context agents
             await _activeSupervisor.Stop(context).ConfigureAwait(false);
 
-            await Task.WhenAll(context.Agents.Select(x => x.Stop(context))).UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+            await Task.WhenAll(context.Agents.Select(x => x.Stop(context))).OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
-            await Completed.UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+            await Completed.OrCanceled(context.CancellationToken).ConfigureAwait(false);
         }
 
         async Task ActiveAndActualAgentsCompleted(StopSupervisorContext context)

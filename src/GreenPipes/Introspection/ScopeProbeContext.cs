@@ -49,7 +49,7 @@ namespace GreenPipes.Introspection
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if ((value == null) || (value is string && string.IsNullOrEmpty((string)value)))
+            if ((value == null) || (value is string s && string.IsNullOrEmpty(s)))
                 _variables.Remove(key);
             else
                 _variables[key] = value;
@@ -71,8 +71,7 @@ namespace GreenPipes.Introspection
 
             IList<ScopeProbeContext> list;
 
-            object value;
-            if (_variables.TryGetValue(key, out value))
+            if (_variables.TryGetValue(key, out var value))
             {
                 list = value as IList<ScopeProbeContext>;
                 if (list == null)
@@ -92,8 +91,7 @@ namespace GreenPipes.Introspection
         {
             return _variables.ToDictionary(x => x.Key, item =>
             {
-                var list = item.Value as IList<ScopeProbeContext>;
-                if (list != null)
+                if (item.Value is IList<ScopeProbeContext> list)
                 {
                     if (list.Count == 1)
                         return list[0].Build();
@@ -108,7 +106,7 @@ namespace GreenPipes.Introspection
         void SetVariablesFromDictionary(IEnumerable<KeyValuePair<string, object>> values)
         {
             foreach (KeyValuePair<string, object> value in values)
-                if ((value.Value == null) || (value.Value is string && string.IsNullOrEmpty((string)value.Value)))
+                if ((value.Value == null) || (value.Value is string s && string.IsNullOrEmpty(s)))
                     _variables.Remove(value.Key);
                 else
                     _variables[value.Key] = value.Value;

@@ -78,10 +78,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            await dynamicRouter.SendCommand<SetConcurrencyLimit>(new
-            {
-                ConcurrencyLimit = 32
-            });
+            await dynamicRouter.SetConcurrencyLimit(32);
 
             var context = new InputContext("Hello");
 

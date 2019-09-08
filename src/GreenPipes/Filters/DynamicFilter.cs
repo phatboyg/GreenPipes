@@ -18,6 +18,7 @@ namespace GreenPipes.Filters
     using System.Linq;
     using System.Threading.Tasks;
     using Observers;
+    using Util;
 
 
     /// <summary>
@@ -29,19 +30,22 @@ namespace GreenPipes.Filters
         IDynamicFilter<TInput>
         where TInput : class, PipeContext
     {
-        readonly Dictionary<Type, IOutputPipe> _outputPipes;
+        readonly Dictionary<Type, IOutputFilter> _outputPipes;
+        readonly IPipe<TInput> _empty;
         protected readonly IPipeContextConverterFactory<TInput> ConverterFactory;
         protected readonly FilterObservable Observers;
-        IOutputPipe[] _outputPipeArray;
+
+        IOutputFilter[] _outputPipeArray;
 
         public DynamicFilter(IPipeContextConverterFactory<TInput> converterFactory)
         {
             ConverterFactory = converterFactory;
 
-            _outputPipes = new Dictionary<Type, IOutputPipe>();
+            _outputPipes = new Dictionary<Type, IOutputFilter>();
             _outputPipeArray = _outputPipes.Values.ToArray();
 
             Observers = new FilterObservable();
+            _empty = Pipe.Empty<TInput>();
         }
 
         ConnectHandle IObserverConnector.ConnectObserver<T>(IFilterObserver<T> observer)
@@ -73,24 +77,31 @@ namespace GreenPipes.Filters
 
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        public async Task Send(TInput context, IPipe<TInput> next)
+        public Task Send(TInput context, IPipe<TInput> next)
         {
             var outputPipes = _outputPipeArray;
 
             if (outputPipes.Length == 1)
             {
-                await outputPipes[0].Send(context).ConfigureAwait(false);
+                return outputPipes[0].Send(context, next);
             }
-            else if (outputPipes.Length > 1)
+
+            if (outputPipes.Length > 1)
             {
-                var outputTasks = new Task[outputPipes.Length];
-                for (int i = 0; i < outputPipes.Length; i++)
-                    outputTasks[i] = outputPipes[i].Send(context);
+                async Task SendAsync()
+                {
+                    var outputTasks = new Task[outputPipes.Length];
+                    for (int i = 0; i < outputPipes.Length; i++)
+                        outputTasks[i] = outputPipes[i].Send(context, _empty);
 
-                await Task.WhenAll(outputTasks).ConfigureAwait(false);
+                    await Task.WhenAll(outputTasks).ConfigureAwait(false);
+                    await next.Send(context).ConfigureAwait(false);
+                }
+
+                return SendAsync();
             }
 
-            await next.Send(context).ConfigureAwait(false);
+            return TaskUtil.Completed;
         }
 
         protected TResult GetPipe<T, TResult>()
@@ -100,7 +111,7 @@ namespace GreenPipes.Filters
             return GetPipe<T>().As<TResult>();
         }
 
-        protected IOutputPipe GetPipe<T>()
+        protected IOutputFilter GetPipe<T>()
             where T : class, PipeContext
         {
             lock (_outputPipes)
@@ -118,77 +129,49 @@ namespace GreenPipes.Filters
             }
         }
 
-        protected virtual IOutputPipe CreateOutputPipe<T>()
+        protected virtual IOutputFilter CreateOutputPipe<T>()
             where T : class, PipeContext
         {
-            return new OutputPipe<T>(Observers, ConverterFactory.GetConverter<T>());
-        }
+            var converter = ConverterFactory.GetConverter<T>();
 
-        public void AddFilter<T>(IFilter<T> filter)
-            where T : class, PipeContext
-        {
-            GetPipe<T>().AddFilter(filter);
+            return (IOutputFilter)Activator.CreateInstance(typeof(OutputFilter<>).MakeGenericType(typeof(TInput), typeof(T)), Observers, converter);
         }
 
 
-        protected interface IOutputPipe :
-            IPipe<TInput>,
+        protected interface IOutputFilter :
+            IFilter<TInput>,
             IObserverConnector
         {
             TResult As<TResult>()
                 where TResult : class;
-
-            void AddFilter<T>(IFilter<T> filter)
-                where T : class, PipeContext;
         }
 
 
-        protected class OutputPipe<TOutput> :
-            IOutputPipe
-            where TOutput : class, PipeContext
+        protected class OutputFilter<TOutput> :
+            IOutputFilter
+            where TOutput : class, TInput
         {
-            readonly Lazy<IOutputPipeFilter<TInput, TOutput>> _filter;
-            readonly IPipe<TInput> _nextPipe;
             protected readonly IPipeContextConverter<TInput, TOutput> ContextConverter;
             protected readonly FilterObservable Observers;
+            IOutputPipeFilter<TInput, TOutput> _filter;
 
-            public OutputPipe(FilterObservable observers, IPipeContextConverter<TInput, TOutput> contextConverter)
+            public OutputFilter(FilterObservable observers, IPipeContextConverter<TInput, TOutput> contextConverter)
             {
-                _filter = new Lazy<IOutputPipeFilter<TInput, TOutput>>(CreateFilter);
                 ContextConverter = contextConverter;
                 Observers = observers;
-
-                PipeFilters = new List<IFilter<TOutput>>();
-
-                _nextPipe = Pipe.Empty<TInput>();
             }
 
-            protected IList<IFilter<TOutput>> PipeFilters { get; }
-
-            TResult IOutputPipe.As<TResult>()
+            TResult IOutputFilter.As<TResult>()
             {
-                return _filter.Value as TResult;
-            }
-
-            void IOutputPipe.AddFilter<T>(IFilter<T> filter)
-            {
-                if (_filter.IsValueCreated)
-                    throw new PipeConfigurationException("The filter has already been created, no additional filters can be added");
-
-                var self = this as OutputPipe<T>;
-                if (self == null)
-                    throw new ArgumentException("The message type is invalid: " + typeof(T).Name);
-
-                self.PipeFilters.Add(filter);
+                return Filter as TResult;
             }
 
             ConnectHandle IObserverConnector.ConnectObserver<T>(IFilterObserver<T> observer)
             {
-                var connector = _filter.Value as IObserverConnector<T>;
-                if (connector == null)
-                    throw new ArgumentException($"The filter is not of the specified type: {typeof(T).Name}", nameof(observer));
+                if (Filter is IObserverConnector<T> connector)
+                    return connector.ConnectObserver(observer);
 
-                return connector.ConnectObserver(observer);
+                throw new ArgumentException($"The filter is not of the specified type: {typeof(T).Name}", nameof(observer));
             }
 
             public ConnectHandle ConnectObserver(IFilterObserver observer)
@@ -196,19 +179,21 @@ namespace GreenPipes.Filters
                 return Observers.Connect(observer);
             }
 
-            public Task Send(TInput context)
+            public Task Send(TInput context, IPipe<TInput> next)
             {
-                return _filter.Value.Send(context, _nextPipe);
+                return Filter.Send(context, next);
             }
 
             public void Probe(ProbeContext context)
             {
-                _filter.Value.Probe(context);
+                Filter.Probe(context);
             }
 
-            protected virtual IOutputPipeFilter<TInput, TOutput> CreateFilter()
+            protected virtual IOutputPipeFilter<TInput, TOutput> Filter => _filter ?? (_filter = CreateFilter());
+
+            IOutputPipeFilter<TInput, TOutput> CreateFilter()
             {
-                IOutputPipeFilter<TInput, TOutput> filter = new OutputPipeFilter<TInput, TOutput>(PipeFilters, ContextConverter, new TeeFilter<TOutput>());
+                IOutputPipeFilter<TInput, TOutput> filter = new OutputPipeFilter<TInput, TOutput>(ContextConverter, new TeeFilter<TOutput>());
 
                 filter.ConnectObserver(new ObservableAdapter<TOutput>(Observers));
 
@@ -242,39 +227,34 @@ namespace GreenPipes.Filters
             return pipeConnector.ConnectPipe(key, pipe);
         }
 
-        protected override IOutputPipe CreateOutputPipe<T>()
+        protected override IOutputFilter CreateOutputPipe<T>()
         {
-            var dynamicType = typeof(KeyOutputPipe<>).MakeGenericType(typeof(TInput), typeof(TKey), typeof(T));
+            var dynamicType = typeof(KeyOutputFilter<>).MakeGenericType(typeof(TInput), typeof(TKey), typeof(T));
 
             var pipe = Activator.CreateInstance(dynamicType, Observers, ConverterFactory.GetConverter<T>(), _keyAccessor);
 
-            return (IOutputPipe)pipe;
+            return (IOutputFilter)pipe;
         }
 
 
-        protected class KeyOutputPipe<TOutput> :
-            OutputPipe<TOutput>
+        protected class KeyOutputFilter<TOutput> :
+            OutputFilter<TOutput>
             where TOutput : class, TInput
         {
-            readonly Lazy<IOutputPipeFilter<TInput, TOutput, TKey>> _filter;
             readonly KeyAccessor<TInput, TKey> _keyAccessor;
+            IOutputPipeFilter<TInput, TOutput, TKey> _filter;
 
-            public KeyOutputPipe(FilterObservable observers, IPipeContextConverter<TInput, TOutput> contextConverter, KeyAccessor<TInput, TKey> keyAccessor)
+            public KeyOutputFilter(FilterObservable observers, IPipeContextConverter<TInput, TOutput> contextConverter, KeyAccessor<TInput, TKey> keyAccessor)
                 : base(observers, contextConverter)
             {
                 _keyAccessor = keyAccessor;
-
-                _filter = new Lazy<IOutputPipeFilter<TInput, TOutput, TKey>>(CreateKeyFilter);
             }
 
-            protected override IOutputPipeFilter<TInput, TOutput> CreateFilter()
-            {
-                return _filter.Value;
-            }
+            protected override IOutputPipeFilter<TInput, TOutput> Filter => _filter ?? (_filter = CreateKeyFilter());
 
             IOutputPipeFilter<TInput, TOutput, TKey> CreateKeyFilter()
             {
-                IOutputPipeFilter<TInput, TOutput, TKey> filter = new OutputPipeFilter<TInput, TOutput, TKey>(PipeFilters, ContextConverter, _keyAccessor);
+                IOutputPipeFilter<TInput, TOutput, TKey> filter = new OutputPipeFilter<TInput, TOutput, TKey>(ContextConverter, _keyAccessor);
 
                 filter.ConnectObserver(new ObservableAdapter<TOutput>(Observers));
 

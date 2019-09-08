@@ -22,7 +22,7 @@ namespace GreenPipes
     public interface ProbeContext
     {
         /// <summary>
-        /// If for some reason the probe is cancelled, allowing an early withdrawl
+        /// If for some reason the probe is cancelled, allowing an early withdrawal
         /// </summary>
         CancellationToken CancellationToken { get; }
 

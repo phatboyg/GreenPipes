@@ -67,15 +67,16 @@ namespace GreenPipes.Filters
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var keyPipe = pipe as IPipe<TContext>;
-            if (keyPipe == null)
-                throw new ArgumentException($"The pipe must match the input type: {TypeCache<TContext>.ShortName}", nameof(pipe));
+            if (pipe is IPipe<TContext> keyPipe)
+            {
+                var added = _pipes.TryAdd(key, keyPipe);
+                if (!added)
+                    throw new DuplicateKeyPipeConfigurationException($"A pipe with the specified key already exists: {key}");
 
-            var added = _pipes.TryAdd(key, keyPipe);
-            if (!added)
-                throw new DuplicateKeyPipeConfigurationException($"A pipe with the specified key already exists: {key}");
+                return new Handle(key, RemovePipe);
+            }
 
-            return new Handle(key, RemovePipe);
+            throw new ArgumentException($"The pipe must match the input type: {TypeCache<TContext>.ShortName}", nameof(pipe));
         }
 
         void RemovePipe(TKey key)

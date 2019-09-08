@@ -1,14 +1,14 @@
-// Copyright 2012-2018 Chris Patterson
-//  
+// Copyright 2012-2019 Chris Patterson
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes
 {
@@ -19,7 +19,7 @@ namespace GreenPipes
 
 
     /// <summary>
-    /// The base for a pipe context, with the underlying support for managing paylaods (out-of-band data
+    /// The base for a pipe context, with the underlying support for managing payloads (out-of-band data
     /// that is carried along with the context).
     /// </summary>
     public abstract class BasePipeContext
@@ -27,9 +27,7 @@ namespace GreenPipes
         IPayloadCache _payloadCache;
 
         /// <summary>
-        /// A new pipe context with an existing payload cache -- includes a new CancellationTokenSource. If 
-        /// cancellation is not supported, use the above constructor with CancellationToken.None to avoid
-        /// creating a token source.
+        /// A pipe with no cancellation support
         /// </summary>
         protected BasePipeContext()
         {
@@ -37,20 +35,27 @@ namespace GreenPipes
         }
 
         /// <summary>
-        /// A new pipe context with an existing payload cache -- includes a new CancellationTokenSource. If 
-        /// cancellation is not supported, use the above constructor with CancellationToken.None to avoid
-        /// creating a token source.
+        /// A pipe using the specified <paramref name="cancellationToken"/>
+        /// </summary>
+        /// <param name="cancellationToken">A cancellation token</param>
+        protected BasePipeContext(CancellationToken cancellationToken)
+        {
+            CancellationToken = cancellationToken;
+        }
+
+        /// <summary>
+        /// A pipe with no cancellation support, using the specified <paramref name="payloadCache"/>
         /// </summary>
         /// <param name="payloadCache"></param>
         protected BasePipeContext(IPayloadCache payloadCache)
         {
-            CancellationToken = CancellationToken.None;
+            _payloadCache = payloadCache ?? throw new ArgumentNullException(nameof(payloadCache));
 
-            _payloadCache = payloadCache;
+            CancellationToken = CancellationToken.None;
         }
 
         /// <summary>
-        /// Uses the specified payloadCache and cancellationToken for the context
+        /// A pipe using the specified <paramref name="cancellationToken"/> and <paramref name="payloadCache"/>
         /// </summary>
         /// <param name="payloadCache">A payload cache</param>
         /// <param name="cancellationToken">A cancellation token</param>
@@ -62,33 +67,9 @@ namespace GreenPipes
         }
 
         /// <summary>
-        /// A new pipe context based off an existing pipe context, which delegates the payloadCache
-        /// to the existing pipe context.
-        /// </summary>
-        /// <param name="context"></param>
-        protected BasePipeContext(PipeContext context)
-            : this(new PayloadCacheProxy(context), context.CancellationToken)
-        {
-        }
-
-        /// <summary>
         /// Returns the CancellationToken for the context (implicit interface)
         /// </summary>
         public virtual CancellationToken CancellationToken { get; }
-
-        IPayloadCache PayloadCache
-        {
-            get
-            {
-                if (_payloadCache != null)
-                    return _payloadCache;
-
-                while (Volatile.Read(ref _payloadCache) == null)
-                    Interlocked.CompareExchange(ref _payloadCache, new PayloadCache(), null);
-
-                return _payloadCache;
-            }
-        }
 
         /// <summary>
         /// Returns true if the payload type is included with or supported by the context type
@@ -101,7 +82,7 @@ namespace GreenPipes
         }
 
         /// <summary>
-        /// Attemts 
+        /// Attempts to get the specified payload type
         /// </summary>
         /// <param name="payload"></param>
         /// <typeparam name="T"></typeparam>
@@ -109,9 +90,11 @@ namespace GreenPipes
         public virtual bool TryGetPayload<T>(out T payload)
             where T : class
         {
-            payload = this as T;
-            if (payload != null)
+            if (this is T context)
+            {
+                payload = context;
                 return true;
+            }
 
             return PayloadCache.TryGetPayload(out payload);
         }
@@ -125,8 +108,7 @@ namespace GreenPipes
         public virtual T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
             where T : class
         {
-            var context = this as T;
-            if (context != null)
+            if (this is T context)
                 return context;
 
             return PayloadCache.GetOrAddPayload(payloadFactory);
@@ -142,12 +124,24 @@ namespace GreenPipes
         public virtual T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
             where T : class
         {
-            // can't modify implicit payload types
-            var context = this as T;
-            if (context != null)
+            if (this is T context)
                 return context;
 
             return PayloadCache.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
+        protected IPayloadCache PayloadCache
+        {
+            get
+            {
+                if (_payloadCache != null)
+                    return _payloadCache;
+
+                while (Volatile.Read(ref _payloadCache) == null)
+                    Interlocked.CompareExchange(ref _payloadCache, new ListPayloadCache(), null);
+
+                return _payloadCache;
+            }
         }
     }
 }

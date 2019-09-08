@@ -13,10 +13,7 @@
 namespace GreenPipes.Filters
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
-    using Builders;
     using Internals.Extensions;
     using Observers;
 
@@ -29,21 +26,17 @@ namespace GreenPipes.Filters
     public class OutputPipeFilter<TInput, TOutput> :
         IOutputPipeFilter<TInput, TOutput>
         where TInput : class, PipeContext
-        where TOutput : class, PipeContext
+        where TOutput : class, TInput
     {
         readonly IPipeContextConverter<TInput, TOutput> _contextConverter;
         readonly FilterObservable<TOutput> _observers;
         readonly ITeeFilter<TOutput> _output;
-        readonly IPipe<TOutput> _outputPipe;
 
-        public OutputPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
-            ITeeFilter<TOutput> outputFilter)
+        public OutputPipeFilter(IPipeContextConverter<TInput, TOutput> contextConverter, ITeeFilter<TOutput> outputFilter)
         {
             _contextConverter = contextConverter;
 
             _output = outputFilter;
-
-            _outputPipe = BuildOutputPipe(filters.Concat(Enumerable.Repeat(_output, 1)).ToArray());
 
             _observers = new FilterObservable<TOutput>();
         }
@@ -53,29 +46,27 @@ namespace GreenPipes.Filters
             var scope = context.CreateFilterScope("dispatchPipe");
             scope.Add("outputType", TypeCache<TOutput>.ShortName);
 
-            _outputPipe.Probe(scope);
+            _output.Probe(scope);
         }
 
         Task IFilter<TInput>.Send(TInput context, IPipe<TInput> next)
         {
             return _contextConverter.TryConvert(context, out var pipeContext)
-                ? SendToOutput(context, next, pipeContext)
+                ? SendToOutput(next, pipeContext)
                 : next.Send(context);
         }
 
-        async Task SendToOutput(TInput context, IPipe<TInput> next, TOutput pipeContext)
+        async Task SendToOutput(IPipe<TInput> next, TOutput pipeContext)
         {
             if (_observers.Count > 0)
                 await _observers.PreSend(pipeContext).ConfigureAwait(false);
 
             try
             {
-                await _outputPipe.Send(pipeContext).ConfigureAwait(false);
+                await _output.Send(pipeContext, next).ConfigureAwait(false);
 
                 if (_observers.Count > 0)
                     await _observers.PostSend(pipeContext).ConfigureAwait(false);
-
-                await next.Send(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -95,14 +86,6 @@ namespace GreenPipes.Filters
         {
             return _output.ConnectPipe(pipe);
         }
-
-        static IPipe<TOutput> BuildOutputPipe(IFilter<TOutput>[] filters)
-        {
-            if (filters.Length == 0)
-                throw new ArgumentException("There must be at least one filter, the output filter, for the output pipe");
-
-            return filters.ToPipe();
-        }
     }
 
 
@@ -114,15 +97,13 @@ namespace GreenPipes.Filters
     {
         readonly ITeeFilter<TOutput, TKey> _outputFilter;
 
-        public OutputPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
-            KeyAccessor<TInput, TKey> keyAccessor)
-            : this(filters, contextConverter, new TeeFilter<TOutput, TKey>(keyAccessor))
+        public OutputPipeFilter(IPipeContextConverter<TInput, TOutput> contextConverter, KeyAccessor<TInput, TKey> keyAccessor)
+            : this(contextConverter, new TeeFilter<TOutput, TKey>(keyAccessor))
         {
         }
 
-        protected OutputPipeFilter(IEnumerable<IFilter<TOutput>> filters, IPipeContextConverter<TInput, TOutput> contextConverter,
-            ITeeFilter<TOutput, TKey> outputFilter)
-            : base(filters, contextConverter, outputFilter)
+        protected OutputPipeFilter(IPipeContextConverter<TInput, TOutput> contextConverter, ITeeFilter<TOutput, TKey> outputFilter)
+            : base(contextConverter, outputFilter)
         {
             _outputFilter = outputFilter;
         }

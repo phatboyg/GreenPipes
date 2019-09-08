@@ -40,8 +40,7 @@ namespace GreenPipes.Internals.Mapping
                 return;
             }
 
-            var s = value as string;
-            if (s != null)
+            if (value is string s)
             {
                 var enumValue = Enum.Parse(_property.Property.PropertyType, s);
                 _property.Set(obj, enumValue);
