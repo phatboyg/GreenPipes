@@ -69,7 +69,7 @@ namespace GreenPipes.Tests
             Assert.That(rejected, Is.False);
         }
 
-#if !NETCOREAPP2_0
+#if !NETCOREAPP2_2
         [Test]
         public async Task Unauthenticated()
         {
@@ -174,7 +174,7 @@ namespace GreenPipes.Tests
         {
             var scope = context.CreateScope("SampleAuthFilter");
             scope.Add("allowed-roles", _allowedRoles);
-            
+
             _authPipe.Probe(scope.CreateScope("auth-pipe"));
             _unauthPipe.Probe(scope.CreateScope("unauth-pipe"));
         }

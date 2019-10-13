@@ -1,14 +1,14 @@
 ﻿// Copyright 2012-2018 Chris Patterson
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Tests.Agents
 {
@@ -30,7 +30,7 @@ namespace GreenPipes.Tests.Agents
 
             supervisor.SetReady();
 
-            await supervisor.Ready.OrTimeout(s:5);
+            await supervisor.Ready.OrTimeout(s: 5);
 
             await supervisor.Stop();
 
@@ -65,24 +65,22 @@ namespace GreenPipes.Tests.Agents
         [Test]
         public async Task Should_fault_on_ready_faulted()
         {
-            var supervisor = new Supervisor();
+            for (int i = 0; i < 50; i++)
+            {
+                var supervisor = new Supervisor();
 
-            var provocateur = new Agent();
-            provocateur.SetNotReady(new IntentionalTestException("So not ready."));
-            supervisor.Add(provocateur);
+                var provocateur = new Agent();
+                provocateur.SetNotReady(new IntentionalTestException("So not ready."));
+                supervisor.Add(provocateur);
 
-            supervisor.SetReady();
+                supervisor.SetReady();
 
-            Assert.That(async () => await supervisor.Ready.OrTimeout(s: 5),
-                Throws.TypeOf<AggregateException>());
+                Assert.That(async () => await supervisor.Ready.OrTimeout(s: 5), Throws.TypeOf<AggregateException>());
 
-            Console.WriteLine("Stopping");
+                await supervisor.Stop().OrTimeout(s: 5);
 
-            await supervisor.Stop().OrTimeout(s: 5);
-
-            Console.WriteLine("Waiting for Completed...");
-
-            await supervisor.Completed.OrTimeout(s: 5);
+                await supervisor.Completed.OrTimeout(s: 5);
+            }
         }
 
         [Test]

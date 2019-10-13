@@ -1,14 +1,14 @@
-﻿// Copyright 2012-2018 Chris Patterson
-//  
+﻿// Copyright 2012-2019 Chris Patterson
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Agents
 {
@@ -79,12 +79,14 @@ namespace GreenPipes.Agents
         public override void SetReady()
         {
             if (!IsAlreadyReady)
+            {
                 lock (_agents)
                 {
                     SetReady(_agents.Count == 0
                         ? TaskUtil.Completed
                         : Task.WhenAll(_agents.Values.Select(x => x.Ready).ToArray()));
                 }
+            }
         }
 
         /// <inheritdoc />
@@ -95,7 +97,7 @@ namespace GreenPipes.Agents
             {
                 agents = _agents.Count == 0
                     ? new IAgent[0]
-                    : _agents.Values.Where(x => !x.Completed.IsCompletedSuccessfully()).ToArray();
+                    : _agents.Values.Where(x => !x.Completed.IsCompleted).ToArray();
             }
 
             return StopSupervisor(new Context(context, agents));
@@ -104,9 +106,7 @@ namespace GreenPipes.Agents
         protected virtual async Task StopSupervisor(StopSupervisorContext context)
         {
             if (context.Agents.Length == 0)
-            {
                 SetCompleted(TaskUtil.Completed);
-            }
 
             if (context.Agents.Length == 1)
             {
@@ -118,17 +118,13 @@ namespace GreenPipes.Agents
             {
                 Task[] completedTasks = new Task[context.Agents.Length];
                 for (int i = 0; i < context.Agents.Length; i++)
-                {
                     completedTasks[i] = context.Agents[i].Completed;
-                }
 
                 SetCompleted(Task.WhenAll(completedTasks));
 
                 Task[] stopTasks = new Task[context.Agents.Length];
                 for (int i = 0; i < context.Agents.Length; i++)
-                {
                     stopTasks[i] = context.Agents[i].Stop(context);
-                }
 
                 await Task.WhenAll(stopTasks).OrCanceled(context.CancellationToken).ConfigureAwait(false);
             }

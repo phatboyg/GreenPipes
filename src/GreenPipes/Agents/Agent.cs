@@ -1,14 +1,14 @@
 ﻿// Copyright 2012-2018 Chris Patterson
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Agents
 {
@@ -156,10 +156,25 @@ namespace GreenPipes.Agents
                 if (_ready.Task.IsCompleted)
                     return;
 
-                var setReady = _setReady = new TaskCompletionSource<bool>();
-                setReady.Task.ContinueWith(SetReadyInternal, TaskScheduler.Default);
-
                 var setReadyCancel = _setReadyCancel = new CancellationTokenSource();
+
+                void OnSetReady(Task<bool> task)
+                {
+                    if (setReadyCancel.IsCancellationRequested)
+                        return;
+
+                    if (task.IsCanceled)
+                        _ready.TrySetCanceled();
+                    else if (task.IsFaulted)
+
+                        // ReSharper disable once AssignNullToNotNullAttribute
+                        _ready.TrySetException(task.Exception);
+                    else
+                        _ready.TrySetResult(task.Result);
+                }
+
+                var setReady = _setReady = new TaskCompletionSource<bool>();
+                setReady.Task.ContinueWith(OnSetReady, TaskScheduler.Default);
 
                 void OnCompleted(Task task)
                 {
@@ -203,10 +218,25 @@ namespace GreenPipes.Agents
                 if (_completed.Task.IsCompleted)
                     return;
 
-                var setCompleted = _setCompleted = new TaskCompletionSource<bool>();
-                setCompleted.Task.ContinueWith(SetCompletedInternal, TaskScheduler.Default);
-
                 var setCompletedCancel = _setCompletedCancel = new CancellationTokenSource();
+
+                void OnSetCompleted(Task<bool> task)
+                {
+                    if (setCompletedCancel.IsCancellationRequested)
+                        return;
+
+                    if (task.IsCanceled)
+                        _completed.TrySetCanceled();
+                    else if (task.IsFaulted)
+
+                        // ReSharper disable once AssignNullToNotNullAttribute
+                        _completed.TrySetException(task.Exception);
+                    else
+                        _completed.TrySetResult(task.Result);
+                }
+
+                var setCompleted = _setCompleted = new TaskCompletionSource<bool>();
+                setCompleted.Task.ContinueWith(OnSetCompleted, TaskScheduler.Default);
 
                 void OnCompleted(Task task)
                 {
@@ -231,30 +261,6 @@ namespace GreenPipes.Agents
         public override string ToString()
         {
             return "Agent";
-        }
-
-        void SetReadyInternal(Task<bool> task)
-        {
-            if (task.IsCanceled)
-                _ready.TrySetCanceled();
-            else if (task.IsFaulted)
-
-                // ReSharper disable once AssignNullToNotNullAttribute
-                _ready.TrySetException(task.Exception);
-            else
-                _ready.TrySetResult(task.Result);
-        }
-
-        void SetCompletedInternal(Task<bool> task)
-        {
-            if (task.IsCanceled)
-                _completed.TrySetCanceled();
-            else if (task.IsFaulted)
-
-                // ReSharper disable once AssignNullToNotNullAttribute
-                _completed.TrySetException(task.Exception);
-            else
-                _completed.TrySetResult(task.Result);
         }
 
         /// <summary>
