@@ -23,9 +23,26 @@ namespace GreenPipes
         readonly PipeContext _context;
         IPayloadCache _payloadCache;
 
+        /// <summary>
+        /// A pipe using the parent scope cancellationToken
+        /// </summary>
+        /// <param name="context"></param>
         protected ScopePipeContext(PipeContext context)
         {
             _context = context;
+        }
+
+        /// <summary>
+        /// A pipe using the parent scope cancellationToken
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="payloads">Loads the payload cache with the specified objects</param>
+        protected ScopePipeContext(PipeContext context, params object[] payloads)
+        {
+            _context = context;
+
+            if (payloads != null && payloads.Length > 0)
+                _payloadCache = new ListPayloadCache(payloads);
         }
 
         public virtual CancellationToken CancellationToken => _context.CancellationToken;

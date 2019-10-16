@@ -35,12 +35,37 @@ namespace GreenPipes
         }
 
         /// <summary>
+        /// A pipe with no cancellation support
+        /// </summary>
+        /// <param name="payloads">Loads the payload cache with the specified objects</param>
+        protected BasePipeContext(params object[] payloads)
+        {
+            CancellationToken = CancellationToken.None;
+
+            if (payloads != null && payloads.Length > 0)
+                _payloadCache = new ListPayloadCache(payloads);
+        }
+
+        /// <summary>
         /// A pipe using the specified <paramref name="cancellationToken"/>
         /// </summary>
         /// <param name="cancellationToken">A cancellation token</param>
         protected BasePipeContext(CancellationToken cancellationToken)
         {
             CancellationToken = cancellationToken;
+        }
+
+        /// <summary>
+        /// A pipe using the specified <paramref name="cancellationToken"/>
+        /// </summary>
+        /// <param name="cancellationToken">A cancellation token</param>
+        /// <param name="payloads">Loads the payload cache with the specified objects</param>
+        protected BasePipeContext(CancellationToken cancellationToken, params object[] payloads)
+        {
+            CancellationToken = cancellationToken;
+
+            if (payloads != null && payloads.Length > 0)
+                _payloadCache = new ListPayloadCache(payloads);
         }
 
         /// <summary>

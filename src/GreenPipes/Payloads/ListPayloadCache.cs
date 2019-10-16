@@ -21,6 +21,15 @@ namespace GreenPipes.Payloads
     {
         IList<object> _cache;
 
+        public ListPayloadCache()
+        {
+        }
+
+        public ListPayloadCache(object[] payloads)
+        {
+            _cache = new List<object>(payloads);
+        }
+
         public bool HasPayloadType(Type payloadType)
         {
             lock (this)
