@@ -86,7 +86,7 @@ namespace GreenPipes.Internals.Extensions
 
         static readonly TimeSpan _defaultTimeout = new TimeSpan(0, 0, 0, 5, 0);
 
-        public static Task OrTimeout(this Task task, int d = 0, int h = 0, int m = 0, int s = 0, int ms = 0, CancellationToken cancellationToken = default,
+        public static Task OrTimeout(this Task task, int ms = 0, int s = 0, int m = 0, int h = 0, int d = 0, CancellationToken cancellationToken = default,
             [CallerMemberName] string memberName = null, [CallerFilePath] string filePath = null, [CallerLineNumber] int? lineNumber = null)
         {
             var timeout = new TimeSpan(d, h, m, s, ms);
@@ -121,7 +121,7 @@ namespace GreenPipes.Internals.Extensions
             return WaitAsync();
         }
 
-        public static Task<T> OrTimeout<T>(this Task<T> task, int d = 0, int h = 0, int m = 0, int s = 0, int ms = 0,
+        public static Task<T> OrTimeout<T>(this Task<T> task, int ms = 0, int s = 0, int m = 0, int h = 0, int d = 0, 
             CancellationToken cancellationToken = default,
             [CallerMemberName] string memberName = null, [CallerFilePath] string filePath = null,
             [CallerLineNumber] int? lineNumber = null)

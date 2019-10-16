@@ -1,14 +1,14 @@
 // Copyright 2012-2018 Chris Patterson
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Util
 {
@@ -60,7 +60,7 @@ namespace GreenPipes.Util
                 _connected = _connections.Values.ToArray();
             }
 
-            return new Handle(id, Disconnect);
+            return new Handle(id, this);
         }
 
         /// <summary>
@@ -136,18 +136,18 @@ namespace GreenPipes.Util
         class Handle :
             ConnectHandle
         {
-            readonly Action<long> _disconnect;
+            readonly Connectable<T> _connectable;
             readonly long _id;
 
-            public Handle(long id, Action<long> disconnect)
+            public Handle(long id, Connectable<T> connectable)
             {
                 _id = id;
-                _disconnect = disconnect;
+                _connectable = connectable;
             }
 
             public void Disconnect()
             {
-                _disconnect(_id);
+                _connectable.Disconnect(_id);
             }
 
             public void Dispose()

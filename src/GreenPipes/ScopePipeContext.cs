@@ -1,3 +1,15 @@
+// Copyright 2012-2019 Chris Patterson
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
 namespace GreenPipes
 {
     using System;
@@ -11,12 +23,12 @@ namespace GreenPipes
         readonly PipeContext _context;
         IPayloadCache _payloadCache;
 
-        public ScopePipeContext(PipeContext context)
+        protected ScopePipeContext(PipeContext context)
         {
             _context = context;
         }
 
-        public CancellationToken CancellationToken => _context.CancellationToken;
+        public virtual CancellationToken CancellationToken => _context.CancellationToken;
 
         IPayloadCache PayloadCache
         {
@@ -32,12 +44,12 @@ namespace GreenPipes
             }
         }
 
-        public bool HasPayloadType(Type payloadType)
+        public virtual bool HasPayloadType(Type payloadType)
         {
             return payloadType.GetTypeInfo().IsInstanceOfType(this) || PayloadCache.HasPayloadType(payloadType) || _context.HasPayloadType(payloadType);
         }
 
-        public bool TryGetPayload<T>(out T payload)
+        public virtual bool TryGetPayload<T>(out T payload)
             where T : class
         {
             if (this is T context)
@@ -49,7 +61,7 @@ namespace GreenPipes
             return PayloadCache.TryGetPayload(out payload) || _context.TryGetPayload(out payload);
         }
 
-        public T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
+        public virtual T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
             where T : class
         {
             if (this is T context)
@@ -64,16 +76,14 @@ namespace GreenPipes
             return PayloadCache.GetOrAddPayload(payloadFactory);
         }
 
-        public T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        public virtual T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
             where T : class
         {
             if (this is T context)
                 return context;
 
             if (PayloadCache.TryGetPayload<T>(out var payload))
-            {
                 return PayloadCache.AddOrUpdatePayload(addFactory, updateFactory);
-            }
 
             if (_context.TryGetPayload(out payload))
             {
