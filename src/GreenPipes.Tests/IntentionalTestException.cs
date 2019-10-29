@@ -15,9 +15,8 @@ namespace GreenPipes.Tests
     using System;
     using System.Runtime.Serialization;
 
-#if !NETCOREAPP2_2
+
     [Serializable]
-#endif
     public class IntentionalTestException :
         Exception
     {
@@ -35,11 +34,9 @@ namespace GreenPipes.Tests
         {
         }
 
-#if !NETCOREAPP2_2
         protected IntentionalTestException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-#endif
     }
 }

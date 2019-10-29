@@ -64,7 +64,7 @@ namespace GreenPipes.Util
         /// <returns></returns>
         public static TaskCompletionSource<T> GetTask<T>(TaskCreationOptions options = TaskCreationOptions.None)
         {
-#if NETCORE
+#if NETSTD
             options |= TaskCreationOptions.RunContinuationsAsynchronously;
 #endif
             return new TaskCompletionSource<T>(options);
@@ -78,7 +78,7 @@ namespace GreenPipes.Util
         /// <returns></returns>
         public static TaskCompletionSource<bool> GetTask(TaskCreationOptions options = TaskCreationOptions.None)
         {
-#if NETCORE
+#if NETSTD
             options |= TaskCreationOptions.RunContinuationsAsynchronously;
 #endif
             return new TaskCompletionSource<bool>(options);
