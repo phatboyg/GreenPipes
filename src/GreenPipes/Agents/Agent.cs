@@ -43,8 +43,8 @@ namespace GreenPipes.Agents
         /// </summary>
         public Agent()
         {
-            _ready = new TaskCompletionSource<bool>();
-            _completed = new TaskCompletionSource<bool>();
+            _ready = TaskUtil.GetTask();
+            _completed = TaskUtil.GetTask();
 
             _stopped = new Lazy<CancellationTokenSource>(() =>
             {
@@ -111,7 +111,7 @@ namespace GreenPipes.Agents
         /// <returns></returns>
         protected virtual Task StopAgent(StopContext context)
         {
-            _completed.TrySetResult(true);
+            _completed.SetCompleted();
 
             return TaskUtil.Completed;
         }
@@ -121,7 +121,7 @@ namespace GreenPipes.Agents
         /// </summary>
         public virtual void SetReady()
         {
-            _ready.TrySetResult(true);
+            _ready.SetCompleted();
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace GreenPipes.Agents
                         _ready.TrySetResult(task.Result);
                 }
 
-                var setReady = _setReady = new TaskCompletionSource<bool>();
+                var setReady = _setReady = TaskUtil.GetTask();
                 setReady.Task.ContinueWith(OnSetReady, TaskScheduler.Default);
 
                 void OnCompleted(Task task)
@@ -188,7 +188,7 @@ namespace GreenPipes.Agents
                         // ReSharper disable once AssignNullToNotNullAttribute
                         setReady.TrySetException(task.Exception);
                     else
-                        setReady.TrySetResult(true);
+                        setReady.SetCompleted();
                 }
 
                 readyTask.ContinueWith(OnCompleted, TaskScheduler.Default);
@@ -235,7 +235,7 @@ namespace GreenPipes.Agents
                         _completed.TrySetResult(task.Result);
                 }
 
-                var setCompleted = _setCompleted = new TaskCompletionSource<bool>();
+                var setCompleted = _setCompleted = TaskUtil.GetTask();
                 setCompleted.Task.ContinueWith(OnSetCompleted, TaskScheduler.Default);
 
                 void OnCompleted(Task task)
@@ -250,7 +250,7 @@ namespace GreenPipes.Agents
                         // ReSharper disable once AssignNullToNotNullAttribute
                         setCompleted.TrySetException(task.Exception);
                     else
-                        setCompleted.TrySetResult(true);
+                        setCompleted.SetCompleted();
                 }
 
                 completedTask.ContinueWith(OnCompleted, TaskScheduler.Default);
@@ -276,7 +276,7 @@ namespace GreenPipes.Agents
             else
                 _ready.TrySetException(new InvalidOperationException("The context faulted but no exception was present."));
 
-            _completed.TrySetResult(true);
+            _completed.SetCompleted();
         }
     }
 }

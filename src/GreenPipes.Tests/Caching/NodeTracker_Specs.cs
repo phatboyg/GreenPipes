@@ -7,6 +7,7 @@
     using GreenPipes.Caching.Internals;
     using NUnit.Framework;
     using TestValueObjects;
+    using Util;
 
 
     [TestFixture]
@@ -20,7 +21,7 @@
 
             public NodeObserver()
             {
-                _source = new TaskCompletionSource<INode<SimpleValue>>();
+                _source = TaskUtil.GetTask<INode<SimpleValue>>();
                 _cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
                 _cancellation.Token.Register(() => _source.TrySetCanceled());
             }

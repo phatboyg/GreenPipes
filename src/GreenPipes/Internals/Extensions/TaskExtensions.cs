@@ -17,6 +17,7 @@ namespace GreenPipes.Internals.Extensions
     using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using Util;
 
 
     public static class TaskExtensions
@@ -49,10 +50,9 @@ namespace GreenPipes.Internals.Extensions
 
             async Task WaitAsync()
             {
-                var source = new TaskCompletionSource<bool>();
-                using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), source))
+                using (cancellationToken.RegisterTask(out var cancelTask))
                 {
-                    var completed = await Task.WhenAny(task, source.Task).ConfigureAwait(false);
+                    var completed = await Task.WhenAny(task, cancelTask).ConfigureAwait(false);
                     if (completed != task)
                         throw new OperationCanceledException(cancellationToken);
 
@@ -70,10 +70,9 @@ namespace GreenPipes.Internals.Extensions
 
             async Task<T> WaitAsync()
             {
-                var source = new TaskCompletionSource<bool>();
-                using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), source))
+                using (cancellationToken.RegisterTask(out var cancelTask))
                 {
-                    var completed = await Task.WhenAny(task, source.Task).ConfigureAwait(false);
+                    var completed = await Task.WhenAny(task, cancelTask).ConfigureAwait(false);
                     if (completed != task)
                         throw new OperationCanceledException(cancellationToken);
 
@@ -110,18 +109,30 @@ namespace GreenPipes.Internals.Extensions
 
             async Task WaitAsync()
             {
-                var completed = await Task.WhenAny(task, Task.Delay(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : timeout, cancellationToken))
-                    .ConfigureAwait(false);
-                if (completed != task)
-                    throw new TimeoutException(FormatTimeoutMessage(memberName, filePath, lineNumber));
+                CancellationTokenSource cancel = new CancellationTokenSource();
 
-                task.GetAwaiter().GetResult();
+                CancellationTokenRegistration registration = cancellationToken.RegisterIfCanBeCanceled(cancel);
+                try
+                {
+                    var delayTask = Task.Delay(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : timeout, cancel.Token);
+
+                    var completed = await Task.WhenAny(task, delayTask).ConfigureAwait(false);
+                    if (completed == delayTask)
+                        throw new TimeoutException(FormatTimeoutMessage(memberName, filePath, lineNumber));
+
+                    task.GetAwaiter().GetResult();
+                }
+                finally
+                {
+                    registration.Dispose();
+                    cancel.Cancel();
+                }
             }
 
             return WaitAsync();
         }
 
-        public static Task<T> OrTimeout<T>(this Task<T> task, int ms = 0, int s = 0, int m = 0, int h = 0, int d = 0, 
+        public static Task<T> OrTimeout<T>(this Task<T> task, int ms = 0, int s = 0, int m = 0, int h = 0, int d = 0,
             CancellationToken cancellationToken = default,
             [CallerMemberName] string memberName = null, [CallerFilePath] string filePath = null,
             [CallerLineNumber] int? lineNumber = null)
@@ -147,12 +158,24 @@ namespace GreenPipes.Internals.Extensions
 
             async Task<T> WaitAsync()
             {
-                var completed = await Task.WhenAny(task, Task.Delay(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : timeout, cancellationToken))
-                    .ConfigureAwait(false);
-                if (completed != task)
-                    throw new TimeoutException(FormatTimeoutMessage(memberName, filePath, lineNumber));
+                CancellationTokenSource cancel = new CancellationTokenSource();
 
-                return task.GetAwaiter().GetResult();
+                CancellationTokenRegistration registration = cancellationToken.RegisterIfCanBeCanceled(cancel);
+                try
+                {
+                    var delayTask = Task.Delay(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : timeout, cancel.Token);
+
+                    var completed = await Task.WhenAny(task, delayTask).ConfigureAwait(false);
+                    if (completed == delayTask)
+                        throw new TimeoutException(FormatTimeoutMessage(memberName, filePath, lineNumber));
+
+                    return task.GetAwaiter().GetResult();
+                }
+                finally
+                {
+                    registration.Dispose();
+                    cancel.Cancel();
+                }
             }
 
             return WaitAsync();

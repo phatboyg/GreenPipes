@@ -8,6 +8,7 @@
     using GreenPipes.Caching.Internals;
     using NUnit.Framework;
     using TestValueObjects;
+    using Util;
 
 
     [TestFixture]
@@ -139,13 +140,13 @@
             public NodeAddedCountObserver(int expected)
             {
                 _expected = expected;
-                _source = new TaskCompletionSource<bool>();
+                _source = TaskUtil.GetTask();
             }
 
             public void ValueAdded(INode<SimpleValue> node, SimpleValue value)
             {
                 if (Interlocked.Increment(ref _count) == _expected)
-                    _source.TrySetResult(true);
+                    _source.SetCompleted();
             }
 
             public void ValueRemoved(INode<SimpleValue> node, SimpleValue value)
@@ -169,13 +170,13 @@
             public SmartAddedCountObserver(int expected)
             {
                 _expected = expected;
-                _source = new TaskCompletionSource<bool>();
+                _source = TaskUtil.GetTask();
             }
 
             public void ValueAdded(INode<SmartValue> node, SmartValue value)
             {
                 if (Interlocked.Increment(ref _count) == _expected)
-                    _source.TrySetResult(true);
+                    _source.SetCompleted();
             }
 
             public void ValueRemoved(INode<SmartValue> node, SmartValue value)
@@ -201,7 +202,7 @@
             public NodeRemovedCountObserver(int expected)
             {
                 _expected = expected;
-                _source = new TaskCompletionSource<bool>();
+                _source = TaskUtil.GetTask();
             }
 
             public void ValueAdded(INode<T> node, T value)
@@ -211,7 +212,7 @@
             public void ValueRemoved(INode<T> node, T value)
             {
                 if (Interlocked.Increment(ref _count) == _expected)
-                    _source.TrySetResult(true);
+                    _source.SetCompleted();
             }
 
             public void CacheCleared()

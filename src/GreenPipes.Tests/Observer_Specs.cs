@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Tests
 {
@@ -106,9 +106,9 @@ namespace GreenPipes.Tests
 
             public Observer()
             {
-                _preConsumed = new TaskCompletionSource<TContext>();
-                _postConsumed = new TaskCompletionSource<TContext>();
-                _consumeFaulted = new TaskCompletionSource<TContext>();
+                _preConsumed = TaskUtil.GetTask<TContext>();
+                _postConsumed = TaskUtil.GetTask<TContext>();
+                _consumeFaulted = TaskUtil.GetTask<TContext>();
             }
 
             public Task<TContext> PreSent => _preConsumed.Task;
@@ -146,9 +146,9 @@ namespace GreenPipes.Tests
 
             public Observer()
             {
-                _preConsumed = new TaskCompletionSource<CommandContext>();
-                _postConsumed = new TaskCompletionSource<CommandContext>();
-                _consumeFaulted = new TaskCompletionSource<CommandContext>();
+                _preConsumed = TaskUtil.GetTask<CommandContext>();
+                _postConsumed = TaskUtil.GetTask<CommandContext>();
+                _consumeFaulted = TaskUtil.GetTask<CommandContext>();
             }
 
             public Task<CommandContext> PreSent => _preConsumed.Task;
