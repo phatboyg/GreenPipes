@@ -13,19 +13,42 @@
 namespace GreenPipes
 {
     using System;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using Internals.Extensions;
+    using Pipes;
     using Util;
 
 
     public static class PipeExtensions
     {
         /// <summary>
+        /// Returns true if the pipe is not empty
+        /// </summary>
+        /// <param name="pipe"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNotEmpty<T>(this IPipe<T> pipe)
+            where T : class, PipeContext
+        {
+            switch (pipe)
+            {
+                case null:
+                case EmptyPipe<T> _:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
+        /// <summary>
         /// Get a payload from the pipe context
         /// </summary>
         /// <typeparam name="TPayload">The payload type</typeparam>
         /// <param name="context">The pipe context</param>
         /// <returns>The payload, or throws a PayloadNotFoundException if the payload is not present</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TPayload GetPayload<TPayload>(this PipeContext context)
             where TPayload : class
         {
