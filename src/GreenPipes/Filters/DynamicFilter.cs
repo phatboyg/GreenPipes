@@ -42,7 +42,7 @@ namespace GreenPipes.Filters
             ConverterFactory = converterFactory;
 
             _outputPipes = new Dictionary<Type, IOutputFilter>();
-            _outputPipeArray = _outputPipes.Values.ToArray();
+            _outputPipeArray = new IOutputFilter[0];
 
             Observers = new FilterObservable();
             _empty = Pipe.Empty<TInput>();
@@ -153,12 +153,13 @@ namespace GreenPipes.Filters
         {
             protected readonly IPipeContextConverter<TInput, TOutput> ContextConverter;
             protected readonly FilterObservable Observers;
-            IOutputPipeFilter<TInput, TOutput> _filter;
 
             public OutputFilter(FilterObservable observers, IPipeContextConverter<TInput, TOutput> contextConverter)
             {
                 ContextConverter = contextConverter;
                 Observers = observers;
+
+                Filter = new OutputPipeFilter<TInput, TOutput>(ContextConverter, Observers, new TeeFilter<TOutput>());
             }
 
             TResult IOutputFilter.As<TResult>()
@@ -189,12 +190,7 @@ namespace GreenPipes.Filters
                 Filter.Probe(context);
             }
 
-            protected virtual IOutputPipeFilter<TInput, TOutput> Filter => _filter ?? (_filter = CreateFilter());
-
-            IOutputPipeFilter<TInput, TOutput> CreateFilter()
-            {
-                return new OutputPipeFilter<TInput, TOutput>(ContextConverter, Observers, new TeeFilter<TOutput>());
-            }
+            protected virtual IOutputPipeFilter<TInput, TOutput> Filter { get; }
         }
     }
 
@@ -227,9 +223,7 @@ namespace GreenPipes.Filters
         {
             var dynamicType = typeof(KeyOutputFilter<>).MakeGenericType(typeof(TInput), typeof(TKey), typeof(T));
 
-            var pipe = Activator.CreateInstance(dynamicType, Observers, ConverterFactory.GetConverter<T>(), _keyAccessor);
-
-            return (IOutputFilter)pipe;
+            return (IOutputFilter)Activator.CreateInstance(dynamicType, Observers, ConverterFactory.GetConverter<T>(), _keyAccessor);
         }
 
 
@@ -237,21 +231,13 @@ namespace GreenPipes.Filters
             OutputFilter<TOutput>
             where TOutput : class, TInput
         {
-            readonly KeyAccessor<TInput, TKey> _keyAccessor;
-            IOutputPipeFilter<TInput, TOutput, TKey> _filter;
-
             public KeyOutputFilter(FilterObservable observers, IPipeContextConverter<TInput, TOutput> contextConverter, KeyAccessor<TInput, TKey> keyAccessor)
                 : base(observers, contextConverter)
             {
-                _keyAccessor = keyAccessor;
+                Filter = new OutputPipeFilter<TInput, TOutput, TKey>(ContextConverter, Observers, keyAccessor);
             }
 
-            protected override IOutputPipeFilter<TInput, TOutput> Filter => _filter ?? (_filter = CreateKeyFilter());
-
-            IOutputPipeFilter<TInput, TOutput, TKey> CreateKeyFilter()
-            {
-                return new OutputPipeFilter<TInput, TOutput, TKey>(ContextConverter, Observers, _keyAccessor);
-            }
+            protected override IOutputPipeFilter<TInput, TOutput> Filter { get; }
         }
     }
 }
