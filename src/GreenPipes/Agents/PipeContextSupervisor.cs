@@ -16,8 +16,6 @@
         ISupervisor<TContext>
         where TContext : class, PipeContext
     {
-        static readonly string Caption = $"Cache<{TypeCache<TContext>.ShortName}>";
-
         readonly ISupervisor _activeSupervisor;
         readonly IPipeContextFactory<TContext> _contextFactory;
         readonly object _contextLock = new object();
@@ -74,7 +72,7 @@
             var scope = context.CreateScope("source");
             scope.Set(new
             {
-                Type = Caption,
+                Type = TypeCache<PipeContextSupervisor<TContext>>.ShortName,
                 HasContext,
             });
         }
@@ -125,12 +123,6 @@
 
                 return context;
             }
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            return Caption;
         }
     }
 }

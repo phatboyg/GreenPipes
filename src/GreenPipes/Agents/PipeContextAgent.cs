@@ -14,8 +14,6 @@
         IPipeContextAgent<TContext>
         where TContext : class, PipeContext
     {
-        static readonly string Caption = $"Context<{typeof(TContext).Name}>";
-
         readonly Task<TContext> _context;
         readonly TaskCompletionSource<DateTime> _inactive;
 
@@ -47,8 +45,7 @@
             {
                 if (_context.Result is IAsyncDisposable asyncDisposable)
                     await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-
-                if (_context.Result is IDisposable disposable)
+                else if (_context.Result is IDisposable disposable)
                     disposable.Dispose();
             }
 
@@ -59,12 +56,6 @@
         protected override async Task StopAgent(StopContext context)
         {
             await DisposeAsync().ConfigureAwait(false);
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            return Caption;
         }
     }
 }

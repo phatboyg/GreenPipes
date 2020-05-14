@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes.Internals.Extensions;
 
 
     public class NodeTracker<TValue> :
@@ -185,7 +186,9 @@
         {
             try
             {
-                var value = await node.Value.ConfigureAwait(false);
+                var value = node.Value.IsCompletedSuccessfully()
+                    ? node.Value.GetAwaiter().GetResult()
+                    : await node.Value.ConfigureAwait(false);
 
                 Statistics.ValueRemoved();
 
@@ -195,11 +198,11 @@
 
                 switch (value)
                 {
-                    case IDisposable disposable:
-                        disposable.Dispose();
-                        break;
                     case IAsyncDisposable asyncDisposable:
                         await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                        break;
+                    case IDisposable disposable:
+                        disposable.Dispose();
                         break;
                 }
             }
@@ -328,7 +331,9 @@
 
         async Task EvictNode(IBucketNode<TValue> node)
         {
-            var value = await node.Value.ConfigureAwait(false);
+            var value = node.Value.IsCompletedSuccessfully()
+                ? node.Value.GetAwaiter().GetResult()
+                : await node.Value.ConfigureAwait(false);
 
             Statistics.ValueRemoved();
 
@@ -340,11 +345,11 @@
             {
                 switch (value)
                 {
-                    case IDisposable disposable:
-                        disposable.Dispose();
-                        break;
                     case IAsyncDisposable asyncDisposable:
                         await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                        break;
+                    case IDisposable disposable:
+                        disposable.Dispose();
                         break;
                 }
             }

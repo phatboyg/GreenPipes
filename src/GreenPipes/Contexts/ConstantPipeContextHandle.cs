@@ -25,8 +25,7 @@
 
             if (_context is IAsyncDisposable asyncDisposable)
                 await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-
-            if (_context is IDisposable disposable)
+            else if (_context is IDisposable disposable)
                 disposable.Dispose();
 
             _disposed = true;

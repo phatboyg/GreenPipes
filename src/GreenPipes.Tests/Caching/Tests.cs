@@ -67,7 +67,7 @@
 
             public ValueTask DisposeAsync()
             {
-                return new ValueTask();
+                return default;
             }
 
             public event Action Used;

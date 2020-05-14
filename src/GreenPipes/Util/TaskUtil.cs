@@ -1,6 +1,7 @@
 ﻿namespace GreenPipes.Util
 {
     using System;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -17,6 +18,7 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Task<T> Default<T>()
         {
             return Cached<T>.DefaultValueTask;
@@ -28,6 +30,7 @@
         /// <param name="exception"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Task<T> Faulted<T>(Exception exception)
         {
             TaskCompletionSource<T> source = GetTask<T>();
@@ -41,6 +44,7 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Task<T> Cancelled<T>()
         {
             return Cached<T>.CanceledTask;
@@ -53,6 +57,7 @@
         /// <param name="options"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TaskCompletionSource<T> GetTask<T>(TaskCreationOptions options = TaskCreationOptions.None)
         {
             return new TaskCompletionSource<T>(options | TaskCreationOptions.RunContinuationsAsynchronously);
@@ -64,6 +69,7 @@
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TaskCompletionSource<bool> GetTask(TaskCreationOptions options = TaskCreationOptions.None)
         {
             return new TaskCompletionSource<bool>(options | TaskCreationOptions.RunContinuationsAsynchronously);
