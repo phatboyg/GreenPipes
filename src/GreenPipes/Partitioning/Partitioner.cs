@@ -1,14 +1,14 @@
-// Copyright 2012-2018 Chris Patterson
-//  
+// Copyright 2012-2020 Chris Patterson
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Partitioning
 {
@@ -16,9 +16,11 @@ namespace GreenPipes.Partitioning
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Agents;
 
 
     public class Partitioner :
+        Supervisor,
         IPartitioner
     {
         readonly IHashGenerator _hashGenerator;
@@ -37,11 +39,6 @@ namespace GreenPipes.Partitioning
                 .ToArray();
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
-        {
-            return Task.WhenAll(_partitions.Select(x => x.DisposeAsync(cancellationToken)));
-        }
-
         IPartitioner<T> IPartitioner.GetPartitioner<T>(PartitionKeyProvider<T> keyProvider)
         {
             return new ContextPartitioner<T>(this, keyProvider);
@@ -57,9 +54,10 @@ namespace GreenPipes.Partitioning
                 _partitions[i].Probe(scope);
         }
 
-        Task Send<T>(byte[] key, T context, IPipe<T> next) where T : class, PipeContext
+        Task Send<T>(byte[] key, T context, IPipe<T> next)
+            where T : class, PipeContext
         {
-            var hash = _hashGenerator.Hash(key);
+            var hash = key.Length > 0 ? _hashGenerator.Hash(key) : 0;
 
             var partitionId = hash % _partitionCount;
 
@@ -94,9 +92,22 @@ namespace GreenPipes.Partitioning
                 _partitioner.Probe(context);
             }
 
-            public Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
+            Task IAgent.Ready => _partitioner.Ready;
+            Task IAgent.Completed => _partitioner.Completed;
+            CancellationToken IAgent.Stopping => _partitioner.Stopping;
+            CancellationToken IAgent.Stopped => _partitioner.Stopped;
+
+            Task IAgent.Stop(StopContext context)
             {
-                return _partitioner.DisposeAsync(cancellationToken);
+                return _partitioner.Stop(context);
+            }
+
+            int ISupervisor.PeakActiveCount => _partitioner.PeakActiveCount;
+            long ISupervisor.TotalCount => _partitioner.TotalCount;
+
+            void ISupervisor.Add(IAgent agent)
+            {
+                _partitioner.Add(agent);
             }
         }
     }

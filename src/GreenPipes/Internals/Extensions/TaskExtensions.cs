@@ -24,23 +24,17 @@ namespace GreenPipes.Internals.Extensions
     {
         public static Task TrySetResultOnThreadPool<T>(this TaskCompletionSource<T> source, T result)
         {
-            void SetResult() => source.TrySetResult(result);
-
-            return Task.Run(SetResult);
+            return Task.Run(() => source.TrySetResult(result));
         }
 
         public static Task TrySetExceptionOnThreadPool<T>(this TaskCompletionSource<T> source, Exception exception)
         {
-            void SetException() => source.TrySetException(exception);
-
-            return Task.Run(SetException);
+            return Task.Run(() => source.TrySetException(exception));
         }
 
         public static Task TrySetCanceledOnThreadPool<T>(this TaskCompletionSource<T> source)
         {
-            void SetCanceled() => source.TrySetCanceled();
-
-            return Task.Run(SetCanceled);
+            return Task.Run(() => source.TrySetCanceled());
         }
 
         public static Task OrCanceled(this Task task, CancellationToken cancellationToken)

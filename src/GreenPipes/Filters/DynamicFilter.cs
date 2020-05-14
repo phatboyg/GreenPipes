@@ -17,6 +17,7 @@ namespace GreenPipes.Filters
     using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
+    using Internals.Extensions;
     using Observers;
     using Util;
 
@@ -90,9 +91,15 @@ namespace GreenPipes.Filters
             {
                 async Task SendAsync()
                 {
-                    var outputTasks = new Task[outputPipes.Length];
+                    var outputTasks = new List<Task>(outputPipes.Length);
                     for (int i = 0; i < outputPipes.Length; i++)
-                        outputTasks[i] = outputPipes[i].Send(context, _empty);
+                    {
+                        var outputTask = outputPipes[i].Send(context, _empty);
+                        if (outputTask.IsCompletedSuccessfully())
+                            continue;
+
+                        outputTasks.Add(outputTask);
+                    }
 
                     await Task.WhenAll(outputTasks).ConfigureAwait(false);
                     await next.Send(context).ConfigureAwait(false);

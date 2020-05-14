@@ -46,8 +46,6 @@ namespace GreenPipes.Tests
                     cleanUp = true;
                 });
             });
-
-
         }
 
         [TearDown]
@@ -60,7 +58,7 @@ namespace GreenPipes.Tests
         public async Task Authenticated()
         {
             var request = new RequestContextImpl();
-            request.GetOrAddPayload(() => new GenericPrincipal(new GenericIdentity("Gizmo"), new []{"bob"} ));
+            request.GetOrAddPayload(() => new GenericPrincipal(new GenericIdentity("Gizmo"), new[] {"bob"}));
 
             await _thePipe.Send(request).ConfigureAwait(false);
 
@@ -68,21 +66,6 @@ namespace GreenPipes.Tests
             Assert.That(cleanUp, Is.True);
             Assert.That(rejected, Is.False);
         }
-
-#if !NETCOREAPP2_2
-        [Test]
-        public async Task Unauthenticated()
-        {
-            var request = new RequestContextImpl();
-            request.GetOrAddPayload(() => System.Threading.Thread.CurrentPrincipal);
-
-            await _thePipe.Send(request).ConfigureAwait(false);
-
-            Assert.That(protectedBusinessAction, Is.False);
-            Assert.That(cleanUp, Is.True);
-            Assert.That(rejected, Is.True);
-        }
-#endif
 
         [Test]
         public async Task InvalidSetup()
@@ -96,7 +79,6 @@ namespace GreenPipes.Tests
 
             var unauthPipe = Pipe.New<RequestContextImpl>(cfg =>
             {
-
             });
 
             Assert.That(() =>
@@ -106,9 +88,9 @@ namespace GreenPipes.Tests
                     cfg.UseAuthFilter(authPipe, unauthPipe);
                 });
             }, Throws.TypeOf<PipeConfigurationException>());
-
         }
     }
+
 
     //A random context
     //Notice: No mention of IPrincipal any where
@@ -117,6 +99,7 @@ namespace GreenPipes.Tests
         PipeContext
     {
     }
+
 
     //Play nice with CFG DSL using an extension method
     public static class AuthExtensions
@@ -128,6 +111,7 @@ namespace GreenPipes.Tests
             cfg.AddPipeSpecification(new SampleAuthFilterSpecification<T>(authPipe, unauthPipe, allowedRoles));
         }
     }
+
 
     //Your custom filter specification with validation support
     public class SampleAuthFilterSpecification<T> : IPipeSpecification<T>
@@ -156,8 +140,10 @@ namespace GreenPipes.Tests
         }
     }
 
+
     //your actual filter
-    public class SampleAuthenticationFilter<T> : IFilter<T> where T : class, PipeContext
+    public class SampleAuthenticationFilter<T> : IFilter<T>
+        where T : class, PipeContext
     {
         readonly IPipe<T> _authPipe;
         readonly IPipe<T> _unauthPipe;

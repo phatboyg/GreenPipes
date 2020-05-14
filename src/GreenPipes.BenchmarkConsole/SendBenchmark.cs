@@ -15,12 +15,13 @@ namespace GreenPipes.BenchmarkConsole
     using System;
     using System.Threading.Tasks;
     using BenchmarkDotNet.Attributes;
+    using BenchmarkDotNet.Jobs;
     using Contracts;
     using Pipes;
     using Throughput;
 
 
-    [CoreJob]
+    [SimpleJob(RuntimeMoniker.NetCoreApp31)]
     [MemoryDiagnoser, GcServer(true), GcForce]
     public class SendBenchmark
     {
@@ -31,6 +32,8 @@ namespace GreenPipes.BenchmarkConsole
         readonly IPipe<TestContext> _faultPipe;
         readonly IPipe<TestContext> _retryPipe;
         readonly IPipe<PipeContext> _dispatchPipe;
+        readonly IPipe<PipeContext> _doubleDispatchPipe;
+        readonly IPipe<PipeContext> _tripleDispatchPipe;
 
         public SendBenchmark()
         {
@@ -71,6 +74,19 @@ namespace GreenPipes.BenchmarkConsole
             _dispatchPipe = dispatchPipe;
 
             dispatchPipe.ConnectPipe(Pipe.Empty<CommandContext<SetConcurrencyLimit>>());
+
+            var doubleDispatchPipe = new PipeRouter();
+            _doubleDispatchPipe = doubleDispatchPipe;
+
+            doubleDispatchPipe.ConnectPipe(Pipe.Empty<CommandContext<SetConcurrencyLimit>>());
+            doubleDispatchPipe.ConnectPipe(Pipe.Empty<CommandContext<SetRateLimit>>());
+
+            var tripleDispatchPipe = new PipeRouter();
+            _tripleDispatchPipe = tripleDispatchPipe;
+
+            tripleDispatchPipe.ConnectPipe(Pipe.Empty<CommandContext<SetConcurrencyLimit>>());
+            tripleDispatchPipe.ConnectPipe(Pipe.Empty<CommandContext<SetRateLimit>>());
+            tripleDispatchPipe.ConnectPipe(Pipe.Empty<CommandContext<CircuitBreakerOpened>>());
         }
 
         [Benchmark]
@@ -101,6 +117,18 @@ namespace GreenPipes.BenchmarkConsole
         public async Task DispatchPipe()
         {
             await _dispatchPipe.SendCommand<SetConcurrencyLimit>(_command);
+        }
+
+        [Benchmark]
+        public async Task DoubleDispatchPipe()
+        {
+            await _doubleDispatchPipe.SendCommand<SetConcurrencyLimit>(_command);
+        }
+
+        [Benchmark]
+        public async Task TripleDispatchPipe()
+        {
+            await _tripleDispatchPipe.SendCommand<SetConcurrencyLimit>(_command);
         }
 
         readonly SetConcurrencyLimit _command = new Command(32);

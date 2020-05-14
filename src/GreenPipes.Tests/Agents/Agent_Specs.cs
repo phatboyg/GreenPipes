@@ -196,9 +196,9 @@ namespace GreenPipes.Tests.Agents
 
             public event EventHandler OnInvalid;
 
-            Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+            async ValueTask IAsyncDisposable.DisposeAsync()
             {
-                return Console.Out.WriteLineAsync($"Disposing {Value}");
+                await Console.Out.WriteLineAsync($"Disposing {Value}");
             }
         }
 

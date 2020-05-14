@@ -66,9 +66,9 @@
                 }
             }
 
-            public async Task DisposeAsync(CancellationToken cancellationToken)
+            public ValueTask DisposeAsync()
             {
-                await Task.Yield();
+                return new ValueTask();
             }
         }
 

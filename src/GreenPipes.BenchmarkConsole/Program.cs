@@ -24,9 +24,9 @@ namespace GreenPipes.BenchmarkConsole
             Console.WriteLine();
 
             BenchmarkRunner.Run<SendBenchmark>();
-            // BenchmarkRunner.Run<SupervisorBenchmark>();
+//            BenchmarkRunner.Run<SupervisorBenchmark>();
 
-            // BenchmarkRunner.Run<PayloadBenchmark>();
+  //          BenchmarkRunner.Run<PayloadBenchmark>();
         }
     }
 }

@@ -13,10 +13,11 @@
 namespace GreenPipes.BenchmarkConsole
 {
     using BenchmarkDotNet.Attributes;
+    using BenchmarkDotNet.Jobs;
     using Payloads;
 
 
-    [CoreJob]
+    [SimpleJob(RuntimeMoniker.NetCoreApp31)]
     [MemoryDiagnoser, GcServer(true), GcForce]
     public class PayloadBenchmark
     {

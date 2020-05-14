@@ -40,9 +40,9 @@ namespace GreenPipes.Agents
 
         Task<TContext> PipeContextHandle<TContext>.Context => _agent.Context;
 
-        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        ValueTask IAsyncDisposable.DisposeAsync()
         {
-            return _agent.DisposeAsync(cancellationToken);
+            return _agent.DisposeAsync();
         }
 
         Task IAgent.Ready => _agent.Ready;

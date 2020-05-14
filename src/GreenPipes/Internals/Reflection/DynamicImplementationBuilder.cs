@@ -1,14 +1,14 @@
 ﻿// Copyright 2012-2018 Chris Patterson
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace GreenPipes.Internals.Reflection
 {
@@ -64,7 +64,7 @@ namespace GreenPipes.Internals.Reflection
             {
                 var typeBuilder = builder.DefineType(typeName,
                     TypeAttributes.Serializable | TypeAttributes.Class |
-                        TypeAttributes.Public | TypeAttributes.Sealed,
+                    TypeAttributes.Public | TypeAttributes.Sealed,
                     typeof(object), new[] {interfaceType});
 
                 typeBuilder.DefineDefaultConstructor(MethodAttributes.Public);
@@ -136,11 +136,7 @@ namespace GreenPipes.Internals.Reflection
             {
                 const AssemblyBuilderAccess access = AssemblyBuilderAccess.RunAndCollect;
 
-#if NETCORE
                 var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(name), access);
-#else
-                var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(name), access);
-#endif
 
                 var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName);
 

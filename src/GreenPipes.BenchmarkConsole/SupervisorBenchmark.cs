@@ -3,9 +3,10 @@
     using System.Threading.Tasks;
     using Agents;
     using BenchmarkDotNet.Attributes;
+    using BenchmarkDotNet.Jobs;
 
 
-    [CoreJob]
+    [SimpleJob(RuntimeMoniker.NetCoreApp31)]
     [MemoryDiagnoser, GcServer(true), GcForce]
     public class SupervisorBenchmark
     {
