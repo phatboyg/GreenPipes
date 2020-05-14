@@ -1,16 +1,4 @@
-﻿// Copyright 2012-2018 Chris Patterson
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace GreenPipes.Filters
+﻿namespace GreenPipes.Filters
 {
     using System;
     using System.Collections.Generic;
@@ -31,8 +19,8 @@ namespace GreenPipes.Filters
         IDynamicFilter<TInput>
         where TInput : class, PipeContext
     {
-        readonly Dictionary<Type, IOutputFilter> _outputPipes;
         readonly IPipe<TInput> _empty;
+        readonly Dictionary<Type, IOutputFilter> _outputPipes;
         protected readonly IPipeContextConverterFactory<TInput> ConverterFactory;
         protected readonly FilterObservable Observers;
 
@@ -80,19 +68,17 @@ namespace GreenPipes.Filters
         [DebuggerStepThrough]
         public Task Send(TInput context, IPipe<TInput> next)
         {
-            var outputPipes = _outputPipeArray;
+            IOutputFilter[] outputPipes = _outputPipeArray;
 
             if (outputPipes.Length == 1)
-            {
                 return outputPipes[0].Send(context, next);
-            }
 
             if (outputPipes.Length > 1)
             {
                 async Task SendAsync()
                 {
                     var outputTasks = new List<Task>(outputPipes.Length);
-                    for (int i = 0; i < outputPipes.Length; i++)
+                    for (var i = 0; i < outputPipes.Length; i++)
                     {
                         var outputTask = outputPipes[i].Send(context, _empty);
                         if (outputTask.IsCompletedSuccessfully())
@@ -139,7 +125,7 @@ namespace GreenPipes.Filters
         protected virtual IOutputFilter CreateOutputPipe<T>()
             where T : class, PipeContext
         {
-            var converter = ConverterFactory.GetConverter<T>();
+            IPipeContextConverter<TInput, T> converter = ConverterFactory.GetConverter<T>();
 
             return (IOutputFilter)Activator.CreateInstance(typeof(OutputFilter<>).MakeGenericType(typeof(TInput), typeof(T)), Observers, converter);
         }
@@ -169,6 +155,8 @@ namespace GreenPipes.Filters
                 Filter = new OutputPipeFilter<TInput, TOutput>(ContextConverter, Observers, new TeeFilter<TOutput>());
             }
 
+            protected virtual IOutputPipeFilter<TInput, TOutput> Filter { get; }
+
             TResult IOutputFilter.As<TResult>()
             {
                 return Filter as TResult;
@@ -196,8 +184,6 @@ namespace GreenPipes.Filters
             {
                 Filter.Probe(context);
             }
-
-            protected virtual IOutputPipeFilter<TInput, TOutput> Filter { get; }
         }
     }
 

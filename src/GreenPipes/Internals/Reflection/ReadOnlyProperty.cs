@@ -1,15 +1,3 @@
-// Copyright 2012-2018 Chris Patterson
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace GreenPipes.Internals.Reflection
 {
     using System;
@@ -40,13 +28,13 @@ namespace GreenPipes.Internals.Reflection
             if (property.DeclaringType == null)
                 throw new ArgumentException("DeclaringType is null", nameof(property));
 
-            ParameterExpression instance = Expression.Parameter(typeof(object), "instance");
-            UnaryExpression instanceCast = property.DeclaringType.GetTypeInfo().IsValueType
+            var instance = Expression.Parameter(typeof(object), "instance");
+            var instanceCast = property.DeclaringType.GetTypeInfo().IsValueType
                 ? Expression.Convert(instance, property.DeclaringType)
                 : Expression.TypeAs(instance, property.DeclaringType);
 
-            MethodCallExpression call = Expression.Call(instanceCast, property.GetMethod);
-            UnaryExpression typeAs = Expression.TypeAs(call, typeof(object));
+            var call = Expression.Call(instanceCast, property.GetMethod);
+            var typeAs = Expression.TypeAs(call, typeof(object));
 
             return Expression.Lambda<Func<object, object>>(typeAs, instance).Compile();
         }
@@ -77,9 +65,9 @@ namespace GreenPipes.Internals.Reflection
 
         static Func<T, object> GetGetMethod(PropertyInfo property)
         {
-            ParameterExpression instance = Expression.Parameter(typeof(T), "instance");
-            MethodCallExpression call = Expression.Call(instance, property.GetMethod);
-            UnaryExpression typeAs = Expression.TypeAs(call, typeof(object));
+            var instance = Expression.Parameter(typeof(T), "instance");
+            var call = Expression.Call(instance, property.GetMethod);
+            var typeAs = Expression.TypeAs(call, typeof(object));
             return Expression.Lambda<Func<T, object>>(typeAs, instance).Compile();
         }
     }
@@ -109,8 +97,8 @@ namespace GreenPipes.Internals.Reflection
 
         static Func<T, TProperty> GetGetMethod(PropertyInfo property)
         {
-            ParameterExpression instance = Expression.Parameter(typeof(T), "instance");
-            MethodCallExpression call = Expression.Call(instance, property.GetMethod);
+            var instance = Expression.Parameter(typeof(T), "instance");
+            var call = Expression.Call(instance, property.GetMethod);
 
             return Expression.Lambda<Func<T, TProperty>>(call, instance).Compile();
         }

@@ -1,15 +1,3 @@
-// Copyright 2012-2018 Chris Patterson
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace GreenPipes.Partitioning
 {
     public class Murmur3UnsafeHashGenerator :
@@ -47,15 +35,15 @@ namespace GreenPipes.Partitioning
 
         static unsafe uint Hash(byte* data, uint len, uint seed)
         {
-            uint nblocks = len / 4;
-            uint h1 = seed;
+            var nblocks = len / 4;
+            var h1 = seed;
 
             //----------
             // body
 
             uint k1;
             var block = (uint*)data;
-            for (uint i = nblocks; i > 0; --i, ++block)
+            for (var i = nblocks; i > 0; --i, ++block)
             {
                 k1 = *block;
 
@@ -73,7 +61,7 @@ namespace GreenPipes.Partitioning
 
 
             k1 = 0;
-            uint rem = len & 3;
+            var rem = len & 3;
             var tail = (byte*)block;
             if (rem >= 3)
                 k1 ^= (uint)(tail[2] << 16);

@@ -1,16 +1,4 @@
-﻿// Copyright 2012-2018 Chris Patterson
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace GreenPipes.Internals.Mapping
+﻿namespace GreenPipes.Internals.Mapping
 {
     using System;
     using System.Collections.Generic;
@@ -88,17 +76,21 @@ namespace GreenPipes.Internals.Mapping
 
 
                     if (ValueObject.IsValueObjectType(keyType))
+                    {
                         if (ValueObject.IsValueObjectType(elementType))
                         {
-                            var valueConverterType = typeof(ValueValueDictionaryObjectMapper<,,>).MakeGenericType(typeof(TImplementation), keyType, elementType);
+                            var valueConverterType =
+                                typeof(ValueValueDictionaryObjectMapper<,,>).MakeGenericType(typeof(TImplementation), keyType, elementType);
                             return (IObjectMapper<TImplementation>)Activator.CreateInstance(valueConverterType, property);
                         }
                         else
                         {
                             var elementConverter = _cache.GetConverter(elementType);
-                            var valueConverterType = typeof(ValueObjectDictionaryObjectMapper<,,>).MakeGenericType(typeof(TImplementation), keyType, elementType);
+                            var valueConverterType =
+                                typeof(ValueObjectDictionaryObjectMapper<,,>).MakeGenericType(typeof(TImplementation), keyType, elementType);
                             return (IObjectMapper<TImplementation>)Activator.CreateInstance(valueConverterType, property, elementConverter);
                         }
+                    }
 
                     throw new InvalidOperationException("A dictionary with a reference type key is not supported: " + property.Property.Name);
                 }

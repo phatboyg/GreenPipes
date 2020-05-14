@@ -1,16 +1,4 @@
-﻿// Copyright 2012-2019 Chris Patterson
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace GreenPipes.Util
+﻿namespace GreenPipes.Util
 {
     using System;
     using System.Threading;
@@ -29,7 +17,10 @@ namespace GreenPipes.Util
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static Task<T> Default<T>() => Cached<T>.DefaultValueTask;
+        public static Task<T> Default<T>()
+        {
+            return Cached<T>.DefaultValueTask;
+        }
 
         /// <summary>
         /// Returns a faulted task with the specified exception (creating using a <see cref="TaskCompletionSource{T}"/>)
@@ -39,7 +30,7 @@ namespace GreenPipes.Util
         /// <returns></returns>
         public static Task<T> Faulted<T>(Exception exception)
         {
-            var source = GetTask<T>();
+            TaskCompletionSource<T> source = GetTask<T>();
             source.TrySetException(exception);
 
             return source.Task;
@@ -90,7 +81,7 @@ namespace GreenPipes.Util
             if (!cancellationToken.CanBeCanceled)
                 throw new ArgumentException("The cancellationToken must support cancellation", nameof(cancellationToken));
 
-            var source = GetTask();
+            TaskCompletionSource<bool> source = GetTask();
 
             cancelTask = source.Task;
 
@@ -142,7 +133,7 @@ namespace GreenPipes.Util
 
             static Task<T> GetCanceledTask()
             {
-                var source = GetTask<T>();
+                TaskCompletionSource<T> source = GetTask<T>();
                 source.SetCanceled();
                 return source.Task;
             }
