@@ -1,16 +1,4 @@
-﻿// Copyright 2012-2016 Chris Patterson
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace GreenPipes.Tests
+﻿namespace GreenPipes.Tests
 {
     using System;
     using System.Threading;
@@ -21,36 +9,6 @@ namespace GreenPipes.Tests
     [TestFixture]
     public class Using_the_rescue_filter
     {
-        interface ITestContext :
-            PipeContext
-        {
-
-        }
-
-        class TestContext :
-            BasePipeContext,
-            ITestContext
-        {
-            public TestContext()
-            {
-            }
-        }
-
-
-        class TestExceptionContext :
-            ProxyPipeContext,
-            ITestContext
-        {
-            public TestExceptionContext(ITestContext context, Exception exception)
-                : base(context)
-            {
-                Exception = exception;
-            }
-
-            public Exception Exception { get; }
-        }
-
-
         [Test]
         public async Task Should_invoke_the_rescue_pipe()
         {
@@ -65,30 +23,6 @@ namespace GreenPipes.Tests
                 x.UseExecute(cxt =>
                 {
                     throw new IntentionalTestException("Kaboom!");
-                });
-            });
-
-            var context = new TestContext();
-
-            await pipe.Send(context);
-
-            Assert.That(count, Is.EqualTo(1));
-        }
-
-        [Test]
-        public async Task Should_support_an_aggregate_exception()
-        {
-            var count = 0;
-            IPipe<ITestContext> pipe = Pipe.New<ITestContext>(x =>
-            {
-                x.UseRescue(Pipe.New<TestExceptionContext>(r =>
-                {
-                    r.UseExecute(c => Interlocked.Increment(ref count));
-                }), (cxt, ex) => new TestExceptionContext(cxt, ex));
-
-                x.UseExecute(cxt =>
-                {
-                    throw new AggregateException("Boom!");
                 });
             });
 
@@ -119,6 +53,57 @@ namespace GreenPipes.Tests
             var context = new TestContext();
 
             Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
+        }
+
+        [Test]
+        public async Task Should_support_an_aggregate_exception()
+        {
+            var count = 0;
+            IPipe<ITestContext> pipe = Pipe.New<ITestContext>(x =>
+            {
+                x.UseRescue(Pipe.New<TestExceptionContext>(r =>
+                {
+                    r.UseExecute(c => Interlocked.Increment(ref count));
+                }), (cxt, ex) => new TestExceptionContext(cxt, ex));
+
+                x.UseExecute(cxt =>
+                {
+                    throw new AggregateException("Boom!");
+                });
+            });
+
+            var context = new TestContext();
+
+            await pipe.Send(context);
+
+            Assert.That(count, Is.EqualTo(1));
+        }
+
+
+        interface ITestContext :
+            PipeContext
+        {
+        }
+
+
+        class TestContext :
+            BasePipeContext,
+            ITestContext
+        {
+        }
+
+
+        class TestExceptionContext :
+            ProxyPipeContext,
+            ITestContext
+        {
+            public TestExceptionContext(ITestContext context, Exception exception)
+                : base(context)
+            {
+                Exception = exception;
+            }
+
+            public Exception Exception { get; }
         }
     }
 }

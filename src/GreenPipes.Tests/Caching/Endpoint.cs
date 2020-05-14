@@ -5,10 +5,6 @@
 
     public class Endpoint
     {
-        public Uri Address
-        {
-            get;
-            set;
-        }
+        public Uri Address { get; set; }
     }
 }

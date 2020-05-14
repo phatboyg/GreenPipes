@@ -70,31 +70,29 @@
         {
             IOutputFilter[] outputPipes = _outputPipeArray;
 
+            if (outputPipes.Length == 0)
+                return TaskUtil.Completed;
+
             if (outputPipes.Length == 1)
                 return outputPipes[0].Send(context, next);
 
-            if (outputPipes.Length > 1)
+            async Task SendAsync()
             {
-                async Task SendAsync()
+                var outputTasks = new List<Task>(outputPipes.Length);
+                for (var i = 0; i < outputPipes.Length; i++)
                 {
-                    var outputTasks = new List<Task>(outputPipes.Length);
-                    for (var i = 0; i < outputPipes.Length; i++)
-                    {
-                        var outputTask = outputPipes[i].Send(context, _empty);
-                        if (outputTask.IsCompletedSuccessfully())
-                            continue;
+                    var outputTask = outputPipes[i].Send(context, _empty);
+                    if (outputTask.IsCompletedSuccessfully())
+                        continue;
 
-                        outputTasks.Add(outputTask);
-                    }
-
-                    await Task.WhenAll(outputTasks).ConfigureAwait(false);
-                    await next.Send(context).ConfigureAwait(false);
+                    outputTasks.Add(outputTask);
                 }
 
-                return SendAsync();
+                await Task.WhenAll(outputTasks).ConfigureAwait(false);
+                await next.Send(context).ConfigureAwait(false);
             }
 
-            return TaskUtil.Completed;
+            return SendAsync();
         }
 
         protected TResult GetPipe<T, TResult>()

@@ -1,16 +1,4 @@
-﻿// Copyright 2012-2016 Chris Patterson
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace GreenPipes.Tests
+﻿namespace GreenPipes.Tests
 {
     using System;
     using System.Diagnostics;
@@ -33,11 +21,11 @@ namespace GreenPipes.Tests
                 x.UseFilter(new UpdateCacheFilter(_inventoryCache));
             });
 
-            var checks = new CheckInventory[]
+            var checks = new[]
             {
-                new CheckInventory() {ItemNumber = "ABC123", Quantity = 2},
-                new CheckInventory() {ItemNumber = "DEF456", Quantity = 4},
-                new CheckInventory() {ItemNumber = "GHI789", Quantity = 6},
+                new CheckInventory {ItemNumber = "ABC123", Quantity = 2},
+                new CheckInventory {ItemNumber = "DEF456", Quantity = 4},
+                new CheckInventory {ItemNumber = "GHI789", Quantity = 6},
             };
 
             var timer = Stopwatch.StartNew();
@@ -62,7 +50,7 @@ namespace GreenPipes.Tests
                 x.UseFilter(new UpdateCacheFilter(_inventoryCache));
             });
 
-            var checkInventory = new CheckInventory() {ItemNumber = "ABC123", Quantity = 2};
+            var checkInventory = new CheckInventory {ItemNumber = "ABC123", Quantity = 2};
 
             var timer = Stopwatch.StartNew();
             var result = await requestPipe.Send(checkInventory).Result();
@@ -149,7 +137,7 @@ namespace GreenPipes.Tests
                 if (obj != null)
                     result = obj as CheckInventoryResult;
                 else
-                    result = default(CheckInventoryResult);
+                    result = default;
 
                 return result != null;
             }

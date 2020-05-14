@@ -1,21 +1,8 @@
-﻿// Copyright 2012-2018 Chris Patterson
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-using NUnit.Framework;
-
-namespace GreenPipes.Tests
+﻿namespace GreenPipes.Tests
 {
     using System.Threading.Tasks;
     using Filters;
+    using NUnit.Framework;
 
 
     [TestFixture]
@@ -39,7 +26,7 @@ namespace GreenPipes.Tests
             var inputContext = new InputContext(new object());
 
             var limit = 100;
-            for (int i = 0; i <= limit; i++)
+            for (var i = 0; i <= limit; i++)
             {
                 var context = new InputContext<A>(inputContext, new A {Index = i});
                 await pipe.Send(context);

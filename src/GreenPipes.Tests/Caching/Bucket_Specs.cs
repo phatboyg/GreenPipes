@@ -20,10 +20,76 @@
             var settings = new CacheSettings(1000, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(60));
             var manager = new NodeTracker<SimpleValue>(settings);
 
-            Bucket<SimpleValue> bucket = new Bucket<SimpleValue>(manager);
+            var bucket = new Bucket<SimpleValue>(manager);
 
             var valueNode = new BucketNode<SimpleValue>(await SimpleValueFactory.Healthy("Hello"));
             bucket.Push(valueNode);
+        }
+
+        [Test]
+        public async Task Should_fill_them_even_fuller()
+        {
+            var settings = new TestCacheSettings(100, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60));
+
+            var cache = new GreenCache<SimpleValue>(settings);
+
+            IIndex<string, SimpleValue> index = cache.AddIndex("id", x => x.Id);
+
+
+            var addedObserver = new NodeAddedCountObserver(200);
+            cache.Connect(addedObserver);
+
+            var removedObserver = new NodeRemovedCountObserver<SimpleValue>(99);
+            cache.Connect(removedObserver);
+
+            for (var i = 0; i < 200; i++)
+            {
+                var simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
+
+                if (i % 2 == 0)
+                    settings.CurrentTime += TimeSpan.FromSeconds(1);
+            }
+
+            await addedObserver.Completed;
+            await removedObserver.Completed;
+
+            Assert.That(cache.Statistics.Count, Is.EqualTo(101));
+
+            Task<SimpleValue>[] values = cache.GetAll().ToArray();
+
+            Assert.That(values.Length, Is.EqualTo(101));
+        }
+
+        [Test]
+        public async Task Should_fill_up_a_bunch_of_buckets()
+        {
+            var addedObserver = new NodeAddedCountObserver(100);
+            var removedObserver = new NodeRemovedCountObserver<SimpleValue>(40);
+
+            var settings = new TestCacheSettings(100, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60));
+
+            var cache = new GreenCache<SimpleValue>(settings);
+
+            IIndex<string, SimpleValue> index = cache.AddIndex("id", x => x.Id);
+
+            cache.Connect(addedObserver);
+            cache.Connect(removedObserver);
+
+            for (var i = 0; i < 100; i++)
+            {
+                var simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
+
+                settings.CurrentTime += TimeSpan.FromSeconds(1);
+            }
+
+            await addedObserver.Completed;
+            await removedObserver.Completed;
+
+            Assert.That(cache.Statistics.Count, Is.EqualTo(60));
+
+            Task<SimpleValue>[] values = cache.GetAll().ToArray();
+
+            Assert.That(values.Length, Is.EqualTo(60));
         }
 
         [Test]
@@ -33,14 +99,14 @@
 
             var cache = new GreenCache<SimpleValue>(settings);
 
-            var index = cache.AddIndex("id", x => x.Id);
+            IIndex<string, SimpleValue> index = cache.AddIndex("id", x => x.Id);
 
             var observer = new NodeAddedCountObserver(100);
             cache.Connect(observer);
 
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
             {
-                SimpleValue simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
+                var simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
             }
 
             await observer.Completed;
@@ -55,14 +121,14 @@
 
             var cache = new GreenCache<SimpleValue>(settings);
 
-            var index = cache.AddIndex("id", x => x.Id);
+            IIndex<string, SimpleValue> index = cache.AddIndex("id", x => x.Id);
 
             var observer = new NodeAddedCountObserver(100);
             cache.Connect(observer);
 
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
             {
-                SimpleValue simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
+                var simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
 
                 settings.CurrentTime += TimeSpan.FromSeconds(1);
             }
@@ -79,7 +145,7 @@
 
             var cache = new GreenCache<SimpleValue>(settings);
 
-            var index = cache.AddIndex("id", x => x.Id);
+            IIndex<string, SimpleValue> index = cache.AddIndex("id", x => x.Id);
 
             var observer = new NodeAddedCountObserver(200);
             cache.Connect(observer);
@@ -87,9 +153,9 @@
             var removed = new NodeRemovedCountObserver<SimpleValue>(100);
             cache.Connect(removed);
 
-            for (int i = 0; i < 200; i++)
+            for (var i = 0; i < 200; i++)
             {
-                SimpleValue simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
+                var simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
 
                 settings.CurrentTime += TimeSpan.FromSeconds(1);
             }
@@ -107,7 +173,7 @@
 
             var cache = new GreenCache<SmartValue>(settings);
 
-            var index = cache.AddIndex("id", x => x.Id);
+            IIndex<string, SmartValue> index = cache.AddIndex("id", x => x.Id);
 
             var observer = new SmartAddedCountObserver(200);
             cache.Connect(observer);
@@ -116,9 +182,9 @@
             cache.Connect(removed);
 
 
-            for (int i = 0; i < 200; i++)
+            for (var i = 0; i < 200; i++)
             {
-                SmartValue simpleValue = await index.Get($"key{i}", SmartValueFactory.Healthy);
+                var simpleValue = await index.Get($"key{i}", SmartValueFactory.Healthy);
 
                 settings.CurrentTime += TimeSpan.FromSeconds(1);
             }
@@ -133,15 +199,17 @@
         class NodeAddedCountObserver :
             ICacheValueObserver<SimpleValue>
         {
+            readonly int _expected;
             readonly TaskCompletionSource<bool> _source;
             int _count;
-            readonly int _expected;
 
             public NodeAddedCountObserver(int expected)
             {
                 _expected = expected;
                 _source = TaskUtil.GetTask();
             }
+
+            public Task<bool> Completed => _source.Task;
 
             public void ValueAdded(INode<SimpleValue> node, SimpleValue value)
             {
@@ -156,22 +224,23 @@
             public void CacheCleared()
             {
             }
-
-            public Task<bool> Completed => _source.Task;
         }
+
 
         class SmartAddedCountObserver :
             ICacheValueObserver<SmartValue>
         {
+            readonly int _expected;
             readonly TaskCompletionSource<bool> _source;
             int _count;
-            readonly int _expected;
 
             public SmartAddedCountObserver(int expected)
             {
                 _expected = expected;
                 _source = TaskUtil.GetTask();
             }
+
+            public Task<bool> Completed => _source.Task;
 
             public void ValueAdded(INode<SmartValue> node, SmartValue value)
             {
@@ -186,8 +255,6 @@
             public void CacheCleared()
             {
             }
-
-            public Task<bool> Completed => _source.Task;
         }
 
 
@@ -195,15 +262,17 @@
             ICacheValueObserver<T>
             where T : class
         {
+            readonly int _expected;
             readonly TaskCompletionSource<bool> _source;
             int _count;
-            readonly int _expected;
 
             public NodeRemovedCountObserver(int expected)
             {
                 _expected = expected;
                 _source = TaskUtil.GetTask();
             }
+
+            public Task<bool> Completed => _source.Task;
 
             public void ValueAdded(INode<T> node, T value)
             {
@@ -218,75 +287,6 @@
             public void CacheCleared()
             {
             }
-
-            public Task<bool> Completed => _source.Task;
-        }
-
-
-        [Test]
-        public async Task Should_fill_up_a_bunch_of_buckets()
-        {
-            var addedObserver = new NodeAddedCountObserver(100);
-            var removedObserver = new NodeRemovedCountObserver<SimpleValue>(40);
-
-            var settings = new TestCacheSettings(100, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60));
-
-            var cache = new GreenCache<SimpleValue>(settings);
-
-            var index = cache.AddIndex("id", x => x.Id);
-
-            cache.Connect(addedObserver);
-            cache.Connect(removedObserver);
-
-            for (int i = 0; i < 100; i++)
-            {
-                SimpleValue simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
-
-                settings.CurrentTime += TimeSpan.FromSeconds(1);
-            }
-
-            await addedObserver.Completed;
-            await removedObserver.Completed;
-
-            Assert.That(cache.Statistics.Count, Is.EqualTo(60));
-
-            var values = cache.GetAll().ToArray();
-
-            Assert.That(values.Length, Is.EqualTo(60));
-        }
-
-        [Test]
-        public async Task Should_fill_them_even_fuller()
-        {
-            var settings = new TestCacheSettings(100, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60));
-
-            var cache = new GreenCache<SimpleValue>(settings);
-
-            var index = cache.AddIndex("id", x => x.Id);
-
-
-            var addedObserver = new NodeAddedCountObserver(200);
-            cache.Connect(addedObserver);
-
-            var removedObserver = new NodeRemovedCountObserver<SimpleValue>(99);
-            cache.Connect(removedObserver);
-
-            for (int i = 0; i < 200; i++)
-            {
-                SimpleValue simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
-
-                if (i % 2 == 0)
-                    settings.CurrentTime += TimeSpan.FromSeconds(1);
-            }
-
-            await addedObserver.Completed;
-            await removedObserver.Completed;
-
-            Assert.That(cache.Statistics.Count, Is.EqualTo(101));
-
-            var values = cache.GetAll().ToArray();
-
-            Assert.That(values.Length, Is.EqualTo(101));
         }
     }
 }

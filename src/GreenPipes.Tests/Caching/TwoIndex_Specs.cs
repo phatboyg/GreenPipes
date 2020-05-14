@@ -12,42 +12,18 @@
     public class Adding_an_item_through_an_index
     {
         [Test]
-        public async Task Should_update_the_second_index()
-        {
-            var settings = new TestCacheSettings(100, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60));
-
-            var cache = new GreenCache<SimpleValue>(settings);
-
-            var index = cache.AddIndex("id", x => x.Id);
-            var valueIndex = cache.AddIndex("value", x => x.Value);
-
-            for (int i = 0; i < 100; i++)
-            {
-                SimpleValue simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
-            }
-
-            await Task.Delay(100);
-
-            Assert.That(cache.Statistics.Count, Is.EqualTo(100));
-
-            var result = await valueIndex.Get("The key is key27");
-
-            Assert.That(result.Id, Is.EqualTo("key27"));
-        }
-
-        [Test]
         public async Task Should_honor_the_clear()
         {
             var settings = new TestCacheSettings(100, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60));
 
             var cache = new GreenCache<SimpleValue>(settings);
 
-            var index = cache.AddIndex("id", x => x.Id);
-            var valueIndex = cache.AddIndex("value", x => x.Value);
+            IIndex<string, SimpleValue> index = cache.AddIndex("id", x => x.Id);
+            IIndex<string, SimpleValue> valueIndex = cache.AddIndex("value", x => x.Value);
 
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
             {
-                SimpleValue simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
+                var simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
             }
 
             await Task.Delay(100);
@@ -71,12 +47,12 @@
 
             var cache = new GreenCache<SimpleValue>(settings);
 
-            var index = cache.AddIndex("id", x => x.Id);
-            var valueIndex = cache.AddIndex("value", x => x.Value);
+            IIndex<string, SimpleValue> index = cache.AddIndex("id", x => x.Id);
+            IIndex<string, SimpleValue> valueIndex = cache.AddIndex("value", x => x.Value);
 
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
             {
-                SimpleValue simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
+                var simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
             }
 
             await Task.Delay(100);
@@ -95,14 +71,38 @@
             Assert.That(async () => await index.Get("key27"), Throws.TypeOf<KeyNotFoundException>());
             Assert.That(async () => await valueIndex.Get("The key is key27"), Throws.TypeOf<KeyNotFoundException>());
 
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
             {
-                SimpleValue simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
+                var simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
             }
 
             await Task.Delay(100);
 
             Assert.That(cache.Statistics.Count, Is.EqualTo(100));
+        }
+
+        [Test]
+        public async Task Should_update_the_second_index()
+        {
+            var settings = new TestCacheSettings(100, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(60));
+
+            var cache = new GreenCache<SimpleValue>(settings);
+
+            IIndex<string, SimpleValue> index = cache.AddIndex("id", x => x.Id);
+            IIndex<string, SimpleValue> valueIndex = cache.AddIndex("value", x => x.Value);
+
+            for (var i = 0; i < 100; i++)
+            {
+                var simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
+            }
+
+            await Task.Delay(100);
+
+            Assert.That(cache.Statistics.Count, Is.EqualTo(100));
+
+            var result = await valueIndex.Get("The key is key27");
+
+            Assert.That(result.Id, Is.EqualTo("key27"));
         }
 
         [Test]
@@ -112,12 +112,12 @@
 
             var cache = new GreenCache<SimpleValue>(settings);
 
-            var index = cache.AddIndex("id", x => x.Id);
-            var valueIndex = cache.AddIndex("value", x => x.Value);
+            IIndex<string, SimpleValue> index = cache.AddIndex("id", x => x.Id);
+            IIndex<string, SimpleValue> valueIndex = cache.AddIndex("value", x => x.Value);
 
-            for (int i = 0; i < 100; i++)
+            for (var i = 0; i < 100; i++)
             {
-                SimpleValue simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
+                var simpleValue = await index.Get($"key{i}", SimpleValueFactory.Healthy);
             }
 
             await Task.Delay(100);

@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Principal;
-using System.Threading.Tasks;
-using GreenPipes.Payloads;
-using NUnit.Framework;
-
-namespace GreenPipes.Tests
+﻿namespace GreenPipes.Tests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Security.Principal;
+    using System.Threading.Tasks;
+    using NUnit.Framework;
+
+
     public class Authentication_Specs
     {
         IPipe<RequestContextImpl> _thePipe;
-        bool protectedBusinessAction;
         bool cleanUp;
+        bool protectedBusinessAction;
         bool rejected;
 
         [SetUp]
@@ -22,7 +22,7 @@ namespace GreenPipes.Tests
             cleanUp = false;
             rejected = false;
 
-            var authPipe = Pipe.New<RequestContextImpl>(cfg =>
+            IPipe<RequestContextImpl> authPipe = Pipe.New<RequestContextImpl>(cfg =>
             {
                 cfg.UseExecute(cxt =>
                 {
@@ -30,7 +30,7 @@ namespace GreenPipes.Tests
                 });
             });
 
-            var unauthPipe = Pipe.New<RequestContextImpl>(cfg =>
+            IPipe<RequestContextImpl> unauthPipe = Pipe.New<RequestContextImpl>(cfg =>
             {
                 cfg.UseExecute(cxt =>
                 {
@@ -70,14 +70,14 @@ namespace GreenPipes.Tests
         [Test]
         public async Task InvalidSetup()
         {
-            var authPipe = Pipe.New<RequestContextImpl>(cfg =>
+            IPipe<RequestContextImpl> authPipe = Pipe.New<RequestContextImpl>(cfg =>
             {
                 cfg.UseExecute(cxt =>
                 {
                 });
             });
 
-            var unauthPipe = Pipe.New<RequestContextImpl>(cfg =>
+            IPipe<RequestContextImpl> unauthPipe = Pipe.New<RequestContextImpl>(cfg =>
             {
             });
 
@@ -117,9 +117,9 @@ namespace GreenPipes.Tests
     public class SampleAuthFilterSpecification<T> : IPipeSpecification<T>
         where T : class, PipeContext
     {
+        readonly string[] _allowedRoles;
         readonly IPipe<T> _authPipe;
         readonly IPipe<T> _unauthPipe;
-        readonly string[] _allowedRoles;
 
         public SampleAuthFilterSpecification(IPipe<T> authPipe, IPipe<T> unauthPipe, string[] allowedRoles)
         {
@@ -145,9 +145,9 @@ namespace GreenPipes.Tests
     public class SampleAuthenticationFilter<T> : IFilter<T>
         where T : class, PipeContext
     {
+        readonly string[] _allowedRoles;
         readonly IPipe<T> _authPipe;
         readonly IPipe<T> _unauthPipe;
-        readonly string[] _allowedRoles;
 
         public SampleAuthenticationFilter(IPipe<T> authPipe, IPipe<T> unauthPipe, string[] allowedRoles)
         {
@@ -176,9 +176,7 @@ namespace GreenPipes.Tests
                     await _authPipe.Send(context);
                 }
                 else
-                {
                     await _unauthPipe.Send(context);
-                }
             }
 
             await next.Send(context);

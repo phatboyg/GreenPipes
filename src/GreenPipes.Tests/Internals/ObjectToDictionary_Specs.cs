@@ -11,6 +11,34 @@
     public class Creating_a_dictionary_from_an_interface
     {
         [Test]
+        public void Should_handle_a_dictionary_of_strings()
+        {
+            Assert.IsTrue(_dictionary.ContainsKey("Strings"));
+
+            var value = _dictionary["Strings"];
+
+            Assert.IsInstanceOf<object[]>(value);
+
+            var values = value as object[];
+
+            Assert.AreEqual(2, values.Length);
+        }
+
+        [Test]
+        public void Should_handle_a_dictionary_of_values()
+        {
+            Assert.IsTrue(_dictionary.ContainsKey("StringSubValues"));
+
+            var value = _dictionary["StringSubValues"];
+
+            Assert.IsInstanceOf<object[]>(value);
+
+            var values = value as object[];
+
+            Assert.AreEqual(2, values.Length);
+        }
+
+        [Test]
         public void Should_handle_a_present_nullable_value()
         {
             Assert.IsTrue(_dictionary.ContainsKey("NullableDecimalValue"));
@@ -27,37 +55,9 @@
         {
             Assert.IsTrue(_dictionary.ContainsKey("SubValues"));
 
-            object value = _dictionary["SubValues"];
+            var value = _dictionary["SubValues"];
 
             Assert.IsInstanceOf<IDictionary<string, object>[]>(value);
-        }
-
-        [Test]
-        public void Should_handle_a_dictionary_of_strings()
-        {
-            Assert.IsTrue(_dictionary.ContainsKey("Strings"));
-
-            object value = _dictionary["Strings"];
-
-            Assert.IsInstanceOf<object[]>(value);
-
-            var values = value as object[];
-
-            Assert.AreEqual(2, values.Length);
-        }
-
-        [Test]
-        public void Should_handle_a_dictionary_of_values()
-        {
-            Assert.IsTrue(_dictionary.ContainsKey("StringSubValues"));
-
-            object value = _dictionary["StringSubValues"];
-
-            Assert.IsInstanceOf<object[]>(value);
-
-            var values = value as object[];
-
-            Assert.AreEqual(2, values.Length);
         }
 
         [Test]
@@ -65,7 +65,7 @@
         {
             Assert.IsTrue(_dictionary.ContainsKey("Names"));
 
-            object value = _dictionary["Names"];
+            var value = _dictionary["Names"];
 
             Assert.IsInstanceOf<string[]>(value);
         }
@@ -95,7 +95,7 @@
 
             var converter = factory.GetConverter(typeof(Values));
 
-            Values values = (Values)converter.GetObject(_dictionary);
+            var values = (Values)converter.GetObject(_dictionary);
 
             Assert.IsNotNull(values);
 
@@ -126,7 +126,7 @@
         {
             var factory = new DictionaryConverterCache();
 
-            IDictionaryConverter converter = factory.GetConverter(typeof(ValuesImpl));
+            var converter = factory.GetConverter(typeof(ValuesImpl));
 
             _expected = new ValuesImpl("Hello", 27, new DateTime(2012, 10, 1), null, 123.45m);
             _dictionary =
@@ -164,15 +164,10 @@
             readonly string[] _names;
             readonly decimal? _nullableDecimalValue;
             readonly long? _nullableValue;
-            readonly string _stringValue;
-            readonly SubValue[] _subValues;
             readonly IDictionary<string, string> _strings;
             readonly IDictionary<string, SubValue> _stringSubValues;
-
-            public IDictionary<string, SubValue> StringSubValues
-            {
-                get { return _stringSubValues; }
-            }
+            readonly string _stringValue;
+            readonly SubValue[] _subValues;
 
             public ValuesImpl(string stringValue, int intValue, DateTime dateTimeValue, long? nullableValue,
                 decimal? nullableDecimalValue)
@@ -184,65 +179,42 @@
                 _nullableDecimalValue = nullableDecimalValue;
                 _names = new[] {"A", "B", "C"};
                 _subValues = new SubValue[]
-                    {
-                        new SubValueImpl("A")
-                    };
+                {
+                    new SubValueImpl("A")
+                };
                 _strings = new Dictionary<string, string>
-                    {
-                        {"A", "Aye"},
-                        {"B", "Bee"},
-                    };
+                {
+                    {"A", "Aye"},
+                    {"B", "Bee"},
+                };
                 _stringSubValues = new Dictionary<string, SubValue>
-                    {
-                        {"A", new SubValueImpl("Eh")},
-                        {"B", new SubValueImpl("Be")},
-                    };
+                {
+                    {"A", new SubValueImpl("Eh")},
+                    {"B", new SubValueImpl("Be")},
+                };
             }
 
-            public IDictionary<string, string> Strings
-            {
-                get { return _strings; }
-            }
+            public IDictionary<string, SubValue> StringSubValues => _stringSubValues;
 
+            public IDictionary<string, string> Strings => _strings;
 
-            public string StringValue
-            {
-                get { return _stringValue; }
-            }
+            public string StringValue => _stringValue;
 
-            public int IntValue
-            {
-                get { return _intValue; }
-            }
+            public int IntValue => _intValue;
 
-            public DateTime DateTimeValue
-            {
-                get { return _dateTimeValue; }
-            }
+            public DateTime DateTimeValue => _dateTimeValue;
 
-            public long? NullableValue
-            {
-                get { return _nullableValue; }
-            }
+            public long? NullableValue => _nullableValue;
 
-            public decimal? NullableDecimalValue
-            {
-                get { return _nullableDecimalValue; }
-            }
+            public decimal? NullableDecimalValue => _nullableDecimalValue;
 
-            public string[] Names
-            {
-                get { return _names; }
-            }
+            public string[] Names => _names;
 
-            public SubValue[] SubValues
-            {
-                get { return _subValues; }
-            }
+            public SubValue[] SubValues => _subValues;
 
 
             class SubValueImpl : SubValue,
-                                 IEquatable<SubValueImpl>
+                IEquatable<SubValueImpl>
             {
                 readonly string _text;
 
@@ -251,19 +223,17 @@
                     _text = text;
                 }
 
-                public string Text
-                {
-                    get { return _text; }
-                }
-
                 public bool Equals(SubValueImpl other)
                 {
                     if (ReferenceEquals(null, other))
                         return false;
                     if (ReferenceEquals(this, other))
                         return true;
+
                     return string.Equals(_text, other._text);
                 }
+
+                public string Text => _text;
 
                 public override bool Equals(object obj)
                 {
@@ -271,14 +241,15 @@
                         return false;
                     if (ReferenceEquals(this, obj))
                         return true;
-                    if (obj.GetType() != this.GetType())
+                    if (obj.GetType() != GetType())
                         return false;
+
                     return Equals((SubValueImpl)obj);
                 }
 
                 public override int GetHashCode()
                 {
-                    return (_text != null ? _text.GetHashCode() : 0);
+                    return _text != null ? _text.GetHashCode() : 0;
                 }
 
                 public static bool operator ==(SubValueImpl left, SubValueImpl right)

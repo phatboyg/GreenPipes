@@ -13,36 +13,6 @@
     [TestFixture]
     public class Using_the_node_tracker
     {
-        class NodeObserver :
-            ICacheValueObserver<SimpleValue>
-        {
-            readonly TaskCompletionSource<INode<SimpleValue>> _source;
-            CancellationTokenSource _cancellation;
-
-            public NodeObserver()
-            {
-                _source = TaskUtil.GetTask<INode<SimpleValue>>();
-                _cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                _cancellation.Token.Register(() => _source.TrySetCanceled());
-            }
-
-            public void ValueAdded(INode<SimpleValue> node, SimpleValue value)
-            {
-                _source.TrySetResult(node);
-            }
-
-            public void ValueRemoved(INode<SimpleValue> node, SimpleValue value)
-            {
-            }
-
-            public void CacheCleared()
-            {
-            }
-
-            public Task<INode<SimpleValue>> Value => _source.Task;
-        }
-
-
         [Test]
         public async Task Should_accept_a_completed_node()
         {
@@ -61,9 +31,39 @@
 
             var value = await node.Value;
 
-            var observedNode = await observer.Value;
+            INode<SimpleValue> observedNode = await observer.Value;
 
             Assert.That(observedNode, Is.InstanceOf<BucketNode<SimpleValue>>());
+        }
+
+
+        class NodeObserver :
+            ICacheValueObserver<SimpleValue>
+        {
+            readonly TaskCompletionSource<INode<SimpleValue>> _source;
+            CancellationTokenSource _cancellation;
+
+            public NodeObserver()
+            {
+                _source = TaskUtil.GetTask<INode<SimpleValue>>();
+                _cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                _cancellation.Token.Register(() => _source.TrySetCanceled());
+            }
+
+            public Task<INode<SimpleValue>> Value => _source.Task;
+
+            public void ValueAdded(INode<SimpleValue> node, SimpleValue value)
+            {
+                _source.TrySetResult(node);
+            }
+
+            public void ValueRemoved(INode<SimpleValue> node, SimpleValue value)
+            {
+            }
+
+            public void CacheCleared()
+            {
+            }
         }
     }
 }

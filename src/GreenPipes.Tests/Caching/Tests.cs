@@ -15,7 +15,7 @@
             var settings = new CacheSettings(100, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(30));
             var cache = new GreenCache<Endpoint>(settings);
 
-            var addressIndex = cache.AddIndex("address", x => x.Address);
+            IIndex<Uri, Endpoint> addressIndex = cache.AddIndex("address", x => x.Address);
 
             var address = new Uri("rabbitmq://localhost/vhost/input-queue");
 
@@ -29,7 +29,8 @@
 
     namespace TestValueObjects
     {
-        using System.Threading;
+        using System;
+        using GreenPipes.Caching;
 
 
         public class SimpleValue
@@ -52,8 +53,6 @@
                 _value = value;
             }
 
-            public event Action Used;
-
             public string Id => _id;
 
             public string Value
@@ -70,6 +69,8 @@
             {
                 return new ValueTask();
             }
+
+            public event Action Used;
         }
 
 
