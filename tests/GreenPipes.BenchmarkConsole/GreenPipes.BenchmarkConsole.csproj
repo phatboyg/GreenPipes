@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>GreenPipes.BenchmarkConsole</AssemblyName>
+    <PackageId>GreenPipes.BenchmarkConsole</PackageId>
+    <OutputType>Exe</OutputType>
+    <IsPackable>False</IsPackable>
+    <LangVersion>8</LangVersion>
+    <OutputType>Exe</OutputType>
+    <IsPackable>False</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\GreenPipes\GreenPipes.csproj" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
+  </ItemGroup>
+
+</Project>

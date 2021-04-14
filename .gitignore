@@ -3,8 +3,6 @@ build_output/*
 
 BenchmarkDotNet.Artifacts
 
-.fake/**/*
-
 **/*.suo
 **/**/*.suo
 **/*.user
@@ -32,8 +30,6 @@ packages
 
 TestResult.xml
 submit.xml
-src/tests/*
-tests/*
 doc/*
 SolutionVersion.cs
 AppPackages/
