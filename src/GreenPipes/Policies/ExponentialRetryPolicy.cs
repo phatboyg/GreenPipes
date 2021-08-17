@@ -10,32 +10,32 @@ namespace GreenPipes.Policies
     {
         readonly IExceptionFilter _filter;
         readonly int _highInterval;
+        readonly TimeSpan[] _intervals;
         readonly int _lowInterval;
         readonly int _maxInterval;
         readonly int _minInterval;
-        readonly int _retryLimit;
 
         public ExponentialRetryPolicy(IExceptionFilter filter, int retryLimit, TimeSpan minInterval, TimeSpan maxInterval, TimeSpan intervalDelta)
         {
             _filter = filter;
-            _retryLimit = retryLimit;
+            RetryLimit = retryLimit;
             _minInterval = (int)minInterval.TotalMilliseconds;
             _maxInterval = (int)maxInterval.TotalMilliseconds;
 
             _lowInterval = (int)(intervalDelta.TotalMilliseconds * 0.8);
             _highInterval = (int)(intervalDelta.TotalMilliseconds * 1.2);
 
-            Intervals = GetIntervals().ToArray();
+            _intervals = CalculateIntervals().ToArray();
         }
 
-        public TimeSpan[] Intervals { get; }
+        public int RetryLimit { get; }
 
         void IProbeSite.Probe(ProbeContext context)
         {
             context.Set(new
             {
                 Policy = "Exponential",
-                Limit = _retryLimit,
+                Limit = RetryLimit,
                 Min = _minInterval,
                 Max = _maxInterval,
                 Low = _lowInterval,
@@ -55,13 +55,19 @@ namespace GreenPipes.Policies
             return _filter.Match(exception);
         }
 
-        IEnumerable<TimeSpan> GetIntervals()
+        public TimeSpan GetRetryInterval(int retryCount)
+        {
+            return retryCount < _intervals.Length ? _intervals[retryCount] : _intervals[_intervals.Length - 1];
+        }
+
+        IEnumerable<TimeSpan> CalculateIntervals()
         {
             var random = new Random();
+            var delta = -1;
 
-            for (var i = 0; _retryLimit == int.MaxValue || i < _retryLimit; i++)
+            for (var i = 0; i < RetryLimit && delta < _maxInterval; i++)
             {
-                var delta = (int)Math.Min(_minInterval + Math.Pow(2, i) * random.Next(_lowInterval, _highInterval), _maxInterval);
+                delta = (int)Math.Min(_minInterval + Math.Pow(2, i) * random.Next(_lowInterval, _highInterval), _maxInterval);
 
                 yield return TimeSpan.FromMilliseconds(delta);
             }
@@ -69,7 +75,7 @@ namespace GreenPipes.Policies
 
         public override string ToString()
         {
-            return $"Exponential (limit {_retryLimit}, min {_minInterval}ms, max {_maxInterval}ms";
+            return $"Exponential (limit {RetryLimit}, min {_minInterval}ms, max {_maxInterval}ms";
         }
     }
 }

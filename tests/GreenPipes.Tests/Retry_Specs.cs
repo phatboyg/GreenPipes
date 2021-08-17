@@ -238,6 +238,27 @@
         }
 
         [Test]
+        public void Should_calculate_the_retry_intervals_once()
+        {
+            var count = 0;
+            IPipe<TestContext> pipe = Pipe.New<TestContext>(x =>
+            {
+                x.UseRetry(r => r.Exponential(10, TimeSpan.FromMilliseconds(10), TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(30)));
+                x.UseExecute(payload =>
+                {
+                    count++;
+                    throw new IntentionalTestException("Kaboom!");
+                });
+            });
+
+            var context = new TestContext();
+
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
+
+            Assert.That(count, Is.EqualTo(11));
+        }
+
+        [Test]
         public async Task Should_retry_and_then_succeed_without_repeating_forever()
         {
             var observer = new RetryObserver();

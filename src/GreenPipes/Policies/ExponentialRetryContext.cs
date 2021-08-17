@@ -18,13 +18,13 @@ namespace GreenPipes.Policies
             _policy = policy;
         }
 
-        public override TimeSpan? Delay => _policy.Intervals[RetryCount];
+        public override TimeSpan? Delay => _policy.GetRetryInterval(RetryCount);
 
         bool RetryContext<TContext>.CanRetry(Exception exception, out RetryContext<TContext> retryContext)
         {
             retryContext = new ExponentialRetryContext<TContext>(_policy, Context, Exception, RetryCount + 1, CancellationToken);
 
-            return RetryAttempt < _policy.Intervals.Length && _policy.IsHandled(exception);
+            return RetryAttempt < _policy.RetryLimit && _policy.IsHandled(exception);
         }
     }
 }
