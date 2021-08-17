@@ -38,7 +38,11 @@
                 {
                     var completed = await Task.WhenAny(task, cancelTask).ConfigureAwait(false);
                     if (completed != task)
+                    {
+                        task.IgnoreUnobservedExceptions();
+
                         throw new OperationCanceledException(cancellationToken);
+                    }
 
                     task.GetAwaiter().GetResult();
                 }
@@ -58,7 +62,11 @@
                 {
                     var completed = await Task.WhenAny(task, cancelTask).ConfigureAwait(false);
                     if (completed != task)
+                    {
+                        task.IgnoreUnobservedExceptions();
+
                         throw new OperationCanceledException(cancellationToken);
+                    }
 
                     return task.GetAwaiter().GetResult();
                 }
@@ -100,7 +108,11 @@
 
                     var completed = await Task.WhenAny(task, delayTask).ConfigureAwait(false);
                     if (completed == delayTask)
+                    {
+                        task.IgnoreUnobservedExceptions();
+
                         throw new TimeoutException(FormatTimeoutMessage(memberName, filePath, lineNumber));
+                    }
 
                     task.GetAwaiter().GetResult();
                 }
@@ -149,7 +161,11 @@
 
                     var completed = await Task.WhenAny(task, delayTask).ConfigureAwait(false);
                     if (completed == delayTask)
+                    {
+                        task.IgnoreUnobservedExceptions();
+
                         throw new TimeoutException(FormatTimeoutMessage(memberName, filePath, lineNumber));
+                    }
 
                     return task.GetAwaiter().GetResult();
                 }
@@ -179,6 +195,24 @@
         public static bool IsCompletedSuccessfully(this Task task)
         {
             return task.Status == TaskStatus.RanToCompletion;
+        }
+
+        public static void IgnoreUnobservedExceptions(this Task task)
+        {
+            if (task.IsCompleted)
+            {
+                if (task.IsFaulted)
+                {
+                    var _ = task.Exception;
+                }
+
+                return;
+            }
+
+            task.ContinueWith(t =>
+            {
+                var _ = t.Exception;
+            }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
     }
 }

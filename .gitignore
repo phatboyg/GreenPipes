@@ -8,6 +8,8 @@ BenchmarkDotNet.Artifacts
 **/*.user
 **/**/*.user
 
+.idea
+
 bin
 obj
 _ReSharper*
