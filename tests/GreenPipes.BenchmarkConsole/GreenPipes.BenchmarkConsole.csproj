@@ -13,8 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\GreenPipes\GreenPipes.csproj" />
-    <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
+    <ProjectReference Include="..\..\src\GreenPipes\GreenPipes.csproj"/>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.1"/>
   </ItemGroup>
 
 </Project>

@@ -3,7 +3,6 @@
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Internals.Extensions;
     using Util;
 
 
@@ -37,7 +36,7 @@
         public Task Send(TContext context, IPipe<TContext> next)
         {
             var connectionsTask = _connections.ForEachAsync(pipe => pipe.Send(context));
-            if (connectionsTask.IsCompletedSuccessfully())
+            if (connectionsTask.Status == TaskStatus.RanToCompletion)
                 return next.Send(context);
 
             async Task SendAsync()

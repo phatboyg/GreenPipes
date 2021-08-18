@@ -84,7 +84,7 @@
             lock (_agents)
             {
                 agents = _agents.Count == 0
-                    ? new IAgent[0]
+                    ? Array.Empty<IAgent>()
                     : _agents.Values.Where(x => !x.Completed.IsCompleted).ToArray();
             }
 

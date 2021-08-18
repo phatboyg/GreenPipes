@@ -59,25 +59,52 @@
         async Task SendToOutput(IPipe<TInput> next, TOutput pipeContext)
         {
             if (_observers.Count > 0)
-                await _observers.PreSend(pipeContext).ConfigureAwait(false);
+            {
+                var preSendTask = _observers.PreSend(pipeContext);
+                if (preSendTask.Status != TaskStatus.RanToCompletion)
+                    await preSendTask.ConfigureAwait(false);
+            }
+
             if (_outerObservers.Count > 0)
-                await _outerObservers.PreSend(pipeContext).ConfigureAwait(false);
+            {
+                var preSendTask = _outerObservers.PreSend(pipeContext);
+                if (preSendTask.Status != TaskStatus.RanToCompletion)
+                    await preSendTask.ConfigureAwait(false);
+            }
 
             try
             {
                 await _output.Send(pipeContext, next).ConfigureAwait(false);
 
                 if (_observers.Count > 0)
-                    await _observers.PostSend(pipeContext).ConfigureAwait(false);
+                {
+                    var postSendTask = _observers.PostSend(pipeContext);
+                    if (postSendTask.Status != TaskStatus.RanToCompletion)
+                        await postSendTask.ConfigureAwait(false);
+                }
+
                 if (_outerObservers.Count > 0)
-                    await _outerObservers.PostSend(pipeContext).ConfigureAwait(false);
+                {
+                    var postSendTask = _outerObservers.PostSend(pipeContext);
+                    if (postSendTask.Status != TaskStatus.RanToCompletion)
+                        await postSendTask.ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
                 if (_observers.Count > 0)
-                    await _observers.SendFault(pipeContext, ex).ConfigureAwait(false);
+                {
+                    var sendFaultTask = _observers.SendFault(pipeContext, ex);
+                    if (sendFaultTask.Status != TaskStatus.RanToCompletion)
+                        await sendFaultTask.ConfigureAwait(false);
+                }
+
                 if (_outerObservers.Count > 0)
-                    await _outerObservers.SendFault(pipeContext, ex).ConfigureAwait(false);
+                {
+                    var sendFaultTask = _outerObservers.SendFault(pipeContext, ex);
+                    if (sendFaultTask.Status != TaskStatus.RanToCompletion)
+                        await sendFaultTask.ConfigureAwait(false);
+                }
 
                 throw;
             }

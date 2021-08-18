@@ -22,7 +22,7 @@ namespace GreenPipes.Util
         public Connectable()
         {
             _connections = new Dictionary<long, T>();
-            _connected = new T[0];
+            _connected = Array.Empty<T>();
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace GreenPipes.Util
 
             for (i = 0; i < outputTasks.Length; i++)
             {
-                if (!outputTasks[i].IsCompletedSuccessfully())
+                if (outputTasks[i].Status != TaskStatus.RanToCompletion)
                     break;
             }
 

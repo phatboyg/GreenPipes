@@ -1,16 +1,4 @@
-﻿// Copyright 2012-2018 Chris Patterson
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace GreenPipes.BenchmarkConsole
+﻿namespace GreenPipes.BenchmarkConsole
 {
     using System;
     using System.Threading.Tasks;
@@ -22,17 +10,19 @@ namespace GreenPipes.BenchmarkConsole
 
 
     [SimpleJob(RuntimeMoniker.NetCoreApp31)]
-    [MemoryDiagnoser, GcServer(true), GcForce]
+    [SimpleJob(RuntimeMoniker.Net50)]
+    [MemoryDiagnoser]
     public class SendBenchmark
     {
+        readonly SetConcurrencyLimit _command = new Command(32);
         readonly IPipe<TestContext> _concurrencyPipe;
         readonly TestContext _context;
+        readonly IPipe<PipeContext> _dispatchPipe;
+        readonly IPipe<PipeContext> _doubleDispatchPipe;
         readonly IPipe<TestContext> _doublePipe;
         readonly IPipe<TestContext> _emptyPipe;
         readonly IPipe<TestContext> _faultPipe;
         readonly IPipe<TestContext> _retryPipe;
-        readonly IPipe<PipeContext> _dispatchPipe;
-        readonly IPipe<PipeContext> _doubleDispatchPipe;
         readonly IPipe<PipeContext> _tripleDispatchPipe;
 
         public SendBenchmark()
@@ -116,22 +106,20 @@ namespace GreenPipes.BenchmarkConsole
         [Benchmark]
         public async Task DispatchPipe()
         {
-            await _dispatchPipe.SendCommand<SetConcurrencyLimit>(_command);
+            await _dispatchPipe.SendCommand(_command);
         }
 
         [Benchmark]
         public async Task DoubleDispatchPipe()
         {
-            await _doubleDispatchPipe.SendCommand<SetConcurrencyLimit>(_command);
+            await _doubleDispatchPipe.SendCommand(_command);
         }
 
         [Benchmark]
         public async Task TripleDispatchPipe()
         {
-            await _tripleDispatchPipe.SendCommand<SetConcurrencyLimit>(_command);
+            await _tripleDispatchPipe.SendCommand(_command);
         }
-
-        readonly SetConcurrencyLimit _command = new Command(32);
 
         public async Task FaultPipe()
         {

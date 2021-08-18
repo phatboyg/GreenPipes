@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Internals.Extensions;
 
 
     /// <summary>
@@ -24,7 +23,7 @@
         public Task Send(TContext context, IPipe<TContext> next)
         {
             Task<bool> filterTask = _filter(context);
-            if (filterTask.IsCompletedSuccessfully() && filterTask.Result)
+            if (filterTask.Status == TaskStatus.RanToCompletion && filterTask.Result)
                 return next.Send(context);
 
             async Task SendAsync()

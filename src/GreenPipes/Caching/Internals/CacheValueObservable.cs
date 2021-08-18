@@ -17,7 +17,7 @@
         public CacheValueObservable()
         {
             _connections = new Dictionary<long, ICacheValueObserver<TValue>>();
-            _connected = new ICacheValueObserver<TValue>[0];
+            _connected = Array.Empty<ICacheValueObserver<TValue>>();
         }
 
         public void ValueAdded(INode<TValue> node, TValue value)

@@ -38,7 +38,7 @@
             {
                 lock (_contextLock)
                 {
-                    return _context != null && _context.IsDisposed == false;
+                    return _context is { IsDisposed: false };
                 }
             }
         }
@@ -49,7 +49,9 @@
 
             try
             {
-                var context = await activeContext.Context.ConfigureAwait(false);
+                var context = activeContext.Context.Status == TaskStatus.RanToCompletion
+                    ? activeContext.Context.Result
+                    : await activeContext.Context.ConfigureAwait(false);
 
                 await pipe.Send(context).ConfigureAwait(false);
             }
@@ -107,7 +109,7 @@
         {
             lock (_contextLock)
             {
-                if (_context != null && _context.IsDisposed == false)
+                if (_context is { IsDisposed: false })
                     return _context;
 
                 PipeContextHandle<TContext> context = _context = _contextFactory.CreateContext(this);

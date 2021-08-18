@@ -3,7 +3,6 @@
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Internals.Extensions;
 
 
     public class AsyncDelegateFilter<TContext> :
@@ -27,7 +26,7 @@
         public Task Send(TContext context, IPipe<TContext> next)
         {
             var callbackTask = _callback(context);
-            if (callbackTask.IsCompletedSuccessfully())
+            if (callbackTask.Status == TaskStatus.RanToCompletion)
                 return next.Send(context);
 
             async Task SendAsync()

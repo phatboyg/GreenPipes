@@ -7,7 +7,8 @@
 
 
     [SimpleJob(RuntimeMoniker.NetCoreApp31)]
-    [MemoryDiagnoser, GcServer(true), GcForce]
+    [SimpleJob(RuntimeMoniker.Net50)]
+    [MemoryDiagnoser]
     public class SupervisorBenchmark
     {
         [Benchmark]

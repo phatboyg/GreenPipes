@@ -5,7 +5,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Contracts;
-    using Internals.Extensions;
 
 
     /// <summary>
@@ -51,7 +50,7 @@
         public Task Send(TContext context, IPipe<TContext> next)
         {
             var waitAsync = _limit.WaitAsync(context.CancellationToken);
-            if (waitAsync.IsCompletedSuccessfully())
+            if (waitAsync.Status == TaskStatus.RanToCompletion)
             {
                 Interlocked.Increment(ref _count);
 

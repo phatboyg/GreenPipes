@@ -1,7 +1,6 @@
 namespace GreenPipes
 {
     using System;
-    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using Internals.Extensions;
     using Pipes;
@@ -16,7 +15,6 @@ namespace GreenPipes
         /// <param name="pipe"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNotEmpty<T>(this IPipe<T> pipe)
             where T : class, PipeContext
         {
@@ -36,7 +34,6 @@ namespace GreenPipes
         /// <typeparam name="TPayload">The payload type</typeparam>
         /// <param name="context">The pipe context</param>
         /// <returns>The payload, or throws a PayloadNotFoundException if the payload is not present</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TPayload GetPayload<TPayload>(this PipeContext context)
             where TPayload : class
         {

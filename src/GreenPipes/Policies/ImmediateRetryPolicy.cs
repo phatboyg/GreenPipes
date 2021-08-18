@@ -7,22 +7,21 @@ namespace GreenPipes.Policies
         IRetryPolicy
     {
         readonly IExceptionFilter _filter;
-        readonly int _retryLimit;
 
         public ImmediateRetryPolicy(IExceptionFilter filter, int retryLimit)
         {
             _filter = filter;
-            _retryLimit = retryLimit;
+            RetryLimit = retryLimit;
         }
 
-        public int RetryLimit => _retryLimit;
+        public int RetryLimit { get; }
 
         void IProbeSite.Probe(ProbeContext context)
         {
             context.Set(new
             {
                 Policy = "Immediate",
-                Limit = _retryLimit
+                Limit = RetryLimit
             });
 
             _filter.Probe(context);

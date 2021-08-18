@@ -7,7 +7,6 @@ namespace GreenPipes.Policies
         IRetryPolicy
     {
         readonly IExceptionFilter _filter;
-        readonly int _retryLimit;
 
         public IncrementalRetryPolicy(IExceptionFilter filter, int retryLimit, TimeSpan initialInterval,
             TimeSpan intervalIncrement)
@@ -25,12 +24,12 @@ namespace GreenPipes.Policies
             }
 
             _filter = filter;
-            _retryLimit = retryLimit;
+            RetryLimit = retryLimit;
             InitialInterval = initialInterval;
             IntervalIncrement = intervalIncrement;
         }
 
-        public int RetryLimit => _retryLimit;
+        public int RetryLimit { get; }
 
         public TimeSpan InitialInterval { get; }
 
@@ -41,7 +40,7 @@ namespace GreenPipes.Policies
             context.Set(new
             {
                 Policy = "Incremental",
-                Limit = _retryLimit,
+                Limit = RetryLimit,
                 Initial = InitialInterval,
                 Increment = IntervalIncrement
             });

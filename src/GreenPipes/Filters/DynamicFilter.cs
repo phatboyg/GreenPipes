@@ -5,7 +5,6 @@
     using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
-    using Internals.Extensions;
     using Observers;
     using Util;
 
@@ -31,7 +30,7 @@
             ConverterFactory = converterFactory;
 
             _outputPipes = new Dictionary<Type, IOutputFilter>();
-            _outputPipeArray = new IOutputFilter[0];
+            _outputPipeArray = Array.Empty<IOutputFilter>();
 
             Observers = new FilterObservable();
             _empty = Pipe.Empty<TInput>();
@@ -82,7 +81,7 @@
                 for (var i = 0; i < outputPipes.Length; i++)
                 {
                     var outputTask = outputPipes[i].Send(context, _empty);
-                    if (outputTask.IsCompletedSuccessfully())
+                    if (outputTask.Status == TaskStatus.RanToCompletion)
                         continue;
 
                     outputTasks.Add(outputTask);

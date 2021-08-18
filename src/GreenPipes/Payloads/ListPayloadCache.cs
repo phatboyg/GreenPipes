@@ -20,11 +20,11 @@ namespace GreenPipes.Payloads
 
         public bool HasPayloadType(Type payloadType)
         {
+            if (_cache == null)
+                return false;
+
             lock (this)
             {
-                if (_cache == null)
-                    return false;
-
                 for (var i = _cache.Count - 1; i >= 0; i--)
                 {
                     if (payloadType.IsInstanceOfType(_cache[i]))
@@ -79,7 +79,7 @@ namespace GreenPipes.Payloads
                 if (_cache != null)
                     _cache.Add(payload);
                 else
-                    _cache = new List<object>(1) {payload};
+                    _cache = new List<object>(1) { payload };
 
                 return payload;
             }
@@ -110,7 +110,7 @@ namespace GreenPipes.Payloads
                 if (_cache != null)
                     _cache.Add(payload);
                 else
-                    _cache = new List<object>(1) {payload};
+                    _cache = new List<object>(1) { payload };
 
                 return payload;
             }

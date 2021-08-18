@@ -55,7 +55,6 @@
         ITypeCache<T>
     {
         readonly Lazy<IObjectConverter> _converter;
-        readonly Lazy<IDictionaryConverter> _mapper;
         readonly Lazy<ReadOnlyPropertyCache<T>> _readPropertyCache;
         readonly string _shortName;
         readonly Lazy<ReadWritePropertyCache<T>> _writePropertyCache;
@@ -66,7 +65,6 @@
             _readPropertyCache = new Lazy<ReadOnlyPropertyCache<T>>(() => new ReadOnlyPropertyCache<T>());
             _writePropertyCache = new Lazy<ReadWritePropertyCache<T>>(() => new ReadWritePropertyCache<T>());
 
-            _mapper = new Lazy<IDictionaryConverter>(() => TypeCache.DictionaryConverterCache.GetConverter(typeof(T)));
             _converter = new Lazy<IObjectConverter>(() => TypeCache.ObjectConverterCache.GetConverter(typeof(T)));
         }
 

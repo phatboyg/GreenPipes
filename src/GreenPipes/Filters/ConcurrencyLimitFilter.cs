@@ -45,7 +45,9 @@
         [DebuggerNonUserCode]
         public async Task Send(TContext context, IPipe<TContext> next)
         {
-            await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+            var waitAsyncTask = _limit.WaitAsync(context.CancellationToken);
+            if (waitAsyncTask.Status != TaskStatus.RanToCompletion)
+                await waitAsyncTask.ConfigureAwait(false);
 
             try
             {
@@ -69,7 +71,7 @@
             else
             {
                 for (; previousLimit > concurrencyLimit; previousLimit--)
-                    await _limit.WaitAsync().ConfigureAwait(false);
+                    await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
             }
         }
 

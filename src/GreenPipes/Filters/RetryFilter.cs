@@ -38,7 +38,11 @@
             try
             {
                 if (_observers.Count > 0)
-                    await _observers.PostCreate(policyContext).ConfigureAwait(false);
+                {
+                    var postCreateTask = _observers.PostCreate(policyContext);
+                    if (postCreateTask.Status != TaskStatus.RanToCompletion)
+                        await postCreateTask.ConfigureAwait(false);
+                }
 
                 await next.Send(policyContext.Context).ConfigureAwait(false);
             }
@@ -55,10 +59,16 @@
                 {
                     if (_retryPolicy.IsHandled(exception))
                     {
-                        await policyContext.RetryFaulted(exception).ConfigureAwait(false);
+                        var retryFaultedTask = policyContext.RetryFaulted(exception);
+                        if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
+                            await retryFaultedTask.ConfigureAwait(false);
 
                         if (_observers.Count > 0)
-                            await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
+                        {
+                            var retryFaultTask = _observers.RetryFault(payloadRetryContext);
+                            if (retryFaultTask.Status != TaskStatus.RanToCompletion)
+                                await retryFaultTask.ConfigureAwait(false);
+                        }
                     }
 
                     context.GetOrAddPayload(() => payloadRetryContext);
@@ -70,10 +80,16 @@
                 {
                     if (_retryPolicy.IsHandled(exception))
                     {
-                        await policyContext.RetryFaulted(exception).ConfigureAwait(false);
+                        var retryFaultedTask = policyContext.RetryFaulted(exception);
+                        if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
+                            await retryFaultedTask.ConfigureAwait(false);
 
                         if (_observers.Count > 0)
-                            await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
+                        {
+                            var retryFaultTask = _observers.RetryFault(genericRetryContext);
+                            if (retryFaultTask.Status != TaskStatus.RanToCompletion)
+                                await retryFaultTask.ConfigureAwait(false);
+                        }
                     }
 
                     context.GetOrAddPayload(() => genericRetryContext);
@@ -85,10 +101,16 @@
                 {
                     if (_retryPolicy.IsHandled(exception))
                     {
-                        await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+                        var retryFaultedTask = retryContext.RetryFaulted(exception);
+                        if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
+                            await retryFaultedTask.ConfigureAwait(false);
 
                         if (_observers.Count > 0)
-                            await _observers.RetryFault(retryContext).ConfigureAwait(false);
+                        {
+                            var retryFaultTask = _observers.RetryFault(retryContext);
+                            if (retryFaultTask.Status != TaskStatus.RanToCompletion)
+                                await retryFaultTask.ConfigureAwait(false);
+                        }
 
                         context.GetOrAddPayload(() => retryContext);
                     }
@@ -97,7 +119,11 @@
                 }
 
                 if (_observers.Count > 0)
-                    await _observers.PostFault(retryContext).ConfigureAwait(false);
+                {
+                    var postFaultTask = _observers.PostFault(retryContext);
+                    if (postFaultTask.Status != TaskStatus.RanToCompletion)
+                        await postFaultTask.ConfigureAwait(false);
+                }
 
                 await Attempt(context, retryContext, next).ConfigureAwait(false);
             }
@@ -116,17 +142,27 @@
                 if (retryContext.Delay.HasValue)
                     await Task.Delay(retryContext.Delay.Value, retryContext.CancellationToken).ConfigureAwait(false);
 
-                await retryContext.PreRetry().ConfigureAwait(false);
+                var preRetryContextTask = retryContext.PreRetry();
+                if (preRetryContextTask.Status != TaskStatus.RanToCompletion)
+                    await preRetryContextTask.ConfigureAwait(false);
 
                 if (_observers.Count > 0)
-                    await _observers.PreRetry(retryContext).ConfigureAwait(false);
+                {
+                    var preRetryTask = _observers.PreRetry(retryContext);
+                    if (preRetryTask.Status != TaskStatus.RanToCompletion)
+                        await preRetryTask.ConfigureAwait(false);
+                }
 
                 try
                 {
                     await next.Send(retryContext.Context).ConfigureAwait(false);
 
                     if (_observers.Count > 0)
-                        await _observers.RetryComplete(retryContext).ConfigureAwait(false);
+                    {
+                        var retryCompleteTask = _observers.RetryComplete(retryContext);
+                        if (retryCompleteTask.Status != TaskStatus.RanToCompletion)
+                            await retryCompleteTask.ConfigureAwait(false);
+                    }
 
                     return;
                 }
@@ -143,10 +179,16 @@
                     {
                         if (_retryPolicy.IsHandled(exception))
                         {
-                            await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+                            var retryFaultedTask = retryContext.RetryFaulted(exception);
+                            if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
+                                await retryFaultedTask.ConfigureAwait(false);
 
                             if (_observers.Count > 0)
-                                await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
+                            {
+                                var retryFaultTask = _observers.RetryFault(payloadRetryContext);
+                                if (retryFaultTask.Status != TaskStatus.RanToCompletion)
+                                    await retryFaultTask.ConfigureAwait(false);
+                            }
                         }
 
                         context.GetOrAddPayload(() => payloadRetryContext);
@@ -158,10 +200,16 @@
                     {
                         if (_retryPolicy.IsHandled(exception))
                         {
-                            await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+                            var retryFaultedTask = retryContext.RetryFaulted(exception);
+                            if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
+                                await retryFaultedTask.ConfigureAwait(false);
 
                             if (_observers.Count > 0)
-                                await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
+                            {
+                                var retryFaultTask = _observers.RetryFault(genericRetryContext);
+                                if (retryFaultTask.Status != TaskStatus.RanToCompletion)
+                                    await retryFaultTask.ConfigureAwait(false);
+                            }
                         }
 
                         context.GetOrAddPayload(() => genericRetryContext);
@@ -173,10 +221,16 @@
                     {
                         if (_retryPolicy.IsHandled(exception))
                         {
-                            await nextRetryContext.RetryFaulted(exception).ConfigureAwait(false);
+                            var retryFaultedTask = nextRetryContext.RetryFaulted(exception);
+                            if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
+                                await retryFaultedTask.ConfigureAwait(false);
 
                             if (_observers.Count > 0)
-                                await _observers.RetryFault(nextRetryContext).ConfigureAwait(false);
+                            {
+                                var retryFaultTask = _observers.RetryFault(nextRetryContext);
+                                if (retryFaultTask.Status != TaskStatus.RanToCompletion)
+                                    await retryFaultTask.ConfigureAwait(false);
+                            }
 
                             context.GetOrAddPayload(() => nextRetryContext);
                         }
@@ -185,7 +239,11 @@
                     }
 
                     if (_observers.Count > 0)
-                        await _observers.PostFault(nextRetryContext).ConfigureAwait(false);
+                    {
+                        var postFaultTask = _observers.PostFault(nextRetryContext);
+                        if (postFaultTask.Status != TaskStatus.RanToCompletion)
+                            await postFaultTask.ConfigureAwait(false);
+                    }
 
                     retryContext = nextRetryContext;
                 }

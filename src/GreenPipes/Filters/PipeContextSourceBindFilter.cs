@@ -2,7 +2,6 @@
 {
     using System.Threading.Tasks;
     using Contexts;
-    using Internals.Extensions;
 
 
     /// <summary>
@@ -29,7 +28,7 @@
             var bindPipe = new BindPipe(context, _output);
 
             var sourceTask = _source.Send(context, bindPipe);
-            if (sourceTask.IsCompletedSuccessfully())
+            if (sourceTask.Status == TaskStatus.RanToCompletion)
                 return next.Send(context);
 
             async Task SendAsync()

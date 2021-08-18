@@ -191,7 +191,6 @@
         /// </summary>
         /// <param name="task"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsCompletedSuccessfully(this Task task)
         {
             return task.Status == TaskStatus.RanToCompletion;
